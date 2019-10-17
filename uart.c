@@ -50,9 +50,9 @@ void InterruptEnable(unsigned long InterruptIndex)
 {
     /* Indicate to CPU which device is to interrupt */
     if(InterruptIndex < 32)
-        NVIC_EN0_R = 1 << InterruptIndex;       // Enable the interrupt in the EN0 Register
+        NVIC_EN0_R |= 1 << InterruptIndex;       // Enable the interrupt in the EN0 Register
     else
-        NVIC_EN1_R = 1 << (InterruptIndex - 32);    // Enable the interrupt in the EN1 Register
+        NVIC_EN1_R |= 1 << (InterruptIndex - 32);    // Enable the interrupt in the EN1 Register
 }
 
 void UART0_IntEnable(unsigned long flags)
