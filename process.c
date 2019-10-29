@@ -3,7 +3,7 @@
  *
  *  Created on: Oct 17, 2019
  *      Author: Larry Hughes
- *      Editor: Finlay Miller
+ *      Editor: Finlay Miller/Derek Capone
  */
 
 #include "process.h"
