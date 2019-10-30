@@ -35,6 +35,8 @@ void initStack(unsigned long *stk, void(*func_name)())
     /* Generate initial stack values */
     struct stack_frame sf = initStackFrame(func_name);
 
+    /* Copy stack frame into stack memory */
+    memcpy(&stk[STACKSIZE - sizeof(sf)], &sf, sizeof(sf));
 
 }
 
