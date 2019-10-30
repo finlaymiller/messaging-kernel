@@ -1,20 +1,23 @@
-/**
- * UART test code:
- * Echo's characters back that are inputted.
+/*
+ * uart.c
  *
- * Author: Emad Khan, ECED4402 TA
- * Summer 2017
+ * Defines UART initialization and handler functions
  *
- * Modified:	Oct 5th, 2019
- * Editor:		Finlay Miller
+ *  Created on: Sep 19, 2019
+ *  Author: Derek Capone
  */
 
 #include "uart.h"
+#include "queuing.h"
 
-/* globals */
-volatile char data_rx;
-volatile int got_data;
+/* Globals */
+volatile char uart_data;     /* Input data from UART receive */
 
+/*
+ * Initializes UART0 by setting up UART registers
+ * 8 data bits, no parity, one stop bit
+ * Baud rate = 115200
+ */
 void UART0_Init(void)
 {
     volatile int wait;
@@ -39,91 +42,60 @@ void UART0_Init(void)
 
     UART0_CTL_R = UART_CTL_UARTEN;        // Enable the UART
     wait = 0; // wait; give UART time to enable itself.
-
-
-    InterruptEnable(INT_VEC_UART0);       		// Enable UART0 interrupts
-    UART0_IntEnable(UART_INT_RX | UART_INT_TX); // Enable Receive and Transmit interrupts
-    INTERRUPT_MASTER_ENABLE();
 }
 
-void InterruptEnable(unsigned long InterruptIndex)
-{
-    /* Indicate to CPU which device is to interrupt */
-    if(InterruptIndex < 32)
-        NVIC_EN0_R |= 1 << InterruptIndex;       // Enable the interrupt in the EN0 Register
-    else
-        NVIC_EN1_R |= 1 << (InterruptIndex - 32);    // Enable the interrupt in the EN1 Register
-}
-
+/*
+ * Enables interrupts for UART0
+ */
 void UART0_IntEnable(unsigned long flags)
 {
     /* Set specified bits for interrupt */
     UART0_IM_R |= flags;
 }
 
+/*
+ * Interrupt service routine for UART0
+ * Handles all TX and RX interrupts for UART0
+ */
 void UART0_IntHandler(void)
 {
-    /*
-     * Simplified UART ISR - handles receive and transmit interrupts
-     * Application signaled when data received
-     */
-
-	// Receiving character
-	INTERRUPT_MASTER_DISABLE();
+/*
+ * Simplified UART ISR - handles receive and xmit interrupts
+ * Application signalled when data received
+ */
     if (UART0_MIS_R & UART_INT_RX)
     {
         /* RECV done - clear interrupt and make char available to application */
         UART0_ICR_R |= UART_INT_RX;
+        uart_data = UART0_DR_R;  //Data now holds character from UART
 
-        /* send data to data_rx variable and set data received flag */
-        data_rx = UART0_DR_R;
-        //got_data = TRUE;
-
-        enQ(UART_RX, data_rx);	// send to RX queue
+        /* Enqueue received character for application layer */
+        enqueue(UART_RX, uart_data);
     }
 
-    // Transmitting character
     if (UART0_MIS_R & UART_INT_TX)
     {
         /* XMIT done - clear interrupt */
         UART0_ICR_R |= UART_INT_TX;
 
-        /* transmit char if one is available */
-        if(!isQEmpty(UART_TX))
-        	UART0_TXChar(deQ(UART_TX));
+        /* If queue still busy, get next character */
+        if(get_tx_queue_busy()) UART0_DR_R = dequeue(UART_TX);
     }
-    INTERRUPT_MASTER_ENABLE();
+}
+
+void UART_force_out_char(char c)
+{
+    UART0_DR_R = c;
 }
 
 /*
- * This function makes it easier to transmit an entire string via UART
- *
- * @param	string: The string to be transmitted
- * @returns:		None
+ * Sets the TX queue to busy
+ * Forces the first character in the TX queue into UART data register
  */
-void UART0_TXStr(char *string)
+void UART_force_start(void)
 {
-	unsigned int len = strlen(string);
-	unsigned int i = 0;
-
-	while(i < len)
-		UART0_TXChar(string[i++]);
+    set_tx_queue_busy(BUSY);
+    UART0_DR_R = dequeue(UART_TX);
 }
 
-/*
- * This function makes it easier to transmit a character via UART
- *
- * @param	data:	The character to be transmitted
- * @returns:		None
- */
-void UART0_TXChar(char data)
-{
-    while(!UART0_TXReady());	// wait till UART0 is ready
-    UART0_DR_R = data;			// send character to UART0 data register
-}
 
-int UART0_TXReady(void)
-{
-	// 1 if ready, 0 if busy
-	return !(UART0_FR_R & UART_FR_BUSY);
-}

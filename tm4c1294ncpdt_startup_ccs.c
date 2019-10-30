@@ -33,6 +33,8 @@ void ResetISR(void);
 static void NmiSR(void);
 static void FaultISR(void);
 static void IntDefaultHandler(void);
+extern void UART0_IntHandler(void);
+extern void SysTickHandler(void);
 
 //*****************************************************************************
 //
@@ -54,9 +56,7 @@ extern uint32_t __STACK_TOP;
 // External declarations for the interrupt handlers used by the application.
 //
 //*****************************************************************************
-// UART and SysTick interrupt handlers
-extern void UART0_IntHandler(void);
-extern void SysTick_IntHandler(void);
+// To be added by user
 
 //*****************************************************************************
 //
@@ -84,13 +84,13 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // Debug monitor handler
     0,                                      // Reserved
     IntDefaultHandler,                      // The PendSV handler
-    SysTick_IntHandler,                     // The SysTick handler * Change *
+    SysTickHandler,                      // The SysTick handler
     IntDefaultHandler,                      // GPIO Port A
     IntDefaultHandler,                      // GPIO Port B
     IntDefaultHandler,                      // GPIO Port C
     IntDefaultHandler,                      // GPIO Port D
     IntDefaultHandler,                      // GPIO Port E
-    UART0_IntHandler,                       // UART0 Rx and Tx * Change *
+    UART0_IntHandler,                      // UART0 Rx and Tx
     IntDefaultHandler,                      // UART1 Rx and Tx
     IntDefaultHandler,                      // SSI0 Rx and Tx
     IntDefaultHandler,                      // I2C0 Master and Slave

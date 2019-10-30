@@ -21,7 +21,7 @@
 #define STACKSIZE	1024
 
 /* Cortex default stack frame */
-typedef struct stackframe
+struct stack_frame
 {
 	/* Registers saved explicitly by the software */
 	unsigned long r4;
@@ -41,15 +41,17 @@ typedef struct stackframe
 	unsigned long lr;
 	unsigned long pc;
 	unsigned long psr;
-} stack_frame;
+};
 
 /* process control block */
-typedef struct process_control_block
+struct pcb
 {
-	unsigned long sp;	// stack pointer - r13 (PSP)
-	pcb* next;			// link to next pcb
-	pcb* prev;			// link to previous pcb
-} pcb;
+	unsigned long sp;   // stack pointer - r13 (PSP)
+	unsigned int id;  // process identifier
+	unsigned long state;    // state of process
+	struct pcb* next;           // link to next pcb
+	struct pcb* prev;           // link to previous pcb
+};
 
 /* function declarations */
 void setLR(volatile unsigned long);

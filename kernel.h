@@ -17,4 +17,8 @@
 #define TRUE  1
 #define FALSE 0
 
+void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority);
+void initStack(unsigned long *stk, void(*func_name)());
+struct stack_frame initStackFrame(void(*func_name)());
+
 #endif /* KERNEL_H_ */

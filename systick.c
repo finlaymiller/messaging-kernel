@@ -1,81 +1,104 @@
 /*
  * systick.c
  *
- *	Modified by: Finlay Miller
- *	Modified on: Oct 09, 2019
+ * Defines all SysTick module functions
+ * Defines constants for SysTick registers and bits
  *
- *  - SysTick sample code
- *	- Originally written for the Stellaris (2013)
- *	- Will need to use debugger to "see" interrupts
- *	- Code uses bit-operations to access SysTick bits
+ *  Created on: Oct 2, 2019
+ *  Author: Derek Capone
  */
 
+
 #include "systick.h"
+#include "time.h"
+#include "queuing.h"
 
-/* globals */
-systick_struct systick;
-extern volatile int got_data;
+// SysTick Registers
+// SysTick Control and Status Register (STCTRL)
+#define ST_CTRL_R   (*((volatile unsigned long *)0xE000E010))
+// Systick Reload Value Register (STRELOAD)
+#define ST_RELOAD_R (*((volatile unsigned long *)0xE000E014))
 
+// SysTick defines
+#define ST_CTRL_COUNT      0x00010000  // Count Flag for STCTRL
+#define ST_CTRL_CLK_SRC    0x00000004  // Clock Source for STCTRL
+#define ST_CTRL_INTEN      0x00000002  // Interrupt Enable for STCTRL
+#define ST_CTRL_ENABLE     0x00000001  // Enable for STCTRL
 
-void SysTickStart(void)
-{
-	// Set the clock source to internal and enable the counter to interrupt
-	ST_CTRL_R |= ST_CTRL_CLK_SRC | ST_CTRL_ENABLE;
-}
+// Maximum period
+#define MAX_WAIT           0x1000000   /* 2^24 */
+#define PERIOD             0x186A00
+#define SYS_CHAR 'x' /* Character to fill in systick queue */
 
-void SysTickStop(void)
-{
-	// Clear the enable bit to stop the counter
-	ST_CTRL_R &= ~(ST_CTRL_ENABLE);
-}
+/* Global to signal SysTick interrupt */
+volatile int elapsed;
+// global variable to count number of interrupts on PORTF0 (falling edge)
+volatile int count = 0;
 
-void SysTickPeriod(unsigned long Period)
-{
-	// For an interrupt, must be between 2 and 16777216 (0x100.0000 or 2^24)
-	ST_RELOAD_R = Period - 1;  /* 1 to 0xff.ffff */
-}
-
-void SysTickIntEnable(void)
-{
-	// Set the interrupt bit in STCTRL
-	ST_CTRL_R |= ST_CTRL_INTEN;
-}
-
-void SysTickIntDisable(void)
-{
-	// Clear the interrupt bit in STCTRL
-	ST_CTRL_R &= ~(ST_CTRL_INTEN);
-}	
-
-void SysTick_IntHandler(void)
-{
-	systick_struct *stptr = &systick;
-
-	stptr->ticks++;			// increment global time counter
-
-	enQ(SYSTICK, TICK);
-	got_data = TRUE;
-}
-
+/*
+ * Initializes SysTick
+ */
 void SysTickInit(void)
-{  
-	SysTickPeriod(CLK_PERIOD/TICK_RATE);	// set clock rate
-	SysTickIntEnable();						// enable interrupts
-	SysTickReset();							// initialize struct
-	SysTickStart();							// start ticking
+{
+    SysTickPeriod(PERIOD);
+    SysTickIntEnable();
+    SysTickStart();
 }
 
 /*
- * Resets all systick struct components to zero
- *
- * @param:		None
- * @returns:	None
+ * Starts SysTick timer
  */
-void SysTickReset(void)
+void SysTickStart(void)
 {
-	systick_struct *stptr = &systick;
-
-	stptr->ticks = 0;
-	stptr->cmp_val = 0;
-	stptr->enabled = 0;
+    // Set the clock source to internal and enable the counter to interrupt
+    ST_CTRL_R |= ST_CTRL_CLK_SRC | ST_CTRL_ENABLE;
 }
+
+/*
+ * Stops SysTick timer
+ */
+void SysTickStop(void)
+{
+    // Clear the enable bit to stop the counter
+    ST_CTRL_R &= ~(ST_CTRL_ENABLE);
+}
+
+/*
+ * Defines and sets the SysTick period
+ */
+void SysTickPeriod(unsigned long Period)
+{
+    /*
+     For an interrupt, must be between 2 and 16777216 (0x100.0000 or 2^24)
+    */
+    ST_RELOAD_R = Period - 1;  /* 1 to 0xff.ffff */
+}
+
+/*
+ * Enables SysTick interrupts
+ */
+void SysTickIntEnable(void)
+{
+    // Set the interrupt bit in STCTRL
+    ST_CTRL_R |= ST_CTRL_INTEN;
+}
+
+/*
+ * Disables SysTick interrupts
+ */
+void SysTickIntDisable(void)
+{
+    // Clear the interrupt bit in STCTRL
+    ST_CTRL_R &= ~(ST_CTRL_INTEN);
+}
+
+/*
+ * Interrupt handler for SysTick
+ * Handles the SysTick interrupts by enqueuing a SysTick char onto SysTick queue
+ */
+void SysTickHandler(void)
+{
+    /* Enqueue characater onto systick queue */
+    enqueue(SYSTICK, SYS_CHAR);
+}
+
