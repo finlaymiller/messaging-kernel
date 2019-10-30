@@ -7,8 +7,8 @@
  *  Author: Derek Capone
  */
 
+#include <circular_queue.h>
 #include "uart.h"
-#include "queuing.h"
 
 /* Globals */
 volatile char uart_data;     /* Input data from UART receive */

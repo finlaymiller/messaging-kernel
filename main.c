@@ -8,8 +8,8 @@
  *  Polls input queues
  */
 
+#include <circular_queue.h>
 #include "uart.h"
-#include "queuing.h"
 #include "systick.h"
 #include "kernel.h"
 
