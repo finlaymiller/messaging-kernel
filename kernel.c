@@ -1,5 +1,5 @@
 /**
- * main.c
+ * kernel.c
  */
 
 #include "kernel.h"
@@ -20,10 +20,6 @@ void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority)
     /* Initialize pcb memory with starting values */
     struct pcb *new_pcb = (struct pcb *)malloc(sizeof(struct pcb));
     new_pcb->id = pid;
-
-
-
-
 }
 
 
