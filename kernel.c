@@ -1,5 +1,5 @@
 /**
- * main.c
+ * kernel.c
  */
 
 #include "kernel.h"
