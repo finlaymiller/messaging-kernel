@@ -9,6 +9,7 @@
  */
 
 #include "uart.h"
+#include "process.h"
 #include "queuing.h"
 #include "systick.h"
 #include "kernel.h"
@@ -51,11 +52,13 @@ void main (void)
     /* Enable CPU interrupts */
     InterruptMasterEnable();
 
-    reg_proc(NULL, 100, 4);
+    reg_proc(&procA, 100, 4);
+
+    SVCHandler(NULL);
 
     while(1)
     {
-        UART_force_out_char('a');
+
     }
 
 }

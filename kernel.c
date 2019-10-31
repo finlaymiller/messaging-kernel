@@ -21,7 +21,7 @@ void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority)
     struct pcb *new_pcb = (struct pcb *)malloc(sizeof(struct pcb));
     new_pcb->id = pid;
 
-    //test commit
+
 
 
 }
@@ -38,6 +38,11 @@ void initStack(unsigned long *stk, void(*func_name)())
     /* Copy stack frame into stack memory */
     memcpy(&stk[STACKSIZE - sizeof(sf)], &sf, sizeof(sf));
 
+    setPSP(&stk[STACKSIZE - sizeof(sf)]);
+
+    loadRegisters();
+
+    //loadLR();
 }
 
 
@@ -62,15 +67,22 @@ struct stack_frame initStackFrame(void(*func_name)())
     sf.r11 = 0;
     sf.r12 = 0;
 
-    sf.lr = 0;  //terminate process routine
+    sf.lr = 0xfffffffd;  //terminate process routine
     sf.pc = (unsigned long)func_name;  //entry point for process
     sf.psr = 0x01000000;
 
     return sf;
 }
 
-
-
+/*
+ * Function to test process
+ */
+void procA(void)
+{
+    while(1){
+        UART_force_out_char('b');
+    }
+}
 
 
 

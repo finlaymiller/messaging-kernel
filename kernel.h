@@ -21,4 +21,6 @@ void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority);
 void initStack(unsigned long *stk, void(*func_name)());
 struct stack_frame initStackFrame(void(*func_name)());
 
+extern void procA(void);
+
 #endif /* KERNEL_H_ */
