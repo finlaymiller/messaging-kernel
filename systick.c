@@ -8,7 +8,6 @@
  *  Author: Derek Capone
  */
 
-
 #include "queue.h"
 #include "systick.h"
 #include "time.h"
