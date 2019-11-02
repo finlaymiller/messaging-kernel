@@ -11,6 +11,9 @@
 #ifndef UART_H_
 #define UART_H_
 
+#include <string.h>
+#include "queue.h"
+
 // UART0 & PORTA Registers
 #define GPIO_PORTA_AFSEL_R  (*((volatile unsigned long *)0x40058420))   // GPIOA Alternate Function Select Register
 #define GPIO_PORTA_DEN_R    (*((volatile unsigned long *)0x4005851C))   // GPIOA Digital Enable Register
@@ -30,6 +33,7 @@
 #define INT_VEC_UART0           5           // UART0 Rx and Tx interrupt index (decimal)
 #define UART_FR_TXFF            0x00000020  // UART Transmit FIFO Full
 #define UART_FR_RXFE            0x00000010  // UART Receive FIFO Empty
+#define UART_FR_BUSY			0x00000008	// UART Transmit Data Busy Bit
 #define UART_RX_FIFO_ONE_EIGHT  0x00000038  // UART Receive FIFO Interrupt Level at >= 1/8
 #define UART_TX_FIFO_SVN_EIGHT  0x00000007  // UART Transmit FIFO Interrupt Level at <= 7/8
 #define UART_LCRH_WLEN_8        0x00000060  // 8 bit word length
@@ -63,13 +67,18 @@
 #define TRUE    1
 #define FALSE   0
 
+// CPU interrupt enable/disable macros
+#define INTERRUPT_MASTER_ENABLE() 	__asm(" cpsie   i")
+#define INTERRUPT_MASTER_DISABLE()	__asm(" cpsid   i")
 
-/* Public function declarations */
-
+// Public UART Functions
 void UART0_Init(void);
-void UART0_IntEnable(unsigned long flags);
+void InterruptEnable(unsigned long);
+void UART0_IntEnable(unsigned long);
 void UART0_IntHandler(void);
-void UART_force_start(void);
-void UART_force_out_char(char c);
+void UART0_Start(void);
+void UART0_TXStr(char *);
+void UART0_TXChar(char);
+int  UART0_TXReady(void);
 
 #endif /* UART_H_ */
