@@ -20,6 +20,8 @@ void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority)
     /* Initialize pcb memory with starting values */
     struct pcb *new_pcb = (struct pcb *)malloc(sizeof(struct pcb));
     new_pcb->id = pid;
+    new_pcb->next = NULL;
+    new_pcb->prev = NULL;
 }
 
 
@@ -33,7 +35,6 @@ void initStack(unsigned long *stk, void(*func_name)())
 
     /* Copy stack frame into stack memory */
     memcpy(&stk[STACKSIZE - sizeof(sf)], &sf, sizeof(sf));
-
 }
 
 

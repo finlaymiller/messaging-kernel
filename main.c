@@ -24,7 +24,7 @@ void main (void)
     UART0_Init();           // Initialize UART0
 
     /* Initialize Systick */
-    //SysTickInit();
+    //DO THIS WITH FIRST SVCall
 
     reg_proc(NULL, 100, 4);
 

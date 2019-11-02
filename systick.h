@@ -10,7 +10,7 @@
 #ifndef SYSTICK_H_
 #define SYSTICK_H_
 
-void SysTickInit(void);
+void systickInit(void);
 void SysTickStart(void);
 void SysTickStop(void);
 void SysTickIntEnable(void);

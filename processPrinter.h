@@ -10,6 +10,6 @@
 
 #include "uart.h"
 
-void p_printchar()
+void p_printchar();
 
 #endif /* PROCESSPRINTER_H_ */

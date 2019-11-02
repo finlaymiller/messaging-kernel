@@ -38,7 +38,7 @@ volatile int count = 0;
 /*
  * Initializes SysTick
  */
-void SysTickInit(void)
+void systickInit(void)
 {
     SysTickPeriod(PERIOD);
     SysTickIntEnable();
