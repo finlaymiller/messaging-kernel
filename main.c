@@ -12,6 +12,7 @@
 #include "uart.h"
 #include "systick.h"
 #include "kernel.h"
+#include "processPrinter.h"
 
 /*
  * Calls initialization functions for all modules

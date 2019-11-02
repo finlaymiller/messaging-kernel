@@ -12,6 +12,7 @@
 
 #include <stdio.h>
 #include "kernel.h"
+#include "processPrinter.h"
 
 #define PRIVATE 	static
 #define SVC()		__asm(" SVC #0")
