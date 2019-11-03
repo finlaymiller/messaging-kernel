@@ -13,6 +13,7 @@
 #include "queuing.h"
 #include "systick.h"
 #include "kernel.h"
+#include "SVC_example.h"
 
 /*
  * Enables all interrupts on the CPU
@@ -42,7 +43,7 @@ void InterruptMasterEnable(void)
 void main (void)
 {
     /* Initialize UART */
-    UART0_Init();           // Initialize UART0
+     UART0_Init();           // Initialize UART0
     InterruptEnable(INT_VEC_UART0);       // Enable UART0 interrupts
     UART0_IntEnable(UART_INT_RX | UART_INT_TX); // Enable Receive and Transmit interrupts
 
@@ -53,8 +54,6 @@ void main (void)
     InterruptMasterEnable();
 
     reg_proc(&procA, 100, 4);
-
-    SVCHandler(NULL);
 
     while(1)
     {

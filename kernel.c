@@ -4,6 +4,8 @@
 
 #include "kernel.h"
 
+static struct pcb *running;
+
 /*
  * Registers process by:
  * - allocating memory for stack size and pcb
@@ -21,14 +23,34 @@ void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority)
     struct pcb *new_pcb = (struct pcb *)malloc(sizeof(struct pcb));
     new_pcb->id = pid;
 
+    /* Set stack to value of high stack mem - stack frame size */
+    new_pcb->sp = (unsigned long) &stk[STACKSIZE - sizeof(struct stack_frame)];
 
+    setPSP(new_pcb->sp);
 
+    loadRegisters();
 
+    //setRunning(new_pcb);
+
+    SVC();
+}
+
+/*
+ * Sets running pointer value
+ */
+void setRunning(struct pcb *run)
+{
+    running = run;
+}
+
+struct pcb* getRunning(void)
+{
+    return running;
 }
 
 
 /*
- * Initializes stack
+ * Initializes stack of process
  */
 void initStack(unsigned long *stk, void(*func_name)())
 {
@@ -37,12 +59,6 @@ void initStack(unsigned long *stk, void(*func_name)())
 
     /* Copy stack frame into stack memory */
     memcpy(&stk[STACKSIZE - sizeof(sf)], &sf, sizeof(sf));
-
-    setPSP(&stk[STACKSIZE - sizeof(sf)]);
-
-    loadRegisters();
-
-    //loadLR();
 }
 
 

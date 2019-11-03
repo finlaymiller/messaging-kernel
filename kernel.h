@@ -20,6 +20,8 @@
 void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority);
 void initStack(unsigned long *stk, void(*func_name)());
 struct stack_frame initStackFrame(void(*func_name)());
+void setRunning(struct pcb *run);
+struct pcb* getRunning(void);
 
 extern void procA(void);
 

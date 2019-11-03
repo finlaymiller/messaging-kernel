@@ -11,4 +11,6 @@ unsigned int arg1;
 unsigned int arg2;
 };
 
+void assignR7(volatile unsigned long data);
+
 #endif /*KERNELCALLS_H_*/
