@@ -26,10 +26,10 @@ void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority)
     /* Set stack to value of high stack mem - stack frame size */
     new_pcb->sp = (unsigned long) &stk[STACKSIZE - sizeof(struct stack_frame)];
 
+    /* Set stack pointer in PCB */
     setPSP(new_pcb->sp);
 
-    loadRegisters();
-
+    /* TODO: Call this later */
     setRunning(new_pcb);
 
     SVC();

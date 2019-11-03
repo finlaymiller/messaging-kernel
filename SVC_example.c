@@ -88,7 +88,10 @@ void SVCHandler(struct stack_frame *argptr)
          * sp is increased because the stack runs from low to high memory.
         */
         struct pcb *curr_running = getRunning();
-        setPSP(curr_running->sp + 8 * sizeof(unsigned int));
+        setPSP(curr_running->sp);
+
+        /* Load software-stored registers */
+        loadRegisters();
 
         /* Start calling other section after first call */
         firstSVCcall = FALSE;
