@@ -56,7 +56,9 @@ void main (void)
     initPriQueue();
 
     reg_proc(&procA, 100, 4);
-    reg_proc(&procA, 50, 4);
+    reg_proc(&procB, 50, 4);
+
+    setRunning();
 
     SVC();
 

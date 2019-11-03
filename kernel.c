@@ -42,9 +42,6 @@ void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority)
     /* Set stack to value of high stack mem - stack frame size */
     new_pcb->sp = (unsigned long) &stk[STACKSIZE - sizeof(struct stack_frame)];
 
-    /* TODO: Call this later */
-    setRunning(new_pcb);
-
     insertPriQueue(new_pcb, priority);
 }
 
@@ -76,9 +73,15 @@ void insertPriQueue(struct pcb *new_pcb, unsigned char priority)
 /*
  * Sets running pointer value
  */
-void setRunning(struct pcb *run)
+void setRunning(void)
 {
-    running = run;
+    char i;
+    for(i=NUM_PRI-1; i>=0; i--){
+        if(pri_queue[i].head != NULL){
+            running = (struct pcb*) pri_queue[i].head;
+            break;
+        }
+    }
 }
 
 struct pcb* getRunning(void)
@@ -134,11 +137,19 @@ struct stack_frame initStackFrame(void(*func_name)())
 void procA(void)
 {
     while(1){
-        UART_force_out_char('b');
+        UART_force_out_char('a');
     }
 }
 
-
+/*
+ * Function to test process
+ */
+void procB(void)
+{
+    while(1){
+        UART_force_out_char('b');
+    }
+}
 
 
 
