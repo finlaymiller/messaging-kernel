@@ -1,10 +1,25 @@
 /**
- * main.c
+ * kernel.c
  */
 
+/* Includes */
 #include "kernel.h"
 
+/* Private defines */
+#define NUM_PRI 5   /* Number of priority queues */
+
 static struct pcb *running;
+static struct pri pri_queue[NUM_PRI];
+
+/* TODO: do this at compile time */
+void initPriQueue(void)
+{
+    char i;
+    for(i=0; i<NUM_PRI; i++){
+        pri_queue[i].head = NULL;
+        pri_queue[i].tail = NULL;
+    }
+}
 
 /*
  * Registers process by:
@@ -12,6 +27,7 @@ static struct pcb *running;
  * - initializing stack with initial register values
  * - initializing pcb values
  * - inserting into desired priority queue
+ * "priority" can be 1-4 (4 highest)
  */
 void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority)
 {
@@ -26,13 +42,35 @@ void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority)
     /* Set stack to value of high stack mem - stack frame size */
     new_pcb->sp = (unsigned long) &stk[STACKSIZE - sizeof(struct stack_frame)];
 
-    /* Set stack pointer in PCB */
-    setPSP(new_pcb->sp);
-
     /* TODO: Call this later */
     setRunning(new_pcb);
 
-    SVC();
+    insertPriQueue(new_pcb, priority);
+}
+
+/*
+ * Insert pcb into respective priority queue
+ */
+void insertPriQueue(struct pcb *new_pcb, unsigned char priority)
+{
+    if(pri_queue[priority].head == NULL){
+        /* If priority queue empty */
+        new_pcb->next = new_pcb;
+        new_pcb->prev = new_pcb;
+        pri_queue[priority].head = (unsigned long*)new_pcb;
+        pri_queue[priority].tail = (unsigned long*)new_pcb;
+    } else {
+        /* If priority queue not empty */
+        new_pcb->next = (struct pcb*)pri_queue[priority].head;
+        new_pcb->prev = (struct pcb*)pri_queue[priority].tail;
+
+        /* Point tail to new pcb */
+        struct pcb *tmp = (struct pcb*)pri_queue[priority].tail;
+        tmp->next = new_pcb;
+
+        /* Set up new tail */
+        pri_queue[priority].tail = (unsigned long*)new_pcb;
+    }
 }
 
 /*

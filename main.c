@@ -53,7 +53,12 @@ void main (void)
     /* Enable CPU interrupts */
     InterruptMasterEnable();
 
+    initPriQueue();
+
     reg_proc(&procA, 100, 4);
+    reg_proc(&procA, 50, 4);
+
+    SVC();
 
     while(1)
     {

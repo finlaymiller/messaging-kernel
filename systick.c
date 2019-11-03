@@ -99,6 +99,6 @@ void SysTickIntDisable(void)
 void SysTickHandler(void)
 {
     /* Enqueue characater onto systick queue */
-    enqueue(SYSTICK, SYS_CHAR);
+    //enqueue(SYSTICK, SYS_CHAR);
 }
 
