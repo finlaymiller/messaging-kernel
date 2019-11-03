@@ -4,6 +4,30 @@
 
 #include "kernel.h"
 
+extern struct pcb *running;
+struct pcb* process_queue[NUM_PRI_LVLS];
+
+void kernelInit(void)
+{
+	/* Initialize UART */
+	UART0_Init();           // Initialize UART0
+
+	PendSVMinPri();
+}
+
+/*
+ * Priority Process Queue Initialization
+ *
+ * @param:		None
+ * @returns:	None
+ */
+void initProcessTable(void)
+{
+	int i;
+	for(i = 0; i < NUM_PRI_LVLS; i++)
+		process_queue[i] = NULL;
+}
+
 /*
  * Registers process by:
  * - allocating memory for stack size and pcb
@@ -66,11 +90,57 @@ struct stack_frame initStackFrame(void(*func_name)())
     return sf;
 }
 
+/*
+ * Search process priority queues to find next process to run.
+ * This function assumes that all pcbs are already correctly linked.
+ *
+ * Remove debugging prints before handing in
+ *
+ * @param:		None
+ * @returns:	Pointer to PCB of next process to run
+ */
+struct pcb* getNextRunning(void)
+{
+	struct pcb* next_to_run = NULL;
+	int i;
 
+	for(i = 0; i < NUM_PRI_LVLS; i++)
+	{
+		if(process_queue[i])
+		{
+			next_to_run = process_queue[i];
+			UART0_TXStr("\nSwitching to priority level ");
+			UART0_TXChar((char)i);
+		}
+	}
 
+	if(!next_to_run)	// no process found, switch to idle process
+	{
+		UART0_TXStr("\nNo process found during getNextRunning\nIdling...");
+		next_to_run = process_queue[0];
+	}
 
+	return next_to_run;
+}
 
+/*
+ * Move to next process AT SAME PRIORITY LEVEL
+ *
+ *
+ * @param:		None
+ * @returns:	None
+ */
+void nextProcess(void)
+{
+	running->sp = getPSP();			// save current SP
 
+	if(running->next == running)	// process is alone on level
+	{
+		// handle process deletion, link breaking, etc, here
+		running = getNextRunning();
+	}
+	else
+		running = running->next;	// move to next process
 
-
-
+	setPSP(running->sp);			// start process
+}

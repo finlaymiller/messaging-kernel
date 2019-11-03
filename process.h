@@ -14,11 +14,12 @@
 #include "kernel.h"
 #include "processPrinter.h"
 
-#define PRIVATE 	static
-#define SVC()		__asm(" SVC #0")
-#define MSP_RTN		0xFFFFFFF9	// link register exception return using MSP
-#define PSP_RTN		0xFFFFFFFD	// link register exception return using PSP
-#define STACKSIZE	1024
+#define PRIVATE 		static
+#define SVC()			__asm(" SVC #0")
+#define MSP_RTN			0xFFFFFFF9	// link register exception return using MSP
+#define PSP_RTN			0xFFFFFFFD	// link register exception return using PSP
+#define STACKSIZE		1024
+#define	NUM_PRI_LVLS	5
 
 /* Cortex default stack frame */
 struct stack_frame

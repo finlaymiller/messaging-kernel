@@ -10,6 +10,16 @@
 
 #include <stdio.h>
 #include "process.h"
+#include "calls.h"
+#include "uart.h"
+
+#define NVIC_INT_CTRL_R			(*((volatile unsigned long *) 0xE000ED04))
+#define NVIC_SYS_PRI3_R			(*((volatile unsigned long *) 0xE000ED20))
+#define TRIGGER_PENDSV			0x10000000
+#define PENDSV_LOWEST_PRIORITY	0x00E00000
+
+#define PendSV()			(NVIC_INT_CTRL_R |= TRIGGER_PENDSV)
+#define PendSVMinPri()		(NVIC_SYS_PRI3_R |= PENDSV_LOWEST_PRIORITY)
 
 struct kcallargs
 {
@@ -26,12 +36,6 @@ enum SVC_CODES
 
 void SVCall(void);
 void SVCHandler(struct stack_frame *);
-int s_get_id(void);
-int s_nice(int);
-int s_terminate(void);
-int s_send(void);
-int s_recv(void);
-int s_bind(unsigned int);
-int s_unbind(unsigned int);
+void PendSVHandler(void);
 
 #endif /* TRAP_H_ */

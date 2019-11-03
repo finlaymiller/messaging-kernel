@@ -9,5 +9,5 @@
 
 void p_printchar(void)
 {
-	UART0_TXChar('a');
+	UART0_TXChar('b');
 }

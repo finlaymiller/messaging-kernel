@@ -20,13 +20,11 @@
  */
 void main (void)
 {
-    /* Initialize UART */
-    UART0_Init();           // Initialize UART0
+	kernelInit();
 
-    /* Initialize Systick */
-    //DO THIS WITH FIRST SVCall
+    reg_proc(p_printchar, 100, 4);
 
-    reg_proc(NULL, 100, 4);
+    SVC();
 
     while(1)
     {

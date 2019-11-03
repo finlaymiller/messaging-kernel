@@ -4,19 +4,9 @@
  *  Created on: Nov 2, 2019
  *      Author: Finlay Miller
  *
- *  All functions that processes need to access through supervisor calls are
- *  stored here. They are prefixed with 's_' to indicate that they are
- *  supervisor-level functions rather than process (p_) or kernel (k_).
  *
  *  NOTE: All the comments I deleted from SVCHandler are still present in the
  *  original file, SVC_example.c.
- *
- *  todo	write nice() function
- *  todo	write send() function
- *  todo	write recv() function
- *  todo	write bind() function
- *  todo	write unbind() function
- *  todo	write terminate() function
  */
 
 #include "trap.h"
@@ -99,9 +89,9 @@ void SVCHandler(struct stack_frame *argptr)
 		/* Start SysTick */
 		systickInit();
 
-		__asm("	movw 	LR,#0xFFFD");  /* Lower 16 [and clear top 16] */
-		__asm("	movt 	LR,#0xFFFF");  /* Upper 16 only */
-		__asm("	bx 	LR");          /* Force return to PSP */
+		__asm("	movw 	LR,#0xFFFF");  /* Lower 16 [and clear top 16] */
+		__asm("	movt 	LR,#0xFFFD");  /* Upper 16 only */
+		__asm("	bx 		LR");          /* Force return to PSP */
 	}
 	else /* Subsequent SVCs */
 	{
@@ -137,94 +127,21 @@ void SVCHandler(struct stack_frame *argptr)
 	}
 }
 
-
 /*
- * Description
+ * Pending Supervisor Call Handler
  *
  * @param:		None
- * @returns:	ID of the current process
+ * @returns:	None
  */
-int s_get_id(void)
+void PendSVHandler(void)
 {
-	// something like:
-	// return running->id;
-	return 0;
-}
+	INTERRUPT_MASTER_DISABLE();
 
+	if(running)
+		saveRegisters();	// save registers if there is a process running
 
-/*
- * Description
- *
- * @param:
- * @returns:
- */
-int s_nice(int priority)
-{
+	nextProcess();			// move to next process
+	loadRegisters();		// restore process registers
 
-	return 0;
-}
-
-
-/*
- * Description
- *
- * @param:
- * @returns:
- */
-int s_terminate(void)
-{
-
-	return 0;
-}
-
-
-/*
- * Description
- *
- * @param:
- * @returns:
- */
-int s_send(void)
-{
-
-	return 0;
-}
-
-
-/*
- * Description
- *
- * @param:
- * @returns:
- */
-int s_recv(void)
-{
-
-	return 0;
-}
-
-
-/*
- * Description
- *
- * @param:		Mailbox number to bind to. 0 if any.
- * @returns:
- */
-int s_bind(unsigned int mailbox_number)
-{
-
-	return 0;
-}
-
-
-/*
- * Description
- *
- * @param:		Mailbox number to unbind from. 0 if all.
- * @returns:
- */
-int s_unbind(unsigned int mailbox_number)
-{
-
-	return 0;
+	INTERRUPT_MASTER_ENABLE();
 }
