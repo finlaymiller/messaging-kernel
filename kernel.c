@@ -30,7 +30,7 @@ void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority)
 
     loadRegisters();
 
-    //setRunning(new_pcb);
+    setRunning(new_pcb);
 
     SVC();
 }
