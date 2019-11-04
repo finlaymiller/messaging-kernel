@@ -26,6 +26,7 @@ void initStack(unsigned long *stk, void(*func_name)());
 struct stack_frame initStackFrame(void(*func_name)());
 struct pcb* getNextRunning(void);
 void nextProcess(void);
+
 struct pri{
     unsigned long *head;    //holds pointer to first pcb in priority queue
     unsigned long *tail;    //holds pointer to last pcb in priority queue

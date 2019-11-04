@@ -89,22 +89,3 @@ void SysTickHandler(void)
 
     INT_CTRL |= INT_CTRL_PENDSV;
 }
-
-
-void PendSV_Handler(void)
-{
-    InterruptMasterDisable();
-
-    if(getRunning()) saveRegisters();
-    setRunningSP((unsigned long*)getPSP());
-
-    nextProcess();
-    loadRegisters();
-
-    InterruptMasterEnable();
-
-    __asm(" movw    LR,#0xFFFD");  /* Lower 16 [and clear top 16] */
-    __asm(" movt    LR,#0xFFFF");  /* Upper 16 only */
-    __asm(" bx  LR");          /* Force return to PSP */
-}
-

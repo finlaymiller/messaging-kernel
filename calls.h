@@ -8,6 +8,8 @@
 #ifndef CALLS_H_
 #define CALLS_H_
 
+#include "trap.h"
+
 int s_get_id(void);
 int s_nice(int);
 int s_terminate(void);

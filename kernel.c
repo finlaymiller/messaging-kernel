@@ -172,9 +172,9 @@ struct pcb* getNextRunning(void)
 
 	for(i = 0; i < NUM_PRI_LVLS; i++)
 	{
-		if(process_queue[i])
+		if(pri_queue[i].head)
 		{
-			next_to_run = process_queue[i];
+			next_to_run = pri_queue[i].head;
 			UART0_TXStr("\nSwitching to priority level ");
 			UART0_TXChar((char)i);
 		}
@@ -183,11 +183,13 @@ struct pcb* getNextRunning(void)
 	if(!next_to_run)	// no process found, switch to idle process
 	{
 		UART0_TXStr("\nNo process found during getNextRunning\nIdling...");
-		next_to_run = process_queue[0];
+		next_to_run = pri_queue[0].head;
 	}
 
 	return next_to_run;
 }
+
+/*
  * Function to test process
  */
 void procA(void)
@@ -215,6 +217,15 @@ void procC(void)
     while(1){
         UART_force_out_char('c');
     }
+}
+
+
+void assignR7(volatile unsigned long data)
+{
+    /* Assign 'data' to R7; since the first argument is R0, this is
+    * simply a MOV from R0 to R7
+    */
+    __asm(" mov r7,r0");
 }
 
 

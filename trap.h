@@ -18,7 +18,6 @@
 #define TRIGGER_PENDSV			0x10000000
 #define PENDSV_LOWEST_PRIORITY	0x00E00000
 
-#define PendSV()			(NVIC_INT_CTRL_R |= TRIGGER_PENDSV)
 #define PendSVMinPri()		(NVIC_SYS_PRI3_R |= PENDSV_LOWEST_PRIORITY)
 
 struct kcallargs
@@ -35,7 +34,6 @@ enum SVC_CODES
 };
 
 void SVCall(void);
-void SVCHandler(struct stack_frame *);
-void PendSVHandler(void);
+void PendSV_Handler(void);
 
 #endif /* TRAP_H_ */

@@ -81,18 +81,40 @@ void SVCHandler(struct stack_frame *argptr)
 	static int firstSVCcall = TRUE;
 	struct kcallargs *kcaptr;
 
-	if (firstSVCcall)
-	{
-		setPSP(running -> sp + 8 * sizeof(unsigned int));
+    if (firstSVCcall){
+        /*
+         * Force a return using PSP
+         * This will be the first process to run, so the eight "soft pulled" registers
+           (R4..R11) must be ignored otherwise PSP will be pointing to the wrong
+           location; the PSP should be pointing to the registers R0..xPSR, which will
+           be "hard pulled"by the BX LR instruction.
+         * To do this, it is necessary to ensure that the PSP points to (i.e., has) the
+           address of R0; at this moment, it points to R4.
+         * Since there are eight registers (R4..R11) to skip, the value of the sp
+           should be increased by 8 * sizeof(unsigned int).
+         * sp is increased because the stack runs from low to high memory.
+        */
+        struct pcb *curr_running = getRunning();
+        setPSP(curr_running->sp);
 
-		firstSVCcall = FALSE;
-		/* Start SysTick */
-		systickInit();
+        /* Load software-stored registers */
+        loadRegisters();
 
-		__asm("	movw 	LR,#0xFFFF");  /* Lower 16 [and clear top 16] */
-		__asm("	movt 	LR,#0xFFFD");  /* Upper 16 only */
-		__asm("	bx 		LR");          /* Force return to PSP */
-	}
+        /* Start calling other section after first call */
+        firstSVCcall = FALSE;
+
+        /* Initialize Systick */
+        systickInit();
+
+        /*
+         - Change the current LR to indicate return to Thread mode using the PSP
+         - Assembler required to change LR to FFFF.FFFD (Thread/PSP)
+         - BX LR loads PC from PSP stack (also, R0 through xPSR) - "hard pull"
+        */
+        __asm(" movw    LR,#0xFFFD");  /* Lower 16 [and clear top 16] */
+        __asm(" movt    LR,#0xFFFF");  /* Upper 16 only */
+        __asm(" bx  LR");          /* Force return to PSP */
+    }
 	else /* Subsequent SVCs */
 	{
 	#ifdef FOR_KERNEL_ARGS
@@ -133,15 +155,19 @@ void SVCHandler(struct stack_frame *argptr)
  * @param:		None
  * @returns:	None
  */
-void PendSVHandler(void)
+void PendSV_Handler(void)
 {
-	INTERRUPT_MASTER_DISABLE();
+    InterruptMasterDisable();
 
-	if(running)
-		saveRegisters();	// save registers if there is a process running
+    if(getRunning()) saveRegisters();
+    setRunningSP((unsigned long*)getPSP());
 
-	nextProcess();			// move to next process
-	loadRegisters();		// restore process registers
+    nextProcess();
+    loadRegisters();
 
-	INTERRUPT_MASTER_ENABLE();
+    InterruptMasterEnable();
+
+    __asm(" movw    LR,#0xFFFD");  /* Lower 16 [and clear top 16] */
+    __asm(" movt    LR,#0xFFFF");  /* Upper 16 only */
+    __asm(" bx  LR");          /* Force return to PSP */
 }

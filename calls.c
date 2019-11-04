@@ -32,6 +32,20 @@ int s_get_id(void)
 	return 0;
 }
 
+int getid()
+{
+    volatile struct kcallargs getidarg; /* Volatile to actually reserve space on stack */
+    getidarg . code = GETID;
+
+    /* Assign address if getidarg to R7 */
+    assignR7((unsigned long) &getidarg);
+
+    SVC();
+
+    return getidarg . rtnvalue;
+
+}
+
 
 /*
  * Description
