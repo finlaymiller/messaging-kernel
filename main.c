@@ -14,7 +14,8 @@
 #include "queue.h"
 #include "systick.h"
 #include "kernel.h"
-#include "SVC_handler.h"
+#include "processPrinter.h"
+#include "trap.h"
 
 /*
  * Calls initialization functions for all modules

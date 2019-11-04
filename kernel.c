@@ -11,6 +11,15 @@
 static struct pcb *running;
 static struct pri pri_queue[NUM_PRI];
 
+void kernelInit(void)
+{
+	/* Initialize UART */
+	UART0_Init();           // Initialize UART0
+
+	PendSVMinPri();
+}
+
+
 /* TODO: do this at compile time */
 void initPriQueue(void)
 {
@@ -148,6 +157,39 @@ struct stack_frame initStackFrame(void(*func_name)())
 }
 
 /*
+ * Search process priority queues to find next process to run.
+ * This function assumes that all pcbs are already correctly linked.
+ *
+ * Remove debugging prints before handing in
+ *
+ * @param:		None
+ * @returns:	Pointer to PCB of next process to run
+ */
+struct pcb* getNextRunning(void)
+{
+	struct pcb* next_to_run = NULL;
+	int i;
+
+	for(i = 0; i < NUM_PRI_LVLS; i++)
+	{
+		if(pri_queue[i].head)
+		{
+			next_to_run = pri_queue[i].head;
+			UART0_TXStr("\nSwitching to priority level ");
+			UART0_TXChar((char)i);
+		}
+	}
+
+	if(!next_to_run)	// no process found, switch to idle process
+	{
+		UART0_TXStr("\nNo process found during getNextRunning\nIdling...");
+		next_to_run = pri_queue[0].head;
+	}
+
+	return next_to_run;
+}
+
+/*
  * Function to test process
  */
 void procA(void)
@@ -175,6 +217,15 @@ void procC(void)
     while(1){
         UART_force_out_char('c');
     }
+}
+
+
+void assignR7(volatile unsigned long data)
+{
+    /* Assign 'data' to R7; since the first argument is R0, this is
+    * simply a MOV from R0 to R7
+    */
+    __asm(" mov r7,r0");
 }
 
 
