@@ -36,6 +36,11 @@ void InterruptMasterEnable(void)
     __asm(" cpsie   i");
 }
 
+void InterruptMasterDisable(void)
+{
+    __asm(" cpsid i");
+}
+
 /*
  * Calls initialization functions for all modules
  * Begins polling the input queue

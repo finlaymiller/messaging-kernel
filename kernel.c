@@ -76,6 +76,9 @@ void insertPriQueue(struct pcb *new_pcb, unsigned char priority)
 void nextProcess(void)
 {
     running = running->next;
+
+    /* Set new stack pointer */
+    setPSP(running->sp);
 }
 
 /*
@@ -146,6 +149,7 @@ void procA(void)
 {
     while(1){
         UART_force_out_char('a');
+        SVC();
     }
 }
 
