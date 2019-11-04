@@ -4,6 +4,7 @@
  *  Created on: Oct 17, 2019
  *      Author: Larry Hughes
  *      Editor: Finlay Miller
+ *      		Derek Capone
  */
 
 #ifndef PROCESS_H_
@@ -14,8 +15,6 @@
 
 #define PRIVATE 	static
 #define SVC()		__asm(" SVC #0")
-#define disable()	__asm(" cpsid i")
-#define enable()	__asm(" cpsie i")
 #define MSP_RTN		0xFFFFFFF9	// link register exception return using MSP
 #define PSP_RTN		0xFFFFFFFD	// link register exception return using PSP
 #define STACKSIZE	1024

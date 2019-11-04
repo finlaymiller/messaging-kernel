@@ -8,6 +8,7 @@
  *  Polls input queues
  */
 
+#include "queue.h"
 #include "uart.h"
 #include "process.h"
 #include "queuing.h"
@@ -67,7 +68,6 @@ void main (void)
 
     while(1)
     {
-
     }
 
 }
