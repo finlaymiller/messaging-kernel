@@ -52,9 +52,6 @@ void main (void)
     InterruptEnable(INT_VEC_UART0);       // Enable UART0 interrupts
     UART0_IntEnable(UART_INT_RX | UART_INT_TX); // Enable Receive and Transmit interrupts
 
-    /* Initialize Systick */
-    SysTickInit();
-
     /* Enable CPU interrupts */
     InterruptMasterEnable();
 
@@ -62,8 +59,9 @@ void main (void)
 
     reg_proc(&procA, 100, 4);
     reg_proc(&procB, 50, 4);
+    reg_proc(&procC, 25, 4);
 
-    setRunning();
+    initRunning();
 
     SVC();
 

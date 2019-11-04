@@ -27,7 +27,8 @@ struct pri{
 void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority);
 void initStack(unsigned long *stk, void(*func_name)());
 struct stack_frame initStackFrame(void(*func_name)());
-void setRunning(void);
+void setRunningSP(unsigned long*);
+void initRunning(void);
 struct pcb* getRunning(void);
 void initPriQueue(void);
 void insertPriQueue(struct pcb *new_pcb, unsigned char priority);
@@ -35,5 +36,6 @@ void nextProcess(void);
 
 extern void procA(void);
 extern void procB(void);
+extern void procC(void);
 
 #endif /* KERNEL_H_ */

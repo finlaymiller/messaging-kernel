@@ -82,9 +82,14 @@ void nextProcess(void)
 }
 
 /*
- * Sets running pointer value
+ * Sets running stack pointer value
  */
-void setRunning(void)
+void setRunningSP(unsigned long* new_sp)
+{
+    running->sp = new_sp;
+}
+
+void initRunning(void)
 {
     char i;
     for(i=NUM_PRI-1; i>=0; i--){
@@ -149,7 +154,6 @@ void procA(void)
 {
     while(1){
         UART_force_out_char('a');
-        SVC();
     }
 }
 
@@ -163,6 +167,14 @@ void procB(void)
     }
 }
 
-
+/*
+ * Function to test process
+ */
+void procC(void)
+{
+    while(1){
+        UART_force_out_char('c');
+    }
+}
 
 

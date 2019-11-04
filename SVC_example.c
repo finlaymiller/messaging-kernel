@@ -96,8 +96,8 @@ void SVCHandler(struct stack_frame *argptr)
         /* Start calling other section after first call */
         firstSVCcall = FALSE;
 
-        /* Start SysTick */
-        //systick_init();
+        /* Initialize Systick */
+        SysTickInit();
 
         /*
          - Change the current LR to indicate return to Thread mode using the PSP
@@ -119,20 +119,6 @@ void SVCHandler(struct stack_frame *argptr)
          * to get the address and store it in kcaptr, it is simply a matter of
            assigning the value of R7 (arptr -> r7) to kcaptr
          */
-
-        disable();
-
-        if(running) saveRegisters();
-        //running->sp = getPSP();  /* TODO: Figure out why this line causes crashes */
-
-        nextProcess();
-        loadRegisters();
-
-        enable();
-
-        __asm(" movw    LR,#0xFFFD");  /* Lower 16 [and clear top 16] */
-        __asm(" movt    LR,#0xFFFF");  /* Upper 16 only */
-        __asm(" bx  LR");          /* Force return to PSP */
 
         #ifdef FOR_KERNEL_ARGS
             kcaptr = (struct kcallargs *) argptr -> r7;
