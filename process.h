@@ -66,6 +66,8 @@ void setMSP(volatile unsigned long);\
 void volatile saveRegisters();
 void volatile loadRegisters();
 void volatile loadLR(void);
+void InterruptMasterEnable(void);
+void InterruptMasterDisable(void);
 
 
 void SVCHandler(struct stack_frame *argptr);

@@ -86,7 +86,7 @@ void nextProcess(void)
  */
 void setRunningSP(unsigned long* new_sp)
 {
-    running->sp = new_sp;
+    running->sp = (unsigned long)new_sp;
 }
 
 void initRunning(void)

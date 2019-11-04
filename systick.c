@@ -11,7 +11,7 @@
 #include "queue.h"
 #include "systick.h"
 #include "time.h"
-#include "queue.h"
+#include "process.h"
 #include "kernel.h"
 
 // SysTick Registers
@@ -113,7 +113,7 @@ void SysTickHandler(void)
 
 void PendSV_Handler(void)
 {
-    disable();
+    InterruptMasterDisable();
 
     if(getRunning()) saveRegisters();
     setRunningSP((unsigned long*)getPSP());
@@ -121,7 +121,7 @@ void PendSV_Handler(void)
     nextProcess();
     loadRegisters();
 
-    enable();
+    InterruptMasterEnable();
 
     __asm(" movw    LR,#0xFFFD");  /* Lower 16 [and clear top 16] */
     __asm(" movt    LR,#0xFFFF");  /* Upper 16 only */

@@ -80,5 +80,6 @@ void UART0_Start(void);
 void UART0_TXStr(char *);
 void UART0_TXChar(char);
 int  UART0_TXReady(void);
+void UART_force_out_char(char c);
 
 #endif /* UART_H_ */

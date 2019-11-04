@@ -17,32 +17,6 @@
 #include "SVC_handler.h"
 
 /*
- * Enables all interrupts on the CPU
- */
-void InterruptEnable(unsigned long InterruptIndex)
-{
-/* Indicate to CPU which device is to interrupt */
-if(InterruptIndex < 32)
-    NVIC_EN0_R = 1 << InterruptIndex;       // Enable the interrupt in the EN0 Register
-else
-    NVIC_EN1_R = 1 << (InterruptIndex - 32);    // Enable the interrupt in the EN1 Register
-}
-
-/*
- * Executes assembly instruction to enable interrupts
- */
-void InterruptMasterEnable(void)
-{
-    /* enable CPU interrupts */
-    __asm(" cpsie   i");
-}
-
-void InterruptMasterDisable(void)
-{
-    __asm(" cpsid i");
-}
-
-/*
  * Calls initialization functions for all modules
  * Begins polling the input queue
  */

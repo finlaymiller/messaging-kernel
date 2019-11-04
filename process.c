@@ -66,3 +66,18 @@ void volatile loadLR(void)
     __asm(" movw     lr, #0xfffd");
     __asm(" movt     lr, #0xffff");
 }
+
+
+/*
+ * Executes assembly instruction to enable interrupts
+ */
+void InterruptMasterEnable(void)
+{
+    /* enable CPU interrupts */
+    __asm(" cpsie   i");
+}
+
+void InterruptMasterDisable(void)
+{
+    __asm(" cpsid i");
+}
