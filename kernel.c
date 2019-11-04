@@ -2,10 +2,14 @@
  * kernel.c
  */
 
+/* Includes */
 #include "kernel.h"
 
-extern struct pcb *running;
-struct pcb* process_queue[NUM_PRI_LVLS];
+/* Private defines */
+#define NUM_PRI 5   /* Number of priority queues */
+
+static struct pcb *running;
+static struct pri pri_queue[NUM_PRI];
 
 void kernelInit(void)
 {
@@ -15,17 +19,15 @@ void kernelInit(void)
 	PendSVMinPri();
 }
 
-/*
- * Priority Process Queue Initialization
- *
- * @param:		None
- * @returns:	None
- */
-void initProcessTable(void)
+
+/* TODO: do this at compile time */
+void initPriQueue(void)
 {
-	int i;
-	for(i = 0; i < NUM_PRI_LVLS; i++)
-		process_queue[i] = NULL;
+    char i;
+    for(i=0; i<NUM_PRI; i++){
+        pri_queue[i].head = NULL;
+        pri_queue[i].tail = NULL;
+    }
 }
 
 /*
@@ -34,6 +36,7 @@ void initProcessTable(void)
  * - initializing stack with initial register values
  * - initializing pcb values
  * - inserting into desired priority queue
+ * "priority" can be 1-4 (4 highest)
  */
 void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority)
 {
@@ -44,13 +47,76 @@ void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority)
     /* Initialize pcb memory with starting values */
     struct pcb *new_pcb = (struct pcb *)malloc(sizeof(struct pcb));
     new_pcb->id = pid;
-    new_pcb->next = NULL;
-    new_pcb->prev = NULL;
+
+    /* Set stack to value of high stack mem - stack frame size */
+    new_pcb->sp = (unsigned long) &stk[STACKSIZE - sizeof(struct stack_frame)];
+
+    insertPriQueue(new_pcb, priority);
+}
+
+/*
+ * Insert pcb into respective priority queue
+ */
+void insertPriQueue(struct pcb *new_pcb, unsigned char priority)
+{
+    if(pri_queue[priority].head == NULL){
+        /* If priority queue empty */
+        new_pcb->next = new_pcb;
+        new_pcb->prev = new_pcb;
+        pri_queue[priority].head = (unsigned long*)new_pcb;
+        pri_queue[priority].tail = (unsigned long*)new_pcb;
+    } else {
+        /* If priority queue not empty */
+        new_pcb->next = (struct pcb*)pri_queue[priority].head;
+        new_pcb->prev = (struct pcb*)pri_queue[priority].tail;
+
+        /* Point tail to new pcb */
+        struct pcb *tmp = (struct pcb*)pri_queue[priority].tail;
+        tmp->next = new_pcb;
+
+        /* Set up new tail */
+        pri_queue[priority].tail = (unsigned long*)new_pcb;
+    }
+}
+
+/*
+ * Changes "running" to the next process in the priority queue
+ */
+void nextProcess(void)
+{
+    running = running->next;
+
+    /* Set new stack pointer */
+    setPSP(running->sp);
+}
+
+/*
+ * Sets running stack pointer value
+ */
+void setRunningSP(unsigned long* new_sp)
+{
+    running->sp = (unsigned long)new_sp;
+}
+
+void initRunning(void)
+{
+    char i;
+    for(i=NUM_PRI-1; i>=0; i--){
+        if(pri_queue[i].head != NULL){
+            running = (struct pcb*) pri_queue[i].head;
+            break;
+        }
+    }
+}
+
+struct pcb* getRunning(void)
+{
+    return running;
 }
 
 
 /*
- * Initializes stack
+ * Initializes stack of process
  */
 void initStack(unsigned long *stk, void(*func_name)())
 {
@@ -83,7 +149,7 @@ struct stack_frame initStackFrame(void(*func_name)())
     sf.r11 = 0;
     sf.r12 = 0;
 
-    sf.lr = 0;  //terminate process routine
+    sf.lr = 0xfffffffd;  //terminate process routine
     sf.pc = (unsigned long)func_name;  //entry point for process
     sf.psr = 0x01000000;
 
@@ -122,25 +188,33 @@ struct pcb* getNextRunning(void)
 
 	return next_to_run;
 }
+ * Function to test process
+ */
+void procA(void)
+{
+    while(1){
+        UART_force_out_char('a');
+    }
+}
 
 /*
- * Move to next process AT SAME PRIORITY LEVEL
- *
- *
- * @param:		None
- * @returns:	None
+ * Function to test process
  */
-void nextProcess(void)
+void procB(void)
 {
-	running->sp = getPSP();			// save current SP
-
-	if(running->next == running)	// process is alone on level
-	{
-		// handle process deletion, link breaking, etc, here
-		running = getNextRunning();
-	}
-	else
-		running = running->next;	// move to next process
-
-	setPSP(running->sp);			// start process
+    while(1){
+        UART_force_out_char('b');
+    }
 }
+
+/*
+ * Function to test process
+ */
+void procC(void)
+{
+    while(1){
+        UART_force_out_char('c');
+    }
+}
+
+

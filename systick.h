@@ -40,6 +40,7 @@ void SysTickStop(void);
 void SysTickIntEnable(void);
 void SysTickIntDisable(void);
 void SysTickHandler(void);
+void PendSV_Handler(void);
 void SysTickPeriod(unsigned long Period);
 
 #endif /* SYSTICK_H_ */

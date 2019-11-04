@@ -8,10 +8,16 @@
  *  Author: Derek Capone
  */
 
-
 #include "queue.h"
 #include "systick.h"
 #include "time.h"
+#include "process.h"
+#include "kernel.h"
+
+//PendSV defines
+#define INT_CTRL   (*((volatile unsigned long *)0xE000ED04))
+#define INT_CTRL_PENDSV     (1<<28)     //bit for generating PendSV interrupt
+#define INT_CTRL_UNPENDSV   (1<<27)     //bit to remove pending state for PendSV
 
 SysTick* systick;
 
@@ -79,6 +85,26 @@ void SysTickIntDisable(void)
 void SysTickHandler(void)
 {
     /* Enqueue characater onto systick queue */
-    UART0_TXChar(SYS_CHAR);
+    //enqueue(SYSTICK, SYS_CHAR);
+
+    INT_CTRL |= INT_CTRL_PENDSV;
+}
+
+
+void PendSV_Handler(void)
+{
+    InterruptMasterDisable();
+
+    if(getRunning()) saveRegisters();
+    setRunningSP((unsigned long*)getPSP());
+
+    nextProcess();
+    loadRegisters();
+
+    InterruptMasterEnable();
+
+    __asm(" movw    LR,#0xFFFD");  /* Lower 16 [and clear top 16] */
+    __asm(" movt    LR,#0xFFFF");  /* Upper 16 only */
+    __asm(" bx  LR");          /* Force return to PSP */
 }
 
