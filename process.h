@@ -20,8 +20,7 @@
 #define STACKSIZE	1024
 
 /* Cortex default stack frame */
-struct stack_frame
-{
+struct stack_frame{
 	/* Registers saved explicitly by the software */
 	unsigned long r4;
 	unsigned long r5;
@@ -43,13 +42,18 @@ struct stack_frame
 };
 
 /* process control block */
-struct pcb
-{
-	unsigned long sp;   // stack pointer - r13 (PSP)
+struct pcb{
+    struct pcb* next;           // link to next pcb
+    struct pcb* prev;           // link to previous pcb
+    unsigned long sp;   // stack pointer - r13 (PSP)
 	unsigned int id;  // process identifier
 	unsigned long state;    // state of process
-	struct pcb* next;           // link to next pcb
-	struct pcb* prev;           // link to previous pcb
+};
+
+/* Linked list structure */
+struct linked_list{
+    unsigned long* next;    // link to next struct pointer
+    unsigned long* prev;    // link to prev struct pointer
 };
 
 /* function declarations */
@@ -61,5 +65,11 @@ void setPSP(volatile unsigned long);
 void setMSP(volatile unsigned long);\
 void volatile saveRegisters();
 void volatile loadRegisters();
+void volatile loadLR(void);
+void InterruptMasterEnable(void);
+void InterruptMasterDisable(void);
+
+
+void SVCHandler(struct stack_frame *argptr);
 
 #endif /* PROCESS_H_ */

@@ -132,3 +132,9 @@ int UART0_TXReady(void)
 	// 1 if ready, 0 if busy
 	return !(UART0_FR_R & UART_FR_BUSY);
 }
+
+void UART_force_out_char(char c)
+{
+    UART0_DR_R = c;
+}
+

@@ -35,6 +35,8 @@ static void FaultISR(void);
 static void IntDefaultHandler(void);
 extern void UART0_IntHandler(void);
 extern void SysTickHandler(void);
+extern void SVCall(void);
+extern void PendSV_Handler(void);
 
 //*****************************************************************************
 //
@@ -80,10 +82,10 @@ void (* const g_pfnVectors[])(void) =
     0,                                      // Reserved
     0,                                      // Reserved
     0,                                      // Reserved
-    IntDefaultHandler,                      // SVCall handler
+    SVCall,                      // SVCall handler
     IntDefaultHandler,                      // Debug monitor handler
     0,                                      // Reserved
-    IntDefaultHandler,                      // The PendSV handler
+    PendSV_Handler,                      // The PendSV handler
     SysTickHandler,                      // The SysTick handler
     IntDefaultHandler,                      // GPIO Port A
     IntDefaultHandler,                      // GPIO Port B
