@@ -71,6 +71,14 @@ void insertPriQueue(struct pcb *new_pcb, unsigned char priority)
 }
 
 /*
+ * Changes "running" to the next process in the priority queue
+ */
+void nextProcess(void)
+{
+    running = running->next;
+}
+
+/*
  * Sets running pointer value
  */
 void setRunning(void)
