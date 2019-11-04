@@ -11,10 +11,10 @@
 #include "queue.h"
 #include "uart.h"
 #include "process.h"
-#include "queuing.h"
+#include "queue.h"
 #include "systick.h"
 #include "kernel.h"
-#include "SVC_example.h"
+#include "SVC_handler.h"
 
 /*
  * Enables all interrupts on the CPU

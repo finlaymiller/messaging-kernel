@@ -10,7 +10,7 @@
  * 20 Feb 2012 - First version
  */
 #include <stdio.h>
-#include "SVC_example.h"
+#include "SVC_handler.h"
 
 extern void systick_init();
 

@@ -11,7 +11,7 @@
 #include "queue.h"
 #include "systick.h"
 #include "time.h"
-#include "queuing.h"
+#include "queue.h"
 #include "kernel.h"
 
 // SysTick Registers
