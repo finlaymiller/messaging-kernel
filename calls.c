@@ -99,27 +99,4 @@ int s_recv(void)
 }
 
 
-/*
- * Description
- *
- * @param:		Mailbox number to bind to. 0 if any.
- * @returns:
- */
-int s_bind(unsigned int mailbox_number)
-{
 
-	return 0;
-}
-
-
-/*
- * Description
- *
- * @param:		Mailbox number to unbind from. 0 if all.
- * @returns:
- */
-int s_unbind(unsigned int mailbox_number)
-{
-
-	return 0;
-}
