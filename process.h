@@ -45,10 +45,10 @@ struct stack_frame{
 
 /* process control block */
 struct pcb{
-    struct pcb* next;           // link to next pcb
-    struct pcb* prev;           // link to previous pcb
-    unsigned long sp;   // stack pointer - r13 (PSP)
-	unsigned int id;  // process identifier
+    struct pcb* next;       // link to next pcb
+    struct pcb* prev; 		// link to previous pcb
+    unsigned long sp;   	// stack pointer - r13 (PSP)
+    unsigned int id;  		// process identifier
 	unsigned long state;    // state of process
 };
 
