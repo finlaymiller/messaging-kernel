@@ -10,10 +10,12 @@
 
 #include "trap.h"
 
-int s_get_id(void);
-int s_nice(int);
-int s_terminate(void);
-int s_send(void);
-int s_recv(void);
+int k_get_id(void);
+int k_nice(int);
+int k_terminate(void);
+int k_send(void);
+int k_recv(void);
+int k_bind(unsigned int);
+int k_unbind(unsigned int);
 
 #endif /* CALLS_H_ */

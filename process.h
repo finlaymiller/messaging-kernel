@@ -48,8 +48,9 @@ struct pcb{
     struct pcb* next;       // link to next pcb
     struct pcb* prev; 		// link to previous pcb
     unsigned long sp;   	// stack pointer - r13 (PSP)
-    unsigned int id;  		// process identifier
+    unsigned int  id;  		// process identifier
 	unsigned long state;    // state of process
+	unsigned int  mailbox;	// ID of mailbox owned by process
 };
 
 /* Linked list structure */

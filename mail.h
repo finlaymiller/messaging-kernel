@@ -9,13 +9,14 @@
 #define MAIL_H_
 
 #include "process.h"
+#include "trap.h"
 
 #define NUM_MAILBOXES	256
 
 // what should/can we use mailbox #0 for?
 enum BIND_ERR_CODES
 {
-	MBX_IN_USE = -3, NO_MBX_FREE, BAD_MBX_NUM, BIND_OK
+	MBX_IN_USE = -3, NO_MBX_FREE, BAD_MBX_NUM
 };
 
 struct message
@@ -30,12 +31,11 @@ struct message
 
 struct mailbox
 {
-	struct pcb*	owner;		// points to pcb of owner process
+	struct pcb*		owner;			// points to pcb of owner process
 	struct message*	message_list;	// points to first message in mailbox
 };
 
 void initMailbox(struct mailbox* mbox);
-int k_bind(unsigned int);
-int k_unbind(unsigned int);
+
 
 #endif /* MAIL_H_ */

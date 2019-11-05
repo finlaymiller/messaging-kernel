@@ -25,15 +25,11 @@
  * @param:		None
  * @returns:	ID of the current process
  */
-int s_get_id(void)
+int k_get_id(void)
 {
 	// something like:
 	// return running->id;
-	return 0;
-}
 
-int getid()
-{
     volatile struct kcallargs getidarg; /* Volatile to actually reserve space on stack */
     getidarg . code = GETID;
 
@@ -43,7 +39,6 @@ int getid()
     SVC();
 
     return getidarg . rtnvalue;
-
 }
 
 
@@ -53,7 +48,7 @@ int getid()
  * @param:
  * @returns:
  */
-int s_nice(int priority)
+int k_nice(int priority)
 {
 
 	return 0;
@@ -66,7 +61,7 @@ int s_nice(int priority)
  * @param:
  * @returns:
  */
-int s_terminate(void)
+int k_terminate(void)
 {
 
 	return 0;
@@ -79,7 +74,7 @@ int s_terminate(void)
  * @param:
  * @returns:
  */
-int s_send(void)
+int k_send(void)
 {
 
 	return 0;
@@ -92,11 +87,66 @@ int s_send(void)
  * @param:
  * @returns:
  */
-int s_recv(void)
+int k_recv(void)
 {
 
 	return 0;
 }
 
 
+/*
+ * TODO		Could this all be simplified by not using an enum and just
+ * 			#defining the error codes? So the program would return [-2 to -1]
+ * 			on error, or [1-256] on success? Probably.
+ *
+ * @param:		Mailbox number to bind to. 0 if any.
+ * @returns:	Mailbox that was bound to, or an error code:
+ * 					1. Mailbox in use by another process
+ * 					2. All mailboxes are in use
+ * 					3. Mailbox number is outside of supported range (1-256)
+ */
+int k_bind(unsigned int mailbox_number)
+{
+	unsigned int good_mailbox = 0, i;
 
+	if((mailbox_number < 0) || (mailbox_number > NUM_MAILBOXES))
+	{	// catch mailbox number outside of range
+		return BAD_MBX_NUM;
+	}
+	else if(mailroom[mailbox_number]->owner)
+	{	// catch mailbox bound to by another process
+		return MBX_IN_USE;
+	}
+	else if(mailbox_number == 0)
+	{	// catch bind to ANY mailbox
+		// search mailroom for available box
+		for(i = 0; i < NUM_MAILBOXES; i++)
+		{
+			if(!mailroom[i]->owner)
+			{
+				good_mailbox = i;
+				break;
+			}
+		}
+
+		if(i >= NUM_MAILBOXES)
+			return NO_MBX_FREE;
+	}
+	else
+		good_mailbox = mailbox_number
+
+	return good_mailbox;
+}
+
+
+/*
+ * Description
+ *
+ * @param:		Mailbox number to unbind from. 0 if all.
+ * @returns:
+ */
+int k_unbind(unsigned int mailbox_number)
+{
+
+	return 0;
+}
