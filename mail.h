@@ -36,6 +36,7 @@ struct mailbox
 };
 
 void initMailbox(struct mailbox* mbox);
-
+unsigned bind(unsigned int mailbox_number);
+unsigned unbind(unsigned int mailbox_number);
 
 #endif /* MAIL_H_ */
