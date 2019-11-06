@@ -101,7 +101,7 @@ void setRunningSP(unsigned long* new_sp)
 void initRunning(void)
 {
     char i;
-    for(i=NUM_PRI-1; i>=0; i--){
+    for(i = NUM_PRI-1; i >= 0; i--){
         if(pri_queue[i].head != NULL){
             running = (struct pcb*) pri_queue[i].head;
             break;

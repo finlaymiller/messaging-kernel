@@ -71,32 +71,6 @@ int k_terminate(void)
 
 
 /*
- * Description
- *
- * @param:
- * @returns:
- */
-int k_send(void)
-{
-
-	return 0;
-}
-
-
-/*
- * Description
- *
- * @param:
- * @returns:
- */
-int k_recv(void)
-{
-
-	return 0;
-}
-
-
-/*
  * TODO		Could this all be simplified by not using an enum and just
  * 			#defining the error codes? So the program would return [-2 to -1]
  * 			on error, or [1-256] on success? Probably.
@@ -123,7 +97,7 @@ int k_bind(unsigned int mailbox_number)
 	else if(mailbox_number == 0)
 	{	// catch bind to ANY mailbox
 		// search mailroom for available box
-		for(i = 0; i < NUM_MAILBOXES; i++)
+		for(i = 1; i < NUM_MAILBOXES; i++)
 		{
 			if(!mailroom[i].owner)
 			{
@@ -149,6 +123,32 @@ int k_bind(unsigned int mailbox_number)
  * @returns:
  */
 int k_unbind(unsigned int mailbox_number)
+{
+
+	return 0;
+}
+
+
+/*
+ * Description
+ *
+ * @param:
+ * @returns:
+ */
+int k_send(void)
+{
+
+	return 0;
+}
+
+
+/*
+ * Description
+ *
+ * @param:
+ * @returns:
+ */
+int k_recv(void)
 {
 
 	return 0;

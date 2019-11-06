@@ -11,9 +11,12 @@
 #include "process.h"
 #include "trap.h"
 
-#define NUM_MAILBOXES	256
+#define NUM_MAILBOXES		256
+#define MAX_MESSAGE_LEN		256
+#define NUM_MBX_PER_PROC	4
 
 // what should/can we use mailbox #0 for?
+// a broadcast channel maybe? or it can just unused
 enum BIND_ERR_CODES
 {
 	MBX_IN_USE = -3, NO_MBX_FREE, BAD_MBX_NUM
@@ -35,8 +38,12 @@ struct mailbox
 	struct message*	message_list;	// points to first message in mailbox
 };
 
-void initMailbox(struct mailbox* mbox);
-unsigned p_bind(unsigned int mailbox_number);
-unsigned p_unbind(unsigned int mailbox_number);
+void initMailbox(struct mailbox*);
+unsigned int p_bind(unsigned int);
+unsigned int p_unbind(unsigned int);
+unsigned int p_send(unsigned int, unsigned int, void*, unsigned int);
+unsigned int p_recv(unsigned int, unsigned int, void*, unsigned int);
+
+void procBind(void);
 
 #endif /* MAIL_H_ */

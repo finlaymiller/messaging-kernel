@@ -131,7 +131,7 @@ void SVCHandler(struct stack_frame *argptr)
 			kcaptr -> rtnvalue = k_terminate();
 			break;
 		case SEND:
-			kcaptr -> rtnvalue = k_send();
+			kcaptr -> rtnvalue = k_send(kcaptr->arg1, kcaptr->arg2);
 			break;
 		case RECV:
 			kcaptr -> rtnvalue = k_recv();

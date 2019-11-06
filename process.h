@@ -12,6 +12,7 @@
 
 #include <stdio.h>
 #include "kernel.h"
+#include "mail.h"
 #include "trap.h"
 
 #define PRIVATE 		static
@@ -50,7 +51,6 @@ struct pcb{
     unsigned long sp;   	// stack pointer - r13 (PSP)
     unsigned int  id;  		// process identifier
 	unsigned long state;    // state of process
-	unsigned int  mailbox;	// ID of mailbox owned by process
 };
 
 /* linked list structure */

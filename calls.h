@@ -14,9 +14,9 @@
 int k_get_id(void);
 int k_nice(int);
 int k_terminate(void);
-int k_send(void);
-int k_recv(void);
 int k_bind(unsigned int);
 int k_unbind(unsigned int);
+int k_send(void);
+int k_recv(void);
 
 #endif /* CALLS_H_ */
