@@ -8,6 +8,7 @@
 #ifndef CALLS_H_
 #define CALLS_H_
 
+#include "mail.h"
 #include "trap.h"
 
 int k_get_id(void);

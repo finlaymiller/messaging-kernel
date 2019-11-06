@@ -20,17 +20,17 @@
 
 #define PendSVMinPri()		(NVIC_SYS_PRI3_R |= PENDSV_LOWEST_PRIORITY)
 
-struct kcallargs
-{
-	unsigned int code;
-	unsigned int rtnvalue;
-	unsigned int arg1;
-	unsigned int arg2;
-};
-
 enum SVC_CODES
 {
 	GETID, NICE, TERMINATE, SEND, RECV, BIND, UNBIND
+};
+
+struct kcallargs
+{
+	enum SVC_CODES	code;
+	unsigned int 	rtnvalue;
+	unsigned int 	arg1;
+	unsigned int*	arg2;
 };
 
 void SVCall(void);

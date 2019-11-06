@@ -41,6 +41,7 @@ struct pcb* getRunning(void);
 void initPriQueue(void);
 void insertPriQueue(struct pcb *new_pcb, unsigned char priority);
 void nextProcess(void);
+void assignR7(volatile unsigned long);
 
 extern void procA(void);
 extern void procB(void);

@@ -13,16 +13,16 @@ struct mailbox mailroom[NUM_MAILBOXES];
 
 void initMailbox(struct mailbox* mbox)
 {
-	mbox->pcb 			= NULL;
+	mbox->owner			= NULL;
 	mbox->message_list 	= NULL;
 }
 
-unsigned bind(unsigned int mailbox_number)
+unsigned p_bind(unsigned int mailbox_number)
 {
-	return pkcall(BIND, mailbox_number);
+	return pkcall(BIND, mailbox_number, NULL);
 }
 
-unsigned unbind(unsigned int mailbox_number)
+unsigned p_unbind(unsigned int mailbox_number)
 {
-	return pkcall(UNBIND, mailbox_number);
+	return pkcall(UNBIND, mailbox_number, NULL);
 }

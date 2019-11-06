@@ -12,7 +12,7 @@
 
 #include <stdio.h>
 #include "kernel.h"
-#include "processPrinter.h"
+#include "trap.h"
 
 #define PRIVATE 		static
 #define SVC()			__asm(" SVC #0")
@@ -53,13 +53,15 @@ struct pcb{
 	unsigned int  mailbox;	// ID of mailbox owned by process
 };
 
-/* Linked list structure */
+/* linked list structure */
 struct linked_list{
     unsigned long* next;    // link to next struct pointer
     unsigned long* prev;    // link to prev struct pointer
 };
 
 /* function declarations */
+int pkcall(int , unsigned int , unsigned int*);
+
 void setLR(volatile unsigned long);
 unsigned long getPSP();
 unsigned long getMSP();
@@ -73,6 +75,6 @@ void InterruptMasterEnable(void);
 void InterruptMasterDisable(void);
 
 
-void SVCHandler(struct stack_frame *argptr);
+void SVCHandler(struct stack_frame*);
 
 #endif /* PROCESS_H_ */

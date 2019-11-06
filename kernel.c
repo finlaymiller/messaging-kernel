@@ -219,7 +219,6 @@ void procC(void)
     }
 }
 
-
 void assignR7(volatile unsigned long data)
 {
     /* Assign 'data' to R7; since the first argument is R0, this is
@@ -227,5 +226,3 @@ void assignR7(volatile unsigned long data)
     */
     __asm(" mov r7,r0");
 }
-
-

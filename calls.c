@@ -19,6 +19,8 @@
 
 #include "calls.h"
 
+extern struct mailbox mailroom[NUM_MAILBOXES];
+
 /*
  * Description
  *
@@ -109,11 +111,12 @@ int k_bind(unsigned int mailbox_number)
 {
 	unsigned int good_mailbox = 0, i;
 
-	if((mailbox_number < 0) || (mailbox_number > NUM_MAILBOXES))
+	if(mailbox_number > NUM_MAILBOXES)
 	{	// catch mailbox number outside of range
+		// no need to check < 0 since variable is unsigned
 		return BAD_MBX_NUM;
 	}
-	else if(mailroom[mailbox_number]->owner)
+	else if(mailroom[mailbox_number].owner)
 	{	// catch mailbox bound to by another process
 		return MBX_IN_USE;
 	}
@@ -122,7 +125,7 @@ int k_bind(unsigned int mailbox_number)
 		// search mailroom for available box
 		for(i = 0; i < NUM_MAILBOXES; i++)
 		{
-			if(!mailroom[i]->owner)
+			if(!mailroom[i].owner)
 			{
 				good_mailbox = i;
 				break;
@@ -133,7 +136,7 @@ int k_bind(unsigned int mailbox_number)
 			return NO_MBX_FREE;
 	}
 	else
-		good_mailbox = mailbox_number
+		good_mailbox = mailbox_number;
 
 	return good_mailbox;
 }

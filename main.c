@@ -14,7 +14,6 @@
 #include "queue.h"
 #include "systick.h"
 #include "kernel.h"
-#include "processPrinter.h"
 #include "trap.h"
 
 /*
