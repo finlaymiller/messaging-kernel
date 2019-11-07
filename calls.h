@@ -20,4 +20,7 @@ int k_unbind(unsigned int);
 int k_send(void);
 int k_recv(void);
 
+int getid(void);
+void p_terminate(void);
+
 #endif /* CALLS_H_ */

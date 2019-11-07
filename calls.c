@@ -29,9 +29,12 @@ extern struct mailbox mailroom[NUM_MAILBOXES];
  */
 int k_get_id(void)
 {
-	// something like:
-	// return running->id;
+    struct pcb *running = getRunning();
+    return running->id;
+}
 
+int getid(void)
+{
     volatile struct kcallargs getidarg; /* Volatile to actually reserve space on stack */
     getidarg . code = GETID;
 
@@ -67,6 +70,11 @@ int k_terminate(void)
 {
 
 	return 0;
+}
+
+void p_terminate(void)
+{
+    return;
 }
 
 
