@@ -149,7 +149,7 @@ struct stack_frame initStackFrame(void(*func_name)())
     sf.r11 = 0;
     sf.r12 = 0;
 
-    sf.lr = 0xfffffffd;  //terminate process routine
+    sf.lr = &p_terminate;  //terminate process routine
     sf.pc = (unsigned long)func_name;  //entry point for process
     sf.psr = 0x01000000;
 
@@ -189,6 +189,8 @@ struct pcb* getNextRunning(void)
 	return next_to_run;
 }
 
+
+
 /*
  * Function to test process
  */
@@ -214,8 +216,9 @@ void procB(void)
  */
 void procC(void)
 {
+    int i;
     while(1){
-        UART_force_out_char('c');
+        i = getid();
     }
 }
 

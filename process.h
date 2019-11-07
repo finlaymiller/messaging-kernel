@@ -70,6 +70,7 @@ void volatile loadRegisters();
 void volatile loadLR(void);
 void InterruptMasterEnable(void);
 void InterruptMasterDisable(void);
+int pkcall(int code, unsigned int arg1, unsigned int* arg2);
 
 
 void SVCHandler(struct stack_frame *argptr);
