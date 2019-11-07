@@ -36,34 +36,7 @@ unsigned int p_recv(unsigned int dst, unsigned int src, void *msg, unsigned size
 	return pkcall(RECV, dst, NULL);
 }
 
-/*
- * Function to test binding
- */
-void procBind(void)
+void p_terminate(void)
 {
-    int i, mbx;
-    char buff[10];
-
-    for(i = 255; i < 260; i++)
-    {
-    	mbx = p_bind(i);
-
-    	if(mbx > 0)
-    	{
-    		UART0_TXStr("\nBound to mailbox ");
-    		UART0_TXStr(my_itoa(mbx, buff, 10));
-    	}
-    	else if(mbx < 0)
-    	{
-    		UART0_TXStr("\nError {");
-			UART0_TXStr(BIND_ERR_PRINTS[-mbx - 1]);
-			UART0_TXStr("} when attempting to bind to mailbox ");
-			UART0_TXStr(my_itoa(i, buff, 10));
-    	}
-    	else
-		{
-    		UART0_TXStr("\nSomehow bound to mailbox ");
-    		UART0_TXStr(my_itoa(mbx, buff, 10));
-		}
-    }
+	pkcall(TERMINATE, NULL, NULL);
 }

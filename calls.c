@@ -89,10 +89,6 @@ int k_bind(unsigned int mailbox_number)
 		// no need to check < 0 since variable is unsigned
 		return BAD_MBX_NUM;
 	}
-	else if(mailroom[mailbox_number].owner)
-	{	// catch mailbox bound to by another process
-		return MBX_IN_USE;
-	}
 	else if(mailbox_number == 0)
 	{	// catch bind to ANY mailbox
 		// search mailroom for available box
@@ -107,6 +103,10 @@ int k_bind(unsigned int mailbox_number)
 
 		if(i >= NUM_MAILBOXES)
 			return NO_MBX_FREE;
+	}
+	else if(mailroom[mailbox_number].owner)
+	{	// catch mailbox bound to by another process
+		return MBX_IN_USE;
 	}
 	else
 		good_mailbox = mailbox_number;

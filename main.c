@@ -26,10 +26,11 @@ void main (void)
 	initUART();
     initPriQueue();
 
+    // init procs here
+
     initRunning();
 
-    reg_proc(&procBind, 100, 4);
-    reg_proc(&procBind, 101, 4);
+    UART0_TXStr("\n\n---------- REBOOT ----------\n\n");
 
     SVC();
 
