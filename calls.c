@@ -19,21 +19,19 @@
 
 #include "calls.h"
 
+extern struct mailbox mailroom[NUM_MAILBOXES];
+
 /*
  * Description
  *
  * @param:		None
  * @returns:	ID of the current process
  */
-int s_get_id(void)
+int k_get_id(void)
 {
 	// something like:
 	// return running->id;
-	return 0;
-}
 
-int getid()
-{
     volatile struct kcallargs getidarg; /* Volatile to actually reserve space on stack */
     getidarg . code = GETID;
 
@@ -43,7 +41,6 @@ int getid()
     SVC();
 
     return getidarg . rtnvalue;
-
 }
 
 
@@ -53,7 +50,7 @@ int getid()
  * @param:
  * @returns:
  */
-int s_nice(int priority)
+int k_nice(int priority)
 {
 
 	return 0;
@@ -66,33 +63,7 @@ int s_nice(int priority)
  * @param:
  * @returns:
  */
-int s_terminate(void)
-{
-
-	return 0;
-}
-
-
-/*
- * Description
- *
- * @param:
- * @returns:
- */
-int s_send(void)
-{
-
-	return 0;
-}
-
-
-/*
- * Description
- *
- * @param:
- * @returns:
- */
-int s_recv(void)
+int k_terminate(void)
 {
 
 	return 0;
@@ -103,12 +74,50 @@ int s_recv(void)
  * Description
  *
  * @param:		Mailbox number to bind to. 0 if any.
- * @returns:
+ * @returns:	Mailbox that was bound to, or an error code:
+ * 					-3 Mailbox in use by another process
+ * 					-2 All mailboxes are in use
+ * 					-1 Mailbox number is outside of supported range (1-256)
  */
-int s_bind(unsigned int mailbox_number)
+int k_bind(unsigned int mailbox_number)
 {
+	unsigned int good_mailbox = 0, i;
 
-	return 0;
+	// search mailroom for available mailbox
+	if(mailbox_number > NUM_MAILBOXES - 1)
+	{	// catch mailbox number outside of range
+		// no need to check < 0 since variable is unsigned
+		return BAD_MBX_NUM;
+	}
+	else if(mailbox_number == 0)
+	{	// catch bind to ANY mailbox
+		// search mailroom for available box
+		for(i = 1; i < NUM_MAILBOXES; i++)
+		{
+			if(!mailroom[i].owner)
+			{
+				good_mailbox = i;
+				break;
+			}
+		}
+
+		if(i >= NUM_MAILBOXES)
+			return NO_MBX_FREE;
+	}
+	else if(mailroom[mailbox_number].owner)
+	{	// catch mailbox bound to by another process
+		return MBX_IN_USE;
+	}
+	else
+		good_mailbox = mailbox_number;
+
+	// update mailbox if one has been found
+	if(good_mailbox > 0)
+	{
+		mailroom[good_mailbox].owner = getRunning();
+	}
+
+	return good_mailbox;
 }
 
 
@@ -118,7 +127,33 @@ int s_bind(unsigned int mailbox_number)
  * @param:		Mailbox number to unbind from. 0 if all.
  * @returns:
  */
-int s_unbind(unsigned int mailbox_number)
+int k_unbind(unsigned int mailbox_number)
+{
+
+	return 0;
+}
+
+
+/*
+ * Description
+ *
+ * @param:
+ * @returns:
+ */
+int k_send(void)
+{
+
+	return 0;
+}
+
+
+/*
+ * Description
+ *
+ * @param:
+ * @returns:
+ */
+int k_recv(void)
 {
 
 	return 0;

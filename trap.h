@@ -9,6 +9,7 @@
 #define TRAP_H_
 
 #include <stdio.h>
+#include "kernel.h"
 #include "process.h"
 #include "calls.h"
 #include "uart.h"
@@ -20,17 +21,17 @@
 
 #define PendSVMinPri()		(NVIC_SYS_PRI3_R |= PENDSV_LOWEST_PRIORITY)
 
-struct kcallargs
-{
-	unsigned int code;
-	unsigned int rtnvalue;
-	unsigned int arg1;
-	unsigned int arg2;
-};
-
 enum SVC_CODES
 {
 	GETID, NICE, TERMINATE, SEND, RECV, BIND, UNBIND
+};
+
+struct kcallargs
+{
+	enum SVC_CODES	code;
+	int 			rtnvalue;
+	unsigned int 	arg1;
+	unsigned int*	arg2;
 };
 
 void SVCall(void);

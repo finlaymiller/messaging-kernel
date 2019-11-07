@@ -19,7 +19,7 @@ volatile int got_data;
  * 8 data bits, no parity, one stop bit
  * Baud rate = 115200
  */
-void UART0_Init(void)
+void initUART(void)
 {
     volatile int wait;
 

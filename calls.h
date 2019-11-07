@@ -8,14 +8,16 @@
 #ifndef CALLS_H_
 #define CALLS_H_
 
+#include "kernel.h"
+#include "mail.h"
 #include "trap.h"
 
-int s_get_id(void);
-int s_nice(int);
-int s_terminate(void);
-int s_send(void);
-int s_recv(void);
-int s_bind(unsigned int);
-int s_unbind(unsigned int);
+int k_get_id(void);
+int k_nice(int);
+int k_terminate(void);
+int k_bind(unsigned int);
+int k_unbind(unsigned int);
+int k_send(void);
+int k_recv(void);
 
 #endif /* CALLS_H_ */

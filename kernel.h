@@ -20,7 +20,7 @@ struct pcb;   //forward declaration for struct
 #define TRUE  1
 #define FALSE 0
 
-void kernelInit(void);
+void initKernel(void);
 void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority);
 void initStack(unsigned long *stk, void(*func_name)());
 struct stack_frame initStackFrame(void(*func_name)());
@@ -41,6 +41,7 @@ struct pcb* getRunning(void);
 void initPriQueue(void);
 void insertPriQueue(struct pcb *new_pcb, unsigned char priority);
 void nextProcess(void);
+void assignR7(volatile unsigned long);
 
 extern void procA(void);
 extern void procB(void);

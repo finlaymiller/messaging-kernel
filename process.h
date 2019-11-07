@@ -12,7 +12,8 @@
 
 #include <stdio.h>
 #include "kernel.h"
-#include "processPrinter.h"
+#include "mail.h"
+#include "trap.h"
 
 #define PRIVATE 		static
 #define SVC()			__asm(" SVC #0")
@@ -45,20 +46,22 @@ struct stack_frame{
 
 /* process control block */
 struct pcb{
-    struct pcb* next;           // link to next pcb
-    struct pcb* prev;           // link to previous pcb
-    unsigned long sp;   // stack pointer - r13 (PSP)
-	unsigned int id;  // process identifier
+    struct pcb* next;       // link to next pcb
+    struct pcb* prev; 		// link to previous pcb
+    unsigned long sp;   	// stack pointer - r13 (PSP)
+    unsigned int  id;  		// process identifier
 	unsigned long state;    // state of process
 };
 
-/* Linked list structure */
+/* linked list structure */
 struct linked_list{
     unsigned long* next;    // link to next struct pointer
     unsigned long* prev;    // link to prev struct pointer
 };
 
 /* function declarations */
+int pkcall(int , unsigned int , unsigned int*);
+
 void setLR(volatile unsigned long);
 unsigned long getPSP();
 unsigned long getMSP();
@@ -68,10 +71,12 @@ void setMSP(volatile unsigned long);\
 void volatile saveRegisters();
 void volatile loadRegisters();
 void volatile loadLR(void);
+void returnPSP(void);
+
 void InterruptMasterEnable(void);
 void InterruptMasterDisable(void);
 
 
-void SVCHandler(struct stack_frame *argptr);
+void SVCHandler(struct stack_frame*);
 
 #endif /* PROCESS_H_ */

@@ -11,10 +11,10 @@
 static struct pcb *running;
 static struct pri pri_queue[NUM_PRI];
 
-void kernelInit(void)
+void initKernel(void)
 {
 	/* Initialize UART */
-	UART0_Init();           // Initialize UART0
+	initUART();           // Initialize UART0
 
 	PendSVMinPri();
 }
@@ -101,7 +101,7 @@ void setRunningSP(unsigned long* new_sp)
 void initRunning(void)
 {
     char i;
-    for(i=NUM_PRI-1; i>=0; i--){
+    for(i = NUM_PRI-1; i >= 0; i--){
         if(pri_queue[i].head != NULL){
             running = (struct pcb*) pri_queue[i].head;
             break;
@@ -174,7 +174,7 @@ struct pcb* getNextRunning(void)
 	{
 		if(pri_queue[i].head)
 		{
-			next_to_run = pri_queue[i].head;
+			next_to_run = (struct pcb *)pri_queue[i].head;
 			UART0_TXStr("\nSwitching to priority level ");
 			UART0_TXChar((char)i);
 		}
@@ -183,7 +183,7 @@ struct pcb* getNextRunning(void)
 	if(!next_to_run)	// no process found, switch to idle process
 	{
 		UART0_TXStr("\nNo process found during getNextRunning\nIdling...");
-		next_to_run = pri_queue[0].head;
+		next_to_run = (struct pcb *)pri_queue[0].head;
 	}
 
 	return next_to_run;
@@ -219,7 +219,6 @@ void procC(void)
     }
 }
 
-
 void assignR7(volatile unsigned long data)
 {
     /* Assign 'data' to R7; since the first argument is R0, this is
@@ -227,5 +226,3 @@ void assignR7(volatile unsigned long data)
     */
     __asm(" mov r7,r0");
 }
-
-

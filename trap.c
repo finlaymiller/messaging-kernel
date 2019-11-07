@@ -12,7 +12,6 @@
 #include "trap.h"
 
 extern void systick_init();
-
 struct pcb *running;
 
 
@@ -107,45 +106,43 @@ void SVCHandler(struct stack_frame *argptr)
         systickInit();
 
         /*
-         - Change the current LR to indicate return to Thread mode using the PSP
-         - Assembler required to change LR to FFFF.FFFD (Thread/PSP)
-         - BX LR loads PC from PSP stack (also, R0 through xPSR) - "hard pull"
-        */
-        __asm(" movw    LR,#0xFFFD");  /* Lower 16 [and clear top 16] */
-        __asm(" movt    LR,#0xFFFF");  /* Upper 16 only */
-        __asm(" bx  LR");          /* Force return to PSP */
+		 - Change the current LR to indicate return to Thread mode using the PSP
+		 - Assembler required to change LR to FFFF.FFFD (Thread/PSP)
+		 - BX LR loads PC from PSP stack (also, R0 through xPSR) - "hard pull"
+		*/
+		__asm(" movw    LR,#0xFFFD"); 	/* Lower 16 [and clear top 16] */
+		__asm(" movt    LR,#0xFFFF"); 	/* Upper 16 only */
+		__asm(" bx  LR");          		/* Force return to PSP */
     }
 	else /* Subsequent SVCs */
 	{
-	#ifdef FOR_KERNEL_ARGS
 		kcaptr = (struct kcallargs *) argptr -> r7;
 		switch(kcaptr -> code)
 		{
 		case GETID:
-			kcaptr -> rtnvalue = s_get_id();
+			kcaptr -> rtnvalue = k_get_id();
 		break;
 		case NICE:		// arg1 should be priority level to switch to
-			kcaptr -> rtnvalue = s_nice(kcaptr->arg1);
+			kcaptr -> rtnvalue = k_nice(kcaptr->arg1);
 			break;
 		case TERMINATE:	// no arguments requred
-			kcaptr -> rtnvalue = s_terminate();
+			kcaptr -> rtnvalue = k_terminate();
 			break;
 		case SEND:
-			kcaptr -> rtnvalue = s_send();
+			kcaptr -> rtnvalue = k_send(/*kcaptr->arg1, kcaptr->arg2*/);
 			break;
 		case RECV:
-			kcaptr -> rtnvalue = s_recv();
+			kcaptr -> rtnvalue = k_recv();
 			break;
 		case BIND:		// arg1 should be the mailbox to bind to
-			kcaptr -> rtnvalue = s_bind(kcaptr->arg1);
+			kcaptr -> rtnvalue = k_bind(kcaptr->arg1);
 			break;
 		case UNBIND:	// arg1 should be the mailbox to unbind from
-			kcaptr -> rtnvalue = s_unbind(kcaptr->arg1);
+			kcaptr -> rtnvalue = k_unbind(kcaptr->arg1);
 			break;
 		default:
 			kcaptr -> rtnvalue = -1;
 		}
-	#endif
 	}
 }
 
@@ -167,7 +164,7 @@ void PendSV_Handler(void)
 
     InterruptMasterEnable();
 
-    __asm(" movw    LR,#0xFFFD");  /* Lower 16 [and clear top 16] */
-    __asm(" movt    LR,#0xFFFF");  /* Upper 16 only */
-    __asm(" bx  LR");          /* Force return to PSP */
+    __asm(" movw    LR,#0xFFFD"); 	/* Lower 16 [and clear top 16] */
+	__asm(" movt    LR,#0xFFFF"); 	/* Upper 16 only */
+	__asm(" bx  LR");          		/* Force return to PSP */
 }
