@@ -8,6 +8,7 @@
 #ifndef CALLS_H_
 #define CALLS_H_
 
+#include "kernel.h"
 #include "mail.h"
 #include "trap.h"
 

@@ -23,24 +23,16 @@
  */
 void main (void)
 {
-    /* Initialize UART */
-    UART0_Init();           // Initialize UART0
-    InterruptEnable(INT_VEC_UART0);       // Enable UART0 interrupts
-    UART0_IntEnable(UART_INT_RX | UART_INT_TX); // Enable Receive and Transmit interrupts
-
-    /* Enable CPU interrupts */
-    InterruptMasterEnable();
-
+	initUART();
     initPriQueue();
-
-    reg_proc(&procBind, 100, 4);
 
     initRunning();
 
+    reg_proc(&procBind, 100, 4);
+    reg_proc(&procBind, 101, 4);
+
     SVC();
 
-    while(1)
-    {
-    }
+    while(1);
 
 }

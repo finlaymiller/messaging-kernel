@@ -11,10 +11,10 @@
 static struct pcb *running;
 static struct pri pri_queue[NUM_PRI];
 
-void kernelInit(void)
+void initKernel(void)
 {
 	/* Initialize UART */
-	UART0_Init();           // Initialize UART0
+	initUART();           // Initialize UART0
 
 	PendSVMinPri();
 }
@@ -174,7 +174,7 @@ struct pcb* getNextRunning(void)
 	{
 		if(pri_queue[i].head)
 		{
-			next_to_run = pri_queue[i].head;
+			next_to_run = (struct pcb *)pri_queue[i].head;
 			UART0_TXStr("\nSwitching to priority level ");
 			UART0_TXChar((char)i);
 		}
@@ -183,7 +183,7 @@ struct pcb* getNextRunning(void)
 	if(!next_to_run)	// no process found, switch to idle process
 	{
 		UART0_TXStr("\nNo process found during getNextRunning\nIdling...");
-		next_to_run = pri_queue[0].head;
+		next_to_run = (struct pcb *)pri_queue[0].head;
 	}
 
 	return next_to_run;

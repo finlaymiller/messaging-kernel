@@ -8,7 +8,9 @@
 #ifndef MAIL_H_
 #define MAIL_H_
 
+#include <stdlib.h>
 #include "process.h"
+#include "str_conv_funcs.h"
 #include "trap.h"
 
 #define NUM_MAILBOXES		256
@@ -38,7 +40,7 @@ struct mailbox
 	struct message*	message_list;	// points to first message in mailbox
 };
 
-void initMailbox(struct mailbox*);
+/* function definitions */
 unsigned int p_bind(unsigned int);
 unsigned int p_unbind(unsigned int);
 unsigned int p_send(unsigned int, unsigned int, void*, unsigned int);

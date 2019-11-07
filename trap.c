@@ -12,7 +12,6 @@
 #include "trap.h"
 
 extern void systick_init();
-
 struct pcb *running;
 
 
@@ -107,17 +106,16 @@ void SVCHandler(struct stack_frame *argptr)
         systickInit();
 
         /*
-         - Change the current LR to indicate return to Thread mode using the PSP
-         - Assembler required to change LR to FFFF.FFFD (Thread/PSP)
-         - BX LR loads PC from PSP stack (also, R0 through xPSR) - "hard pull"
-        */
-        __asm(" movw    LR,#0xFFFD");  /* Lower 16 [and clear top 16] */
-        __asm(" movt    LR,#0xFFFF");  /* Upper 16 only */
-        __asm(" bx  LR");          /* Force return to PSP */
+		 - Change the current LR to indicate return to Thread mode using the PSP
+		 - Assembler required to change LR to FFFF.FFFD (Thread/PSP)
+		 - BX LR loads PC from PSP stack (also, R0 through xPSR) - "hard pull"
+		*/
+		__asm(" movw    LR,#0xFFFD"); 	/* Lower 16 [and clear top 16] */
+		__asm(" movt    LR,#0xFFFF"); 	/* Upper 16 only */
+		__asm(" bx  LR");          		/* Force return to PSP */
     }
 	else /* Subsequent SVCs */
 	{
-	#ifdef FOR_KERNEL_ARGS
 		kcaptr = (struct kcallargs *) argptr -> r7;
 		switch(kcaptr -> code)
 		{
@@ -131,7 +129,7 @@ void SVCHandler(struct stack_frame *argptr)
 			kcaptr -> rtnvalue = k_terminate();
 			break;
 		case SEND:
-			kcaptr -> rtnvalue = k_send(kcaptr->arg1, kcaptr->arg2);
+			kcaptr -> rtnvalue = k_send(/*kcaptr->arg1, kcaptr->arg2*/);
 			break;
 		case RECV:
 			kcaptr -> rtnvalue = k_recv();
@@ -145,7 +143,6 @@ void SVCHandler(struct stack_frame *argptr)
 		default:
 			kcaptr -> rtnvalue = -1;
 		}
-	#endif
 	}
 }
 
@@ -167,7 +164,7 @@ void PendSV_Handler(void)
 
     InterruptMasterEnable();
 
-    __asm(" movw    LR,#0xFFFD");  /* Lower 16 [and clear top 16] */
-    __asm(" movt    LR,#0xFFFF");  /* Upper 16 only */
-    __asm(" bx  LR");          /* Force return to PSP */
+    __asm(" movw    LR,#0xFFFD"); 	/* Lower 16 [and clear top 16] */
+	__asm(" movt    LR,#0xFFFF"); 	/* Upper 16 only */
+	__asm(" bx  LR");          		/* Force return to PSP */
 }

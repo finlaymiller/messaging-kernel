@@ -71,21 +71,20 @@ int k_terminate(void)
 
 
 /*
- * TODO		Could this all be simplified by not using an enum and just
- * 			#defining the error codes? So the program would return [-2 to -1]
- * 			on error, or [1-256] on success? Probably.
+ * Description
  *
  * @param:		Mailbox number to bind to. 0 if any.
  * @returns:	Mailbox that was bound to, or an error code:
- * 					1. Mailbox in use by another process
- * 					2. All mailboxes are in use
- * 					3. Mailbox number is outside of supported range (1-256)
+ * 					-3 Mailbox in use by another process
+ * 					-2 All mailboxes are in use
+ * 					-1 Mailbox number is outside of supported range (1-256)
  */
 int k_bind(unsigned int mailbox_number)
 {
 	unsigned int good_mailbox = 0, i;
 
-	if(mailbox_number > NUM_MAILBOXES)
+	// search mailroom for available mailbox
+	if(mailbox_number > NUM_MAILBOXES - 1)
 	{	// catch mailbox number outside of range
 		// no need to check < 0 since variable is unsigned
 		return BAD_MBX_NUM;
@@ -111,6 +110,12 @@ int k_bind(unsigned int mailbox_number)
 	}
 	else
 		good_mailbox = mailbox_number;
+
+	// update mailbox if one has been found
+	if(good_mailbox > 0)
+	{
+		mailroom[good_mailbox].owner = getRunning();
+	}
 
 	return good_mailbox;
 }

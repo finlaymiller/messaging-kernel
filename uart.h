@@ -72,7 +72,7 @@
 #define INTERRUPT_MASTER_DISABLE()	__asm(" cpsid   i")
 
 // Public UART Functions
-void UART0_Init(void);
+void initUART(void);
 void InterruptEnable(unsigned long);
 void UART0_IntEnable(unsigned long);
 void UART0_IntHandler(void);

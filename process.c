@@ -97,6 +97,11 @@ void volatile loadLR(void)
     __asm(" movt     lr, #0xffff");
 }
 
+void returnPSP(void)
+{
+
+}
+
 
 /*
  * Executes assembly instruction to enable interrupts

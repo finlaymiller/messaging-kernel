@@ -10,12 +10,10 @@
 #include "mail.h"
 
 struct mailbox mailroom[NUM_MAILBOXES] = {{NULL}};
-
-void initMailbox(struct mailbox* mbox)
+char *BIND_ERR_PRINTS[3] =
 {
-	mbox->owner			= NULL;
-	mbox->message_list 	= NULL;
-}
+ "Bad mailbox number", "No mailbox free", "Mailbox in use"
+};
 
 unsigned int p_bind(unsigned int mailbox_number)
 {
@@ -43,28 +41,29 @@ unsigned int p_recv(unsigned int dst, unsigned int src, void *msg, unsigned size
  */
 void procBind(void)
 {
-    char i, mbx;
+    int i, mbx;
+    char buff[10];
 
-    for(i = 0; i < 5; i++)
+    for(i = 255; i < 260; i++)
     {
     	mbx = p_bind(i);
 
     	if(mbx > 0)
     	{
     		UART0_TXStr("\nBound to mailbox ");
-    		UART0_TXChar(mbx);
+    		UART0_TXStr(my_itoa(mbx, buff, 10));
     	}
     	else if(mbx < 0)
     	{
-    		UART0_TXStr("\nError ");
-			UART0_TXChar(mbx);
-			UART0_TXStr("when attempting to bind to queue ");
-			UART0_TXChar(i);
+    		UART0_TXStr("\nError {");
+			UART0_TXStr(BIND_ERR_PRINTS[-mbx - 1]);
+			UART0_TXStr("} when attempting to bind to mailbox ");
+			UART0_TXStr(my_itoa(i, buff, 10));
     	}
     	else
 		{
     		UART0_TXStr("\nSomehow bound to mailbox ");
-    		UART0_TXChar(mbx);
+    		UART0_TXStr(my_itoa(mbx, buff, 10));
 		}
     }
 }

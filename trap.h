@@ -9,6 +9,7 @@
 #define TRAP_H_
 
 #include <stdio.h>
+#include "kernel.h"
 #include "process.h"
 #include "calls.h"
 #include "uart.h"
@@ -28,7 +29,7 @@ enum SVC_CODES
 struct kcallargs
 {
 	enum SVC_CODES	code;
-	unsigned int 	rtnvalue;
+	int 			rtnvalue;
 	unsigned int 	arg1;
 	unsigned int*	arg2;
 };

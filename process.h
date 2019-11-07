@@ -71,6 +71,8 @@ void setMSP(volatile unsigned long);\
 void volatile saveRegisters();
 void volatile loadRegisters();
 void volatile loadLR(void);
+void returnPSP(void);
+
 void InterruptMasterEnable(void);
 void InterruptMasterDisable(void);
 
