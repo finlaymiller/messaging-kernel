@@ -27,12 +27,11 @@
  */
 int s_get_id(void)
 {
-	// something like:
-	// return running->id;
-	return 0;
+    struct pcb *running = getRunning();
+    return running->id;
 }
 
-int getid()
+int getid(void)
 {
     volatile struct kcallargs getidarg; /* Volatile to actually reserve space on stack */
     getidarg . code = GETID;
@@ -70,6 +69,11 @@ int s_terminate(void)
 {
 
 	return 0;
+}
+
+void p_terminate(void)
+{
+    return;
 }
 
 

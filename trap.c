@@ -117,7 +117,6 @@ void SVCHandler(struct stack_frame *argptr)
     }
 	else /* Subsequent SVCs */
 	{
-	#ifdef FOR_KERNEL_ARGS
 		kcaptr = (struct kcallargs *) argptr -> r7;
 		switch(kcaptr -> code)
 		{
@@ -145,7 +144,6 @@ void SVCHandler(struct stack_frame *argptr)
 		default:
 			kcaptr -> rtnvalue = -1;
 		}
-	#endif
 	}
 }
 

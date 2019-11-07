@@ -18,4 +18,7 @@ int s_recv(void);
 int s_bind(unsigned int);
 int s_unbind(unsigned int);
 
+int getid(void);
+void p_terminate(void);
+
 #endif /* CALLS_H_ */
