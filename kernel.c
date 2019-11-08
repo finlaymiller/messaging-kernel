@@ -247,6 +247,18 @@ int k_terminate(void)
 
 
 /*
+ * Description
+ *
+ * @param:
+ * @returns:
+ */
+int k_nice(int priority)
+{
+
+    return 0;
+}
+
+/*
  * Function to test process
  */
 void procA(void)
