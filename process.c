@@ -11,6 +11,46 @@
 
 
 /*
+ * Function to test process
+ */
+void procA(void)
+{
+    while(1){
+        UART0_TXChar('a');
+    }
+}
+
+/*
+ * Function to test process
+ */
+void procB(void)
+{
+    while(1){
+        UART0_TXChar('b');
+    }
+}
+
+/*
+ * Function to test process
+ */
+void procC(void)
+{
+    int i;
+    for(i=0; i<100; i++){
+        UART0_TXChar('c');
+    }
+}
+
+/*
+ * Idle process for when no other processes are in priority queue
+ */
+void idleProc(void)
+{
+    while(1);
+}
+
+
+/*
  * Process-kernel call function.  Supplies code and kernel message to the
  * kernel is a kernel request.  Returns the result (return code) to the caller.
  *
@@ -40,80 +80,25 @@ int pkcall(int code, unsigned int arg1, unsigned int* arg2)
 }
 
 
-unsigned long getPSP(void)
+/*
+ * Returns ID of current process
+ *
+ * @param:		None
+ * @returns:	ID of the current process
+ */
+int p_get_id(void)
 {
-	/* returns contents of PSP (current process stack) */
-	__asm("	mrs		r0, psp");
-	__asm("	bx		lr");
-	return 0;
-}
-
-unsigned long getMSP(void)
-{
-	/* returns contents of MSP (main stack) */
-	__asm("	mrs		r0, msp");
-	__asm("	bx		lr");
-	return 0;
-}
-
-unsigned long getSP(void)
-{
-	/* leading space required for label */
-	__asm("	mov		r0, sp");
-	__asm("	bx		lr");
-	return 0;
-}
-
-void setPSP(volatile unsigned long process_stack)
-{
-	/* set PSP to process_stack */
-	__asm("	msr		psp, r0");
-}
-
-void setMSP(volatile unsigned long main_stack)
-{
-	/* set PSP to process_stack */
-	__asm("	msr		msp, r0");
-}
-
-void volatile saveRegisters(void)
-{
-	/* save r4-r11 on process stack */
-	__asm("	mrs		r0, psp");
-	__asm("	stmdb	r0!, {r4-r11}");
-	__asm("	msr		psp, r0");
-}
-
-void volatile loadRegisters(void)
-{
-	/* load r4-r11 from stack to CPU */
-	__asm("	mrs		r0, psp");
-	__asm("	ldmia	r0!, {r4-r11}");
-	__asm("	msr		psp, r0");
-}
-
-void volatile loadLR(void)
-{
-    __asm(" movw     lr, #0xfffd");
-    __asm(" movt     lr, #0xffff");
-}
-
-void returnPSP(void)
-{
-
+    return pkcall(GETID, NULL, NULL);
 }
 
 
 /*
- * Executes assembly instruction to enable interrupts
+ * Terminates process
+ *
+ * @param:		None
+ * @returns:	None
  */
-void InterruptMasterEnable(void)
+void p_terminate(void)
 {
-    /* enable CPU interrupts */
-    __asm(" cpsie   i");
-}
-
-void InterruptMasterDisable(void)
-{
-    __asm(" cpsid i");
+	pkcall(TERMINATE, NULL, NULL);
 }

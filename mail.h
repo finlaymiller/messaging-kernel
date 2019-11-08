@@ -45,6 +45,5 @@ unsigned int p_bind(unsigned int);
 unsigned int p_unbind(unsigned int);
 unsigned int p_send(unsigned int, unsigned int, void*, unsigned int);
 unsigned int p_recv(unsigned int, unsigned int, void*, unsigned int);
-void p_terminate(void);
 
 #endif /* MAIL_H_ */

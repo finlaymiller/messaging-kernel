@@ -16,6 +16,7 @@
 #include "systick.h"
 #include "kernel.h"
 #include "trap.h"
+#include "register.h"
 
 /*
  * Calls initialization functions for all modules

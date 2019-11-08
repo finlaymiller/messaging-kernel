@@ -16,11 +16,10 @@
 #include "trap.h"
 
 #define PRIVATE 		static
-#define SVC()			__asm(" SVC #0")
 #define MSP_RTN			0xFFFFFFF9	// link register exception return using MSP
 #define PSP_RTN			0xFFFFFFFD	// link register exception return using PSP
 #define STACKSIZE		1024
-#define	NUM_PRI_LVLS	5
+#define	NUM_PRI			5
 
 /* Cortex default stack frame */
 struct stack_frame{
@@ -62,24 +61,12 @@ struct linked_list{
 };
 
 /* function declarations */
+extern void procA(void);
+extern void procB(void);
+extern void procC(void);
+extern void idleProc(void);
 int pkcall(int , unsigned int , unsigned int*);
-
-void setLR(volatile unsigned long);
-unsigned long getPSP();
-unsigned long getMSP();
-unsigned long getSP();
-void setPSP(volatile unsigned long);
-void setMSP(volatile unsigned long);\
-void volatile saveRegisters();
-void volatile loadRegisters();
-void volatile loadLR(void);
-void returnPSP(void);
-
-void InterruptMasterEnable(void);
-void InterruptMasterDisable(void);
-int pkcall(int code, unsigned int arg1, unsigned int* arg2);
-
-
-void SVCHandler(struct stack_frame*);
+int p_get_id(void);
+void p_terminate(void);
 
 #endif /* PROCESS_H_ */

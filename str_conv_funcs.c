@@ -8,6 +8,7 @@
 #include "str_conv_funcs.h"
 
 const char digits[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
 /*
  * Converts provided ASCII string to integers and checks for non-integer chars
  *
@@ -33,6 +34,14 @@ int my_atoi(char *str, int *num)
 }
 
 
+/*
+ * Convert integer to string
+ *
+ * @param:	number:	Number to convert
+ * 			buff:	Buffer to write string to
+ * 			base:	Base of number (most commonly 10)
+ * @returns:		Pointer to head of string
+ */
 char *my_itoa(int number, char *buff, int base)
 {
     char *result = (buff == NULL || base > strlen(digits) || base < 2) ? NULL : buff;
@@ -60,8 +69,12 @@ char *my_itoa(int number, char *buff, int base)
 }
 
 
-
-/* reverse:  reverse string s in place */
+/*
+ * Reverse string in place
+ *
+ * @param:	s:	String to reverse
+ * @returns:	None
+ */
 void reverse(char s[])
 {
     int i, j;

@@ -12,7 +12,7 @@
 #include "trap.h"
 
 extern void systick_init();
-struct pcb *running;
+extern struct pcb *running;
 
 
 /*
@@ -103,16 +103,9 @@ void SVCHandler(struct stack_frame *argptr)
         firstSVCcall = FALSE;
 
         /* Initialize Systick */
-        systickInit();
+        initSysTick();
 
-        /*
-		 - Change the current LR to indicate return to Thread mode using the PSP
-		 - Assembler required to change LR to FFFF.FFFD (Thread/PSP)
-		 - BX LR loads PC from PSP stack (also, R0 through xPSR) - "hard pull"
-		*/
-		__asm(" movw    LR,#0xFFFD"); 	/* Lower 16 [and clear top 16] */
-		__asm(" movt    LR,#0xFFFF"); 	/* Upper 16 only */
-		__asm(" bx  LR");          		/* Force return to PSP */
+        returnPSP();
     }
 	else /* Subsequent SVCs */
 	{
@@ -164,7 +157,5 @@ void PendSV_Handler(void)
 
     InterruptMasterEnable();
 
-    __asm(" movw    LR,#0xFFFD"); 	/* Lower 16 [and clear top 16] */
-	__asm(" movt    LR,#0xFFFF"); 	/* Upper 16 only */
-	__asm(" bx  LR");          		/* Force return to PSP */
+    returnPSP();
 }

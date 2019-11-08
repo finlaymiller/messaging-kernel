@@ -6,6 +6,7 @@
  *
  *  Created on: Oct 2, 2019
  *  Author: Derek Capone
+ *
  */
 
 #include "queue.h"
@@ -14,27 +15,28 @@
 #include "process.h"
 #include "kernel.h"
 
-//PendSV defines
-#define INT_CTRL   (*((volatile unsigned long *)0xE000ED04))
-#define INT_CTRL_PENDSV     (1<<28)     //bit for generating PendSV interrupt
-#define INT_CTRL_UNPENDSV   (1<<27)     //bit to remove pending state for PendSV
-
 SysTick* systick;
 
 /*
  * Initializes SysTick
+ *
+ * @param:		None
+ * @returns:	None
  */
-void systickInit(void)
+void initSysTick(void)
 {
-    SysTickPeriod(PERIOD);
-    SysTickIntEnable();
-    SysTickStart();
+    periodSysTick(PERIOD);
+    intEnableSysTick();
+    startSysTick();
 }
 
 /*
  * Starts SysTick timer
+ *
+ * @param:		None
+ * @returns:	None
  */
-void SysTickStart(void)
+void startSysTick(void)
 {
     // Set the clock source to internal and enable the counter to interrupt
     ST_CTRL_R |= ST_CTRL_CLK_SRC | ST_CTRL_ENABLE;
@@ -42,8 +44,11 @@ void SysTickStart(void)
 
 /*
  * Stops SysTick timer
+ *
+ * @param:		None
+ * @returns:	None
  */
-void SysTickStop(void)
+void stopSysTick(void)
 {
     // Clear the enable bit to stop the counter
     ST_CTRL_R &= ~(ST_CTRL_ENABLE);
@@ -51,19 +56,23 @@ void SysTickStop(void)
 
 /*
  * Defines and sets the SysTick period
+ *
+ * @param:	Period:	Number of clock pulses per tick
+ * @returns:		None
  */
-void SysTickPeriod(unsigned long Period)
+void periodSysTick(unsigned long Period)
 {
-    /*
-     For an interrupt, must be between 2 and 16777216 (0x100.0000 or 2^24)
-    */
+    // For an interrupt, must be between 2 and 16777216 (0x100.0000 or 2^24)
     ST_RELOAD_R = Period - 1;  /* 1 to 0xff.ffff */
 }
 
 /*
  * Enables SysTick interrupts
+ *
+ * @param:		None
+ * @returns:	None
  */
-void SysTickIntEnable(void)
+void intEnableSysTick(void)
 {
     // Set the interrupt bit in STCTRL
     ST_CTRL_R |= ST_CTRL_INTEN;
@@ -71,6 +80,9 @@ void SysTickIntEnable(void)
 
 /*
  * Disables SysTick interrupts
+ *
+ * @param:		None
+ * @returns:	None
  */
 void SysTickIntDisable(void)
 {
@@ -81,11 +93,14 @@ void SysTickIntDisable(void)
 /*
  * Interrupt handler for SysTick
  * Handles the SysTick interrupts by enqueuing a SysTick char onto SysTick queue
+ *
+ * @param:		None
+ * @returns:	None
  */
 void SysTickHandler(void)
 {
     /* Enqueue characater onto systick queue */
     //enqueue(SYSTICK, SYS_CHAR);
 
-    INT_CTRL |= INT_CTRL_PENDSV;
+	NVIC_INT_CTRL_R |= INT_CTRL_PENDSV;
 }

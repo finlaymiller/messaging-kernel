@@ -13,6 +13,7 @@
 
 #include <string.h>
 #include "queue.h"
+#include "register.h"
 
 // UART0 & PORTA Registers
 #define GPIO_PORTA_AFSEL_R  (*((volatile unsigned long *)0x40058420))   // GPIOA Alternate Function Select Register
@@ -67,10 +68,6 @@
 #define TRUE    1
 #define FALSE   0
 
-// CPU interrupt enable/disable macros
-#define INTERRUPT_MASTER_ENABLE() 	__asm(" cpsie   i")
-#define INTERRUPT_MASTER_DISABLE()	__asm(" cpsid   i")
-
 // Public UART Functions
 void initUART(void);
 void InterruptEnable(unsigned long);
@@ -80,6 +77,5 @@ void UART0_Start(void);
 void UART0_TXStr(char *);
 void UART0_TXChar(char);
 int  UART0_TXReady(void);
-void UART_force_out_char(char c);
 
 #endif /* UART_H_ */

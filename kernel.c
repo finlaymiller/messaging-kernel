@@ -5,12 +5,19 @@
 /* Includes */
 #include "kernel.h"
 
-/* Private defines */
-#define NUM_PRI 5   /* Number of priority queues */
+/* globals */
+struct pcb *running;		// pointer to pcb of currently running process
+struct pri pri_queue[NUM_PRI] = {{NULL}};// <- NOT SURE IF THIS WILL WORK
+												// IT WORKED FOR mailroom
 
-static struct pcb *running;
-static struct pri pri_queue[NUM_PRI];
+/*******************	 INITIALIZATION FUNCTIONS    *************************/
 
+/*
+ * Description
+ *
+ * @param:
+ * @returns:
+ */
 void initKernel(void)
 {
 	/* Initialize UART */
@@ -19,8 +26,73 @@ void initKernel(void)
 	PendSVMinPri();
 }
 
+/*
+ * Initializes stack of process
+ *
+ * @param:		stk       -
+ * 				func_name -
+ * @returns:	None
+ */
+void initStack(unsigned long *stk, void(*func_name)())
+{
+    /* Generate initial stack values */
+    struct stack_frame sf = initStackFrame(func_name);
 
-/* TODO: do this at compile time */
+    /* Copy stack frame into stack memory */
+    memcpy(&stk[STACKSIZE - sizeof(sf)], &sf, sizeof(sf));
+}
+
+/*
+ * Creates and returns initial stack frame values
+ *
+ * @param:
+ * @returns:
+ */
+struct stack_frame initStackFrame(void(*func_name)())
+{
+    struct stack_frame sf;
+
+    sf.r0  = 0x00000000;
+    sf.r1  = 0x11111111;
+    sf.r2  = 0x22222222;
+    sf.r3  = 0x33333333;
+    sf.r4  = 0x44444444;
+    sf.r5  = 0x55555555;
+    sf.r6  = 0x66666666;
+    sf.r7  = 0x77777777;
+    sf.r8  = 0x88888888;
+    sf.r9  = 0x99999999;
+    sf.r10 = 0x10101010;
+    sf.r11 = 0x11111111;
+    sf.r12 = 0x12121212;
+
+    sf.lr = (unsigned long)p_terminate;	// terminate process routine
+    sf.pc = (unsigned long)func_name;  	// entry point for process
+    sf.psr = 0x01000000;
+
+    return sf;
+}
+
+/*
+ * Description
+ *
+ * @param:
+ * @returns:
+ */
+void initRunning(void)
+{
+    char i;
+    for(i = NUM_PRI-1; i >= 0; i--){
+        if(pri_queue[i].head != NULL){
+            running = (struct pcb*) pri_queue[i].head;
+            break;
+        }
+    }
+}
+
+/* TODO: do this at compile time
+ * CHECK LINE 13
+ */
 void initPriQueue(void)
 {
     char i;
@@ -29,6 +101,8 @@ void initPriQueue(void)
         pri_queue[i].tail = NULL;
     }
 }
+
+/*******************	PROCESS-RELATED FUNCTIONS    *************************/
 
 /*
  * Registers process by:
@@ -59,7 +133,24 @@ void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority)
 }
 
 /*
+ * Changes "running" to the next process in the priority queue
+ *
+ * @param:
+ * @returns:
+ */
+void nextProcess(void)
+{
+    running = running->next;
+
+    /* Set new stack pointer */
+    setPSP(running->sp);
+}
+
+/*
  * Insert pcb into respective priority queue
+ *
+ * @param:
+ * @returns:
  */
 void insertPriQueue(struct pcb *new_pcb, unsigned char priority)
 {
@@ -83,82 +174,7 @@ void insertPriQueue(struct pcb *new_pcb, unsigned char priority)
     }
 }
 
-/*
- * Changes "running" to the next process in the priority queue
- */
-void nextProcess(void)
-{
-    running = running->next;
-
-    /* Set new stack pointer */
-    setPSP(running->sp);
-}
-
-/*
- * Sets running stack pointer value
- */
-void setRunningSP(unsigned long* new_sp)
-{
-    running->sp = (unsigned long)new_sp;
-}
-
-void initRunning(void)
-{
-    char i;
-    for(i = NUM_PRI-1; i >= 0; i--){
-        if(pri_queue[i].head != NULL){
-            running = (struct pcb*) pri_queue[i].head;
-            break;
-        }
-    }
-}
-
-struct pcb* getRunning(void)
-{
-    return running;
-}
-
-
-/*
- * Initializes stack of process
- */
-void initStack(unsigned long *stk, void(*func_name)())
-{
-    /* Generate initial stack values */
-    struct stack_frame sf = initStackFrame(func_name);
-
-    /* Copy stack frame into stack memory */
-    memcpy(&stk[STACKSIZE - sizeof(sf)], &sf, sizeof(sf));
-}
-
-
-/*
- * Creates and returns initial stack frame values
- */
-struct stack_frame initStackFrame(void(*func_name)())
-{
-    struct stack_frame sf;
-
-    sf.r0 = 0x00000000;
-    sf.r1 = 0x11111111;
-    sf.r2 = 0x22222222;
-    sf.r3 = 0x33333333;
-    sf.r4 = 0x44444444;
-    sf.r5 = 0x55555555;
-    sf.r6 = 0x66666666;
-    sf.r7 = 0;
-    sf.r8 = 0;
-    sf.r9 = 0;
-    sf.r10 = 0;
-    sf.r11 = 0;
-    sf.r12 = 0;
-
-    sf.lr = &p_terminate;  //terminate process routine
-    sf.pc = (unsigned long)func_name;  //entry point for process
-    sf.psr = 0x01000000;
-
-    return sf;
-}
+/*******************	RUNNING-RELATED FUNCTIONS    *************************/
 
 /*
  * Search process priority queues to find next process to run.
@@ -174,7 +190,7 @@ struct pcb* getNextRunning(void)
 	struct pcb* next_to_run = NULL;
 	int i;
 
-	for(i = 0; i < NUM_PRI_LVLS; i++)
+	for(i = 0; i < NUM_PRI; i++)
 	{
 		if(pri_queue[i].head)
 		{
@@ -193,102 +209,24 @@ struct pcb* getNextRunning(void)
 	return next_to_run;
 }
 
-
 /*
- * Description
+ * Sets running stack pointer value
  *
  * @param:
  * @returns:
  */
-int k_terminate(void)
+void setRunningSP(unsigned long* new_sp)
 {
-    if(running->next == running){
-        /* If this is the last process in the priority queue */
-        pri_queue[running->pri].head = NULL;
-        pri_queue[running->pri].tail = NULL;
-
-        //terminate process
-
-        /* Set new running */
-        running = getNextRunning();
-    } else {
-        /* Reset head or tail if necessary */
-        if(pri_queue[running->pri].head == (unsigned long*)running){
-            pri_queue[running->pri].head = (unsigned long*)running->next;
-        } else if(pri_queue[running->pri].tail == (unsigned long*)running){
-            pri_queue[running->pri].tail = (unsigned long*)running->prev;
-        }
-
-        /* set up temporary struct for next running pcb */
-        struct pcb *next_run = running->next;
-
-        /* Remove running from linked list */
-        running->prev->next = running->next;
-        running->next->prev = running->prev;
-
-        /* Deallocate memory for stack and pcb */
-        free(running->stk);
-        free(running);
-
-        /* Set new running */
-        running = next_run;
-    }
-
-    /* Set new stack pointer, load registers */
-    setPSP(running->sp);
-    loadRegisters();
-
-    __asm(" movw     lr, #0xfffd");
-    __asm(" movt     lr, #0xffff");
-    __asm(" bx      lr");
-
-    return 0;
-}
-
-
-/*
- * Function to test process
- */
-void procA(void)
-{
-    while(1){
-        UART_force_out_char('a');
-    }
+    running->sp = (unsigned long)new_sp;
 }
 
 /*
- * Function to test process
+ * Gets running pointer value
+ *
+ * @param:
+ * @returns:
  */
-void procB(void)
+struct pcb* getRunning(void)
 {
-    while(1){
-        UART_force_out_char('b');
-    }
-}
-
-/*
- * Function to test process
- */
-void procC(void)
-{
-    int i;
-    for(i=0; i<100; i++){
-        UART_force_out_char('c');
-    }
-}
-
-/*
- * Idle process for when no other processes are in priority queue
- */
-void idleProc(void)
-{
-    while(1);
-}
-
-void assignR7(volatile unsigned long data)
-{
-    /* Assign 'data' to R7; since the first argument is R0, this is
-    * simply a MOV from R0 to R7
-    */
-    __asm(" mov r7,r0");
+    return running;
 }
