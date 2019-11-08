@@ -63,24 +63,6 @@ int k_nice(int priority)
 /*
  * Description
  *
- * @param:
- * @returns:
- */
-int k_terminate(void)
-{
-
-	return 0;
-}
-
-void p_terminate(void)
-{
-    return;
-}
-
-
-/*
- * Description
- *
  * @param:		Mailbox number to bind to. 0 if any.
  * @returns:	Mailbox that was bound to, or an error code:
  * 					-3 Mailbox in use by another process

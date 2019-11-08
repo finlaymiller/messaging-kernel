@@ -42,9 +42,11 @@ void initPriQueue(void);
 void insertPriQueue(struct pcb *new_pcb, unsigned char priority);
 void nextProcess(void);
 void assignR7(volatile unsigned long);
+int k_terminate(void);
 
 extern void procA(void);
 extern void procB(void);
 extern void procC(void);
+extern void idleProc(void);
 
 #endif /* KERNEL_H_ */
