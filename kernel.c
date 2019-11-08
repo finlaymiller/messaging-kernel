@@ -20,10 +20,10 @@ struct pri pri_queue[NUM_PRI] = {{NULL}};// <- NOT SURE IF THIS WILL WORK
  */
 void initKernel(void)
 {
-	/* Initialize UART */
-	initUART();           // Initialize UART0
+	initUART();
+	initPriQueue();
 
-	PendSVMinPri();
+	reg_proc(&idleProc, 0, 0);
 }
 
 /*

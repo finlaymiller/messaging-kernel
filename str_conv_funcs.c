@@ -53,6 +53,7 @@ char *my_itoa(int number, char *buff, int base)
          sign = '-';
 
     }
+
     if (result != NULL)
     {
         do
@@ -65,6 +66,7 @@ char *my_itoa(int number, char *buff, int base)
         *buff = 0;
         reverse(result);
     }
+
     return result;
 }
 

@@ -10,9 +10,8 @@
 #include "mail.h"
 
 struct mailbox mailroom[NUM_MAILBOXES] = {{NULL}};
-char *BIND_ERR_PRINTS[3] =
-{
- "Bad mailbox number", "No mailbox free", "Mailbox in use"
+char *BIND_ERR_PRINTS[3] = {
+"Bad mailbox number", "No mailbox free", "Mailbox in use"
 };
 
 

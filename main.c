@@ -24,12 +24,10 @@
  */
 void main (void)
 {
-	initUART();
-    initPriQueue();
+	initKernel();
 
     // init procs here
-    reg_proc(&idleProc, 0, 0);
-    reg_proc(&procC, 25, 3);
+    reg_proc(&procBindUnbind, 25, 3);
 
     initRunning();
 
