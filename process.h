@@ -21,6 +21,7 @@
 #define PSP_RTN			0xFFFFFFFD	// link register exception return using PSP
 #define STACKSIZE		1024
 #define	NUM_PRI			5
+#define NUM_MBX_PER_PROC	4
 
 /* Cortex default stack frame */
 struct stack_frame{
@@ -52,7 +53,8 @@ struct pcb{
     unsigned int  id;  		// process identifier
 	unsigned long state;    // state of process
 	unsigned char pri;      // priority of the process
-	unsigned long *stk;
+	unsigned long *stk;		// process stack
+	unsigned int mbxs[NUM_MBX_PER_PROC];	// mailboxes bound to by process
 };
 
 /* linked list structure */

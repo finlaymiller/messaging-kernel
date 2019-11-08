@@ -5,8 +5,8 @@
  *      Author: Finlay Miller
  *
  *  All functions that processes need to access through supervisor calls are
- *  stored here. They are prefixed with 's_' to indicate that they are
- *  supervisor-level functions rather than process (p_) or kernel (k_).
+ *  stored here. They are prefixed with 'k_' to indicate that they are
+ *  kernel-level functions rather than process (p_).
  *
  *
  *  todo	write nice() function
@@ -50,7 +50,7 @@ int k_nice(int priority)
 
 
 /*
- * Description
+ * Bine mailbox to process
  *
  * @param:		Mailbox number to bind to. 0 if any.
  * @returns:	Mailbox that was bound to, or an error code:
@@ -60,7 +60,8 @@ int k_nice(int priority)
  */
 int k_bind(unsigned int mailbox_number)
 {
-	unsigned int good_mailbox = 0, i;
+	unsigned int good_mailbox = 0, i = 0;
+	struct pcb* curr_running;
 
 	// search mailroom for available mailbox
 	if(mailbox_number > NUM_MAILBOXES - 1)
@@ -90,10 +91,19 @@ int k_bind(unsigned int mailbox_number)
 	else
 		good_mailbox = mailbox_number;
 
-	// update mailbox if one has been found
+	// update mailbox and pcb if one has been found
 	if(good_mailbox > 0)
 	{
-		mailroom[good_mailbox].owner = getRunning();
+		curr_running = getRunning();
+		mailroom[good_mailbox].owner = curr_running;	// update mailbox
+		for(i = 0; i < NUM_MBX_PER_PROC; i++)			// update pcb
+		{	// get first zero/null mailbox in list
+			if(!curr_running->mbxs[i])
+			{
+				curr_running->mbxs[i] = good_mailbox;
+				break;
+			}
+		}
 	}
 
 	return good_mailbox;
@@ -101,15 +111,54 @@ int k_bind(unsigned int mailbox_number)
 
 
 /*
- * Description
+ * Unbind mailbox(es) from process
  *
  * @param:		Mailbox number to unbind from. 0 if all.
- * @returns:
+ * @returns:	Number of mailbox unbound from. Or an error code:
+ * 				-3 Mailbox in use by another process
+ * 				-2 All mailboxes are in use
+ * 				-1 Mailbox number is outside of supported range (1-256)
  */
 int k_unbind(unsigned int mailbox_number)
 {
+	unsigned int old_mailbox = 0, i = 0;
+	struct pcb* curr_running = getRunning();
+	struct message* msg;	// to be used for emptying mailbox
 
-	return 0;
+	// search mailroom for mailbox
+	if(mailbox_number > NUM_MAILBOXES - 1)
+	{	// catch mailbox number outside of range
+		// no need to check < 0 since variable is unsigned
+		return BAD_MBX_NUM;
+	}
+	else if(mailbox_number == 0)
+	{	// catch unbind from ALL mailboxes
+		for(i = 0; i < NUM_MBX_PER_PROC; i++)
+			curr_running->mbxs[i] = NULL;
+
+		for(i = 1; i < NUM_MAILBOXES; i++)
+			if(mailroom[i].owner == curr_running)
+			   mailroom[i].owner = NULL;
+	}
+	else if(mailroom[mailbox_number].owner != curr_running)
+	{	// catch mailbox bound to by another process
+		return MBX_IN_USE;
+	}
+	else	// ok now we can unbind from the mailbox
+	{
+		msg = mailroom[mailbox_number].message_list;
+		mailroom[mailbox_number].owner = NULL;
+		while(msg->next)		// free messages
+		{
+			msg = msg->next;	// move to next message
+			free(mailroom[mailbox_number].message_list);	// free first message
+			mailroom[mailbox_number].message_list = msg;
+		}
+
+		old_mailbox = mailbox_number;
+	}
+
+	return old_mailbox;
 }
 
 
@@ -181,10 +230,7 @@ int k_terminate(void)
     /* Set new stack pointer, load registers */
     setPSP(running->sp);
     loadRegisters();
-
-    __asm(" movw     lr, #0xfffd");
-    __asm(" movt     lr, #0xffff");
-    __asm(" bx      lr");
+    returnPSP();
 
     return 0;
 }

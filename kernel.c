@@ -129,6 +129,9 @@ void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority)
     /* Set priority in PCB */
     new_pcb->pri = priority;
 
+    /* empty mailbox list */
+    new_pcb->mbxs = {NULL};
+
     insertPriQueue(new_pcb, priority);
 }
 

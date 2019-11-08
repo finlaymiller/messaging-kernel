@@ -15,7 +15,6 @@
 
 #define NUM_MAILBOXES		256
 #define MAX_MESSAGE_LEN		256
-#define NUM_MBX_PER_PROC	4
 
 // what should/can we use mailbox #0 for?
 // a broadcast channel maybe? or it can just unused
@@ -26,8 +25,7 @@ enum BIND_ERR_CODES
 
 struct message
 {
-	struct message* next;	// pointers to next and previous messages in
-	struct message* prev;	// mailbox for linked-list support
+	struct message* next;	// pointer to next message in list
 	unsigned int 	mqid;	// the mailbox of the current process
 	unsigned int 	sqid;	// the mailbox of the message source or sender
 	unsigned int*	addr;	// the address of the message in memory

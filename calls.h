@@ -12,6 +12,7 @@
 #include "mail.h"
 #include "trap.h"
 #include "process.h"
+#include "register.h"
 
 int k_get_id(void);
 int k_nice(int);
