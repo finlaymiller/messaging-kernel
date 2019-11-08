@@ -27,6 +27,8 @@ void main (void)
     initPriQueue();
 
     // init procs here
+    reg_proc(&idleProc, 0, 0);
+    reg_proc(&procC, 25, 3);
 
     initRunning();
 

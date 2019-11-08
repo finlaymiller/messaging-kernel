@@ -51,6 +51,8 @@ struct pcb{
     unsigned long sp;   	// stack pointer - r13 (PSP)
     unsigned int  id;  		// process identifier
 	unsigned long state;    // state of process
+	unsigned char pri;      // priority of the process
+	unsigned long *stk;
 };
 
 /* linked list structure */
