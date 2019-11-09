@@ -24,19 +24,19 @@ void procBindUnbind(void)
 
 		if(mbx > 0)
 		{
-			UART0_TXStr("\nProcess ");
+			UART0_TXStr("\nP");
 			UART0_TXStr(my_itoa(id, buff, 10));
 			UART0_TXStr(" bound to mailbox ");
 			UART0_TXStr(my_itoa(mbx, buff, 10));
 		}
 		else
 		{
-			UART0_TXStr("\nBind operation with process ");
+			UART0_TXStr("\nBind with P");
 			UART0_TXStr(my_itoa(id, buff, 10));
 			UART0_TXStr(" and mailbox ");
 			UART0_TXStr(my_itoa(i, buff, 10));
-			UART0_TXStr(" returned error code \" ");
-			UART0_TXStr(BIND_ERR_PRINTS[mbx]);
+			UART0_TXStr(" returned error \"");
+			UART0_TXStr(BIND_ERR_PRINTS[-mbx - 1]);
 			UART0_TXStr("\"");
 		}
 	}
@@ -48,19 +48,19 @@ void procBindUnbind(void)
 
 		if(mbx > 0)
 		{
-			UART0_TXStr("\nProcess ");
+			UART0_TXStr("\nP");
 			UART0_TXStr(my_itoa(id, buff, 10));
 			UART0_TXStr(" unbound from mailbox ");
 			UART0_TXStr(my_itoa(mbx, buff, 10));
 		}
 		else
 		{
-			UART0_TXStr("\nUnbind operation with process ");
+			UART0_TXStr("\nUnbind with P");
 			UART0_TXStr(my_itoa(id, buff, 10));
 			UART0_TXStr(" and mailbox ");
 			UART0_TXStr(my_itoa(i, buff, 10));
-			UART0_TXStr(" returned error code \" ");
-			UART0_TXStr(BIND_ERR_PRINTS[mbx]);
+			UART0_TXStr(" returned error \"");
+			UART0_TXStr(BIND_ERR_PRINTS[-mbx -1]);
 			UART0_TXStr("\"");
 		}
 	}

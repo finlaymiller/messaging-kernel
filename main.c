@@ -28,7 +28,7 @@ void main (void)
 
     // init procs here
     reg_proc(&procBindUnbind, 1, 3);
-    reg_proc(&procBindUnbind, 2, 3);
+    reg_proc(&procBindUnbind, 2, 2);
 
     initRunning();
 

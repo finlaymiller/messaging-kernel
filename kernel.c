@@ -114,6 +114,8 @@ void initPriQueue(void)
  */
 void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority)
 {
+	unsigned int i;
+
     /* Initialize stack memory and push initial register values */
     unsigned long *stk = (unsigned long *)malloc(STACKSIZE);
     initStack(stk, func_name);
@@ -130,7 +132,8 @@ void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority)
     new_pcb->pri = priority;
 
     /* empty mailbox list */
-    new_pcb->mbxs = {NULL};
+    for(i = 0; i < NUM_MBX_PER_PROC; i++)
+    	new_pcb->mbxs[i] = NULL;
 
     insertPriQueue(new_pcb, priority);
 }

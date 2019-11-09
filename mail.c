@@ -10,6 +10,7 @@
 #include "mail.h"
 
 struct mailbox mailroom[NUM_MAILBOXES] = {{NULL}};
+struct message* mailpile;
 char *BIND_ERR_PRINTS[3] = {
 "Bad mailbox number", "No mailbox free", "Mailbox in use"
 };
@@ -76,10 +77,10 @@ unsigned int p_recv(unsigned int dst, unsigned int src, void *msg, unsigned size
 struct message *allocate()
 {
 	struct message *new_mbox;
-	if (mbox_entry_list == NULL)	// if list is empty, return
+	if (mailpile == NULL)	// if list is empty, return
 			 return NULL;
-	new_mbox = mbox_entry_list; 	// New mbox entry gets head of list (not NULL)
-	mbox_entry_list = mbox_entry_list -> next; // Update list. Could be NULL
+	new_mbox = mailpile; 	// New mbox entry gets head of list (not NULL)
+	mailpile = mailpile -> next; // Update list. Could be NULL
 	return new_mbox;
 }
 
