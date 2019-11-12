@@ -20,5 +20,6 @@ int k_send(void);
 int k_recv(void);
 
 int getid(void);
+int nice(int priority);
 
 #endif /* CALLS_H_ */

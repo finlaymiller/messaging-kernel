@@ -174,13 +174,13 @@ struct pcb* getNextRunning(void)
 	struct pcb* next_to_run = NULL;
 	int i;
 
-	for(i = 0; i < NUM_PRI_LVLS; i++)
-	{
+	for(i = NUM_PRI-1; i>=0; i--){
 		if(pri_queue[i].head)
 		{
 			next_to_run = (struct pcb *)pri_queue[i].head;
 			UART0_TXStr("\nSwitching to priority level ");
 			UART0_TXChar((char)i);
+			break;
 		}
 	}
 
@@ -254,8 +254,69 @@ int k_terminate(void)
  */
 int k_nice(int priority)
 {
+    // remove process from current linked list
+    if(running->next == running){
+        /* If this is the last process in the priority queue */
+        pri_queue[running->pri].head = NULL;
+        pri_queue[running->pri].tail = NULL;
+    } else {
 
-    return 0;
+        /* Reset head or tail if necessary */
+        if(pri_queue[running->pri].head == (unsigned long*)running){
+            pri_queue[running->pri].head = (unsigned long*)running->next;
+        } else if(pri_queue[running->pri].tail == (unsigned long*)running){
+            pri_queue[running->pri].tail = (unsigned long*)running->prev;
+        }
+
+        /* Remove running from linked list */
+        running->prev->next = running->next;
+        running->next->prev = running->prev;
+    }
+
+    // insert process into desired priority queue
+    insertPriQueue(running, priority);
+    running->pri = priority;
+
+    // check for higher priority process
+    int new_priority = checkHighPriority();
+    if(new_priority > priority){
+
+        /* TODO: Simplify this by calling a function from both here and PendSV_Handler */
+
+        saveRegisters();
+        setRunningSP((unsigned long*)getPSP());
+
+        running = (struct pcb*)pri_queue[new_priority].head;
+        /* Set new stack pointer */
+        setPSP(running->sp);
+
+        loadRegisters();
+
+        //branch to new process
+        __asm(" movw    LR,#0xFFFD");   /* Lower 16 [and clear top 16] */
+        __asm(" movt    LR,#0xFFFF");   /* Upper 16 only */
+        __asm(" bx  LR");
+    }
+
+    // return to process calling "nice"
+    return running->pri;
+}
+
+/*
+ * Description: Checks for processes in the highest priority
+ *
+ * @param:
+ * @returns: Highest priority with processes waiting to run
+ */
+int checkHighPriority(void)
+{
+    int i;
+    for(i=NUM_PRI-1; i>=0; i--){
+        if(pri_queue[i].head != NULL) return i;
+    }
+
+    /* Return error value if no processes found */
+    return -1;
 }
 
 /*
@@ -284,7 +345,14 @@ void procB(void)
 void procC(void)
 {
     int i;
-    for(i=0; i<100; i++){
+    for(i=0; i<1000; i++){
+        UART_force_out_char('c');
+    }
+
+    // change priority here
+    nice(4);
+
+    for(i=0; i<1000; i++){
         UART_force_out_char('c');
     }
 }
