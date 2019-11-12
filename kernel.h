@@ -29,6 +29,7 @@ void initStack(unsigned long *stk, void(*func_name)());
 struct stack_frame initStackFrame(void(*func_name)());
 void initRunning(void);
 void initPriQueue(void);
+void initMailroom(void);
 /* process */
 void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority);
 void nextProcess(void);

@@ -11,16 +11,41 @@
 
 extern char *BIND_ERR_PRINTS[3];
 
+void procSendRecv(void)
+{
+	char 	buff[128], msg[128];
+	char	text[] = "this is a test message";
+	int 	id = p_get_id();
+	int 	mbx = p_bind(id);
+	int 	rcode;
+
+	msg[0] = '\0';
+
+	// send message
+	rcode = p_send(mbx, mbx, text);
+	UART0_TXStr("\nSend returned\t");
+	UART0_TXStr(my_itoa(rcode, buff, 10));
+
+	// receive message
+	rcode = p_recv(mbx, mbx, msg, 100);
+	UART0_TXStr("\nReceive returned\t");
+	UART0_TXStr(my_itoa(rcode, buff, 10));
+	UART0_TXStr("\nMessage is \"");
+	UART0_TXStr(msg);
+	UART0_TXStr("\"");
+}
+
+
 void procBindUnbind(void)
 {
 	char buff[128];
 	int i, mbx = 0;
-	int id = pkcall(GETID, NULL, NULL);
+	int id = p_get_id();
 
 	// bind
 	for(i = 50; i < 60; i++)
 	{
-		mbx = pkcall(BIND, i, NULL);
+		mbx = p_bind(i);
 
 		if(mbx > 0)
 		{
@@ -44,7 +69,7 @@ void procBindUnbind(void)
 	// unbind
 	for(i = 55; i < 65; i++)
 	{
-		mbx = pkcall(UNBIND, i, NULL);
+		mbx = p_unbind(i);
 
 		if(mbx > 0)
 		{
@@ -65,6 +90,7 @@ void procBindUnbind(void)
 		}
 	}
 }
+
 
 
 /*
@@ -117,14 +143,14 @@ void idleProc(void)
  *                        list of more arguments
  * @returns:    value returned by kernel, depends on call type.
  */
-int pkcall(int code, unsigned int arg1, unsigned int* arg2)
+int pkcall(int code, unsigned int arg)
 {
     volatile struct kcallargs arglist;
 
     /* Pass code and pkmsg to kernel in arglist structure */
     arglist . code = (enum SVC_CODES)code;
-    arglist . arg1 = arg1;
-    arglist . arg2 = arg2;
+    arglist . arg1 = arg;
+    //arglist . arg2 = arg2;
 
     /* R7 = address of arglist structure */
     assignR7((unsigned long) &arglist);
@@ -145,7 +171,7 @@ int pkcall(int code, unsigned int arg1, unsigned int* arg2)
  */
 int p_get_id(void)
 {
-    return pkcall(GETID, NULL, NULL);
+    return pkcall(GETID, NULL);
 }
 
 
@@ -157,5 +183,6 @@ int p_get_id(void)
  */
 void p_terminate(void)
 {
-	pkcall(TERMINATE, NULL, NULL);
+	pkcall(TERMINATE, NULL);
 }
+

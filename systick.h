@@ -19,13 +19,13 @@
 #define ST_RELOAD_R (*((volatile unsigned long *)0xE000E014))
 
 // SysTick defines
-#define ST_CTRL_COUNT      0x00010000  // Count Flag for STCTRL
-#define ST_CTRL_CLK_SRC    0x00000004  // Clock Source for STCTRL
-#define ST_CTRL_INTEN      0x00000002  // Interrupt Enable for STCTRL
-#define ST_CTRL_ENABLE     0x00000001  // Enable for STCTRL
-#define MAX_WAIT           0x1000000	// 2^24
-#define PERIOD             0x00186A0	// 160 000
-#define SYS_CHAR 'x' /* Character to fill in systick queue */
+#define ST_CTRL_COUNT   0x00010000	// Count Flag for STCTRL
+#define ST_CTRL_CLK_SRC 0x00000004	// Clock Source for STCTRL
+#define ST_CTRL_INTEN   0x00000002	// Interrupt Enable for STCTRL
+#define ST_CTRL_ENABLE  0x00000001	// Enable for STCTRL
+#define MAX_WAIT        0x01000000	// 2^24
+#define PERIOD          0x00027100	// 160 000
+#define SYS_CHAR 		'x' 		// Character to fill in systick queue
 
 typedef struct systick_
 {

@@ -21,7 +21,7 @@
 #define PSP_RTN			0xFFFFFFFD	// link register exception return using PSP
 #define STACKSIZE		1024
 #define	NUM_PRI			5
-#define NUM_MBX_PER_PROC	4
+#define NUM_MBX_PER_PROC	5
 
 /* Cortex default stack frame */
 struct stack_frame{
@@ -64,13 +64,14 @@ struct linked_list{
 };
 
 /* function declarations */
+void procSendRecv(void);
 void procBindUnbind(void);
 void procA(void);
 void procB(void);
 void procC(void);
 void idleProc(void);
 
-int pkcall(int , unsigned int , unsigned int*);
+int pkcall(int, unsigned int);
 int p_get_id(void);
 void p_terminate(void);
 

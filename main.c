@@ -27,8 +27,7 @@ void main (void)
 	initKernel();
 
     // init procs here
-    reg_proc(&procBindUnbind, 1, 3);
-    reg_proc(&procBindUnbind, 2, 2);
+    reg_proc(&procSendRecv, 1, 3);
 
     initRunning();
 

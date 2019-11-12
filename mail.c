@@ -9,10 +9,11 @@
 
 #include "mail.h"
 
-struct mailbox mailroom[NUM_MAILBOXES] = {{NULL}};
+struct mailbox mailroom[NUM_MAILBOXES] = { NULL };
 struct message* mailpile;
-char *BIND_ERR_PRINTS[3] = {
-"Bad mailbox number", "No mailbox free", "Mailbox in use"
+char *BIND_ERR_PRINTS[4] = {
+"Proc bound to max number of mailboxes", "Bad mailbox number",
+"No mailbox free", "Mailbox in use"
 };
 
 
@@ -25,9 +26,9 @@ char *BIND_ERR_PRINTS[3] = {
  * 					-2 All mailboxes are in use
  * 					-1 Mailbox number is outside of supported range (1-256)
  */
-unsigned int p_bind(unsigned int mailbox_number)
+int p_bind(unsigned int mailbox_number)
 {
-	return pkcall(BIND, mailbox_number, NULL);
+	return pkcall(BIND, mailbox_number);
 }
 
 
@@ -37,9 +38,9 @@ unsigned int p_bind(unsigned int mailbox_number)
  * @param:		Mailbox number to unbind from. 0 if all.
  * @returns:
  */
-unsigned int p_unbind(unsigned int mailbox_number)
+int p_unbind(unsigned int mailbox_number)
 {
-	return pkcall(UNBIND, mailbox_number, NULL);
+	return pkcall(UNBIND, mailbox_number);
 }
 
 
@@ -49,12 +50,26 @@ unsigned int p_unbind(unsigned int mailbox_number)
  * @param:
  * @returns:
  */
-unsigned int p_send(unsigned int dst, unsigned int src, void *msg, unsigned size)
+int p_send(unsigned int src, unsigned int dst, char msg[MAX_MESSAGE_LEN])
 {
+	struct message pmsg;
 
-	return pkcall(SEND, dst, NULL);
+	// catch some basic errors before sending to kernel level
+	if(dst > NUM_MAILBOXES)
+		// catch receiver mailbox validity
+		return BAD_RECVER;
+	else if(strlen(msg) > MAX_MESSAGE_LEN)
+		// catch too-long message
+		return BAD_SIZE;
+
+	// load values into message struct
+	pmsg . next = NULL;
+	pmsg . dqid = dst;
+	pmsg . sqid = src;
+	strncpy(pmsg.body, msg, (strlen(msg) < MAX_MESSAGE_LEN) ? strlen(msg) : MAX_MESSAGE_LEN);
+
+	return pkcall(SEND, (unsigned int)&pmsg);
 }
-
 
 /*
  * Description
@@ -62,11 +77,61 @@ unsigned int p_send(unsigned int dst, unsigned int src, void *msg, unsigned size
  * @param:
  * @returns:
  */
-unsigned int p_recv(unsigned int dst, unsigned int src, void *msg, unsigned size)
+int p_recv(unsigned int src, unsigned int dst, char buf[MAX_MESSAGE_LEN])
 {
-	return pkcall(RECV, dst, NULL);
+	struct message pmsg;
+
+	// catch some basic errors before sending to kernel level
+	if((src > NUM_MAILBOXES) || (dst > NUM_MAILBOXES))
+		// catch receiver mailbox validity
+		return BAD_RECVER;
+
+	// load values into message struct
+	pmsg . next = NULL;
+	pmsg . dqid = dst;
+	pmsg . sqid = src;
+	strncpy(pmsg.body, buf, (strlen(buf) < MAX_MESSAGE_LEN) ? strlen(buf) : MAX_MESSAGE_LEN);
+
+	return pkcall(RECV, (unsigned int)&pmsg);
 }
 
+
+void k_copyMessage(struct message *dst_msg, struct message *src_msg)
+{
+	dst_msg->dqid =  src_msg->dqid;
+	dst_msg->sqid =  src_msg->sqid;
+	strcpy(dst_msg->body, src_msg->body);
+}
+
+void clearMessage(struct message *msg)
+{
+	msg->next	= NULL;
+	msg->dqid	= NULL;
+	msg->sqid	= NULL;
+	msg->body[0]= '\0';
+	msg->size	= NULL;
+}
+
+/*
+ * A list of blank messages for use by k_send() and k_recv()
+ *
+ * @param:
+ * @returns:
+ */
+struct message *initMessages(void)
+{
+	struct message *head, *msg;
+	int i = 0;
+
+	do {
+		msg = malloc(sizeof(struct message))
+		clearMessage(void);
+		msg->next = head;
+		head = msg;
+	} while(++i < MAILPILE_SIZE);
+
+	return head;
+}
 
 /*
  * Description
@@ -74,14 +139,34 @@ unsigned int p_recv(unsigned int dst, unsigned int src, void *msg, unsigned size
  * @param:
  * @returns:
  */
-struct message *allocate()
+struct message *allocate(void)
 {
-	struct message *new_mbox;
+	struct message *new_msg;
 	if (mailpile == NULL)	// if list is empty, return
-			 return NULL;
-	new_mbox = mailpile; 	// New mbox entry gets head of list (not NULL)
-	mailpile = mailpile -> next; // Update list. Could be NULL
-	return new_mbox;
+		return NULL;
+	new_msg = mailpile; 	// New mbox entry gets head of list (not NULL)
+	mailpile = mailpile->next; // Update list. Could be NULL
+	new_msg->next = NULL;	// clear old pointer
+	return new_msg;
 }
 
+/*
+ * Description
+ *
+ * @param:
+ * @returns:
+ */
+int deallocate(struct message *old_msg)
+{
+	// link message
+	old_msg -> next = mailpile;
+	mailpile = old_msg;
+
+	// clear message fields
+	old_msg->dqid = NULL;
+	old_msg->sqid = NULL;
+	old_msg->body[0]= '\0';
+
+	return 1; // Always successful
+}
 

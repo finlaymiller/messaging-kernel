@@ -122,10 +122,10 @@ void SVCHandler(struct stack_frame *argptr)
 			kcaptr -> rtnvalue = k_terminate();
 			break;
 		case SEND:
-			kcaptr -> rtnvalue = k_send(/*kcaptr->arg1, kcaptr->arg2*/);
+			kcaptr -> rtnvalue = k_send((struct message *)kcaptr->arg1);
 			break;
 		case RECV:
-			kcaptr -> rtnvalue = k_recv();
+			kcaptr -> rtnvalue = k_recv((struct message *)kcaptr->arg1);
 			break;
 		case BIND:		// arg1 should be the mailbox to bind to
 			kcaptr -> rtnvalue = k_bind(kcaptr->arg1);

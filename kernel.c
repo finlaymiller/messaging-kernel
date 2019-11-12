@@ -7,8 +7,9 @@
 
 /* globals */
 struct pcb *running;		// pointer to pcb of currently running process
-struct pri pri_queue[NUM_PRI] = {{NULL}};// <- NOT SURE IF THIS WILL WORK
-												// IT WORKED FOR mailroom
+struct pri pri_queue[NUM_PRI] = {NULL};
+extern struct message* mailpile;
+extern struct mailbox mailroom[NUM_MAILBOXES];
 
 /*******************	 INITIALIZATION FUNCTIONS    *************************/
 
@@ -20,8 +21,10 @@ struct pri pri_queue[NUM_PRI] = {{NULL}};// <- NOT SURE IF THIS WILL WORK
  */
 void initKernel(void)
 {
+
 	initUART();
 	initPriQueue();
+	mailpile = initMessages();
 
 	reg_proc(&idleProc, 0, 0);
 }
@@ -81,7 +84,7 @@ struct stack_frame initStackFrame(void(*func_name)())
  */
 void initRunning(void)
 {
-    char i;
+    int i;
     for(i = NUM_PRI-1; i >= 0; i--){
         if(pri_queue[i].head != NULL){
             running = (struct pcb*) pri_queue[i].head;
@@ -90,9 +93,7 @@ void initRunning(void)
     }
 }
 
-/* TODO: do this at compile time
- * CHECK LINE 13
- */
+/* TODO: do this at compile time */
 void initPriQueue(void)
 {
     char i;

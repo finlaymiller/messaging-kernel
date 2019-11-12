@@ -35,7 +35,7 @@ struct kcallargs
 	enum SVC_CODES	code;
 	int 			rtnvalue;
 	unsigned int 	arg1;
-	unsigned int*	arg2;
+	//unsigned int*	arg2;
 };
 
 void SVCall(void);

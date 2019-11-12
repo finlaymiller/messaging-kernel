@@ -12,9 +12,6 @@
  *  todo	write nice() function
  *  todo	write send() function
  *  todo	write recv() function
- *  todo	write bind() function
- *  todo	write unbind() function
- *  todo	write terminate() function
  */
 
 #include "calls.h"
@@ -60,8 +57,8 @@ int k_nice(int priority)
  */
 int k_bind(unsigned int mailbox_number)
 {
-	unsigned int good_mailbox = 0, i = 0;
-	struct pcb* curr_running;
+	int good_mailbox = 0, i = 0, found_mailbox = 0;
+	struct pcb* curr_running = getRunning();
 
 	// search mailroom for available mailbox
 	if(mailbox_number > NUM_MAILBOXES - 1)
@@ -94,19 +91,21 @@ int k_bind(unsigned int mailbox_number)
 	// update mailbox and pcb if one has been found
 	if(good_mailbox > 0)
 	{
-		curr_running = getRunning();
 		mailroom[good_mailbox].owner = curr_running;	// update mailbox
 		for(i = 0; i < NUM_MBX_PER_PROC; i++)			// update pcb
 		{	// get first zero/null mailbox in list
-			if(!curr_running->mbxs[i])
+			if(curr_running->mbxs[i] == 0)
 			{
 				curr_running->mbxs[i] = good_mailbox;
+				found_mailbox = 1;
 				break;
 			}
 		}
 	}
 
-	return good_mailbox;
+	// process having already bound to the maximum number of mailboxes
+	// is the last error to catch
+	return (found_mailbox) ? good_mailbox : MAX_MBX_BOUND;
 }
 
 
@@ -123,7 +122,6 @@ int k_unbind(unsigned int mailbox_number)
 {
 	unsigned int old_mailbox = 0, i = 0;
 	struct pcb* curr_running = getRunning();
-	struct message* msg;	// to be used for emptying mailbox
 
 	// search mailroom for mailbox
 	if(mailbox_number > NUM_MAILBOXES - 1)
@@ -146,13 +144,14 @@ int k_unbind(unsigned int mailbox_number)
 	}
 	else	// ok now we can unbind from the mailbox
 	{
-		msg = mailroom[mailbox_number].message_list;
-		mailroom[mailbox_number].owner = NULL;
-		while(msg->next)		// free messages
-		{
-			msg = msg->next;	// move to next message
-			free(mailroom[mailbox_number].message_list);	// free first message
-			mailroom[mailbox_number].message_list = msg;
+		mailroom[mailbox_number].owner = NULL;	// update mailbox
+		for(i = 0; i < NUM_MBX_PER_PROC; i++)	// update pcb
+		{	// get first zero/null mailbox in list
+			if(curr_running->mbxs[i] == mailbox_number)
+			{
+				curr_running->mbxs[i] = 0;
+				break;
+			}
 		}
 
 		old_mailbox = mailbox_number;
@@ -168,10 +167,43 @@ int k_unbind(unsigned int mailbox_number)
  * @param:
  * @returns:
  */
-int k_send(void)
+int k_send(struct message *msg)
 {
+	char b[128];
+	struct pcb* curr_running = getRunning();
+	struct message *kmsg;
 
-	return 0;
+	// debugging prints
+	UART0_TXStr("\nKernel received a message with the following data:");
+	UART0_TXStr("\nMQID\t\t");
+	UART0_TXStr(my_itoa(msg->dqid, b, 10));
+	UART0_TXStr("\nSQID\t\t");
+	UART0_TXStr(my_itoa(msg->sqid, b, 10));
+	UART0_TXStr("\nBODY\t\t");
+	UART0_TXStr(msg->body);
+
+	// mailroom/box error checks
+	if(mailroom[msg->dqid].owner != curr_running)
+	{	// catch sender mailbox validity
+		return BAD_SENDER;
+	}
+	else if(mailroom[msg->dqid].owner == NULL)
+	{		// catch receiver mailbox validity
+			return BAD_RECVER;
+	}
+	else if (mailroom[msg->dqid].num_messages >= MAX_NUM_MESSAGES)
+	{	// catch mailbox full
+		return MBX_FULL;
+	}
+
+	// copy over message data and add to message queue
+	kmsg = allocate();				// get fresh message struct from mailpile
+	k_copyMessage(kmsg, msg);		// copy message contents
+	kmsg->next = mailroom[msg->dqid].message_list;	// add to mailbox ll
+	mailroom[msg->dqid].message_list = kmsg;
+	mailroom[msg->dqid].num_messages++;	// update number of messages in mailbox
+
+	return strlen(kmsg->body);
 }
 
 
@@ -181,10 +213,58 @@ int k_send(void)
  * @param:
  * @returns:
  */
-int k_recv(void)
+int k_recv(struct message *msg)
 {
+	char b[128];
+	int i, copy_size;
+	struct pcb* curr_running = getRunning();
+	struct message *tmsg, *dmsg;
 
-	return 0;
+	// debugging prints
+	UART0_TXStr("\nKernel looking for a message with the following data:");
+	UART0_TXStr("\nMQID\t\t");
+	UART0_TXStr(my_itoa(msg->dqid, b, 10));
+	UART0_TXStr("\nSQID\t\t");
+	UART0_TXStr(my_itoa(msg->sqid, b, 10));
+	UART0_TXStr("\nMAX SIZE\t\t");
+	UART0_TXStr(my_itoa(msg->size, b, 10));
+
+	// mailroom/box error checks
+	if(mailroom[msg->dqid].owner != curr_running)
+	{	// catch sender mailbox validity
+		return BAD_RECVER;
+	}
+	else if(mailroom[msg->sqid].owner == NULL)
+	{		// catch receiver mailbox validity???
+			return BAD_SENDER;
+	}
+	else if (mailroom[msg->dqid].num_messages == 0)
+	{	// catch mailbox empty
+		return MBX_EMTY;
+	}
+
+	tmsg = mailroom[msg->dqid].message_list;
+	while(tmsg->next != NULL)	// get end of message list
+		tmsg = tmsg->next;
+	// tmsg now points to the last node of the list
+	// DO SOME MORE CHECKS ON THE ACTUAL MESSAGE STRUCT HERE
+
+	memcpy(msg->body, tmsg->body, msg->size);  // copy msg contents into buffer
+	mailroom[msg->dqid].num_messages--;
+
+	/*	TEST MESSAGE REMOVAL LATER
+	deallocate(tmsg);	// be careful of leaving message data un-zeroed...
+						// thats a problem for tomorrow
+
+	// need to traverse list again (since its singly-linked) to break last link
+	// to tmsg after deallocate()'ing
+	tmsg = mailroom[msg->dqid].message_list;	// we can reuse this ptr
+	for(i = 0; i < mailroom[msg->dqid].num_messages; i++)
+		tmsg = tmsg->next;
+	tmsg->next = NULL;	// break last link
+	*/
+
+	return strlen(contents);
 }
 
 /*
