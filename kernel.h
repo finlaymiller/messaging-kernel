@@ -43,6 +43,7 @@ void insertPriQueue(struct pcb *new_pcb, unsigned char priority);
 void nextProcess(void);
 void assignR7(volatile unsigned long);
 int k_terminate(void);
+int checkHighPriority(void);
 
 extern void procA(void);
 extern void procB(void);
