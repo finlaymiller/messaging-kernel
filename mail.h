@@ -19,7 +19,7 @@
 #define MAX_NUM_MESSAGES	64
 #define	MAILPILE_SIZE		128
 
-#define TRUE_STRLEN(s)	(strlen(s) + 1)
+#define TRUE_STRLEN(s)	(strlen(s) + 1)	// accounts for null terminator
 
 // what should/can we use mailbox #0 for?
 // a broadcast channel maybe? or it can just unused
@@ -53,7 +53,7 @@ struct mailbox
 int p_bind(unsigned int);
 int p_unbind(unsigned int);
 int p_send(unsigned int, unsigned int, char msg[MAX_MESSAGE_LEN]);
-int p_recv(unsigned int, unsigned int, char buf[MAX_MESSAGE_LEN]);
+int p_recv(unsigned int, unsigned int, char buf[MAX_MESSAGE_LEN], int);
 
 void k_copyMessage(struct message *, struct message *);
 void clearMessage(struct message *);

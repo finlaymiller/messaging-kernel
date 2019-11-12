@@ -67,6 +67,7 @@ int p_send(unsigned int src, unsigned int dst, char msg[MAX_MESSAGE_LEN])
 	pmsg . dqid = dst;
 	pmsg . sqid = src;
 	strncpy(pmsg.body, msg, (strlen(msg) < MAX_MESSAGE_LEN) ? strlen(msg) : MAX_MESSAGE_LEN);
+	pmsg . size = TRUE_STRLEN(pmsg.body);
 
 	return pkcall(SEND, (unsigned int)&pmsg);
 }
@@ -77,7 +78,7 @@ int p_send(unsigned int src, unsigned int dst, char msg[MAX_MESSAGE_LEN])
  * @param:
  * @returns:
  */
-int p_recv(unsigned int src, unsigned int dst, char buf[MAX_MESSAGE_LEN])
+int p_recv(unsigned int src, unsigned int dst, char buf[MAX_MESSAGE_LEN], int size)
 {
 	struct message pmsg;
 
@@ -90,7 +91,9 @@ int p_recv(unsigned int src, unsigned int dst, char buf[MAX_MESSAGE_LEN])
 	pmsg . next = NULL;
 	pmsg . dqid = dst;
 	pmsg . sqid = src;
-	strncpy(pmsg.body, buf, (strlen(buf) < MAX_MESSAGE_LEN) ? strlen(buf) : MAX_MESSAGE_LEN);
+	strncpy(pmsg.body, buf,
+		(strlen(buf) < MAX_MESSAGE_LEN) ? strlen(buf) : MAX_MESSAGE_LEN);
+	pmsg . size = size;
 
 	return pkcall(RECV, (unsigned int)&pmsg);
 }
@@ -101,6 +104,7 @@ void k_copyMessage(struct message *dst_msg, struct message *src_msg)
 	dst_msg->dqid =  src_msg->dqid;
 	dst_msg->sqid =  src_msg->sqid;
 	strcpy(dst_msg->body, src_msg->body);
+	dst_msg->size = src_msg->size;
 }
 
 void clearMessage(struct message *msg)
@@ -124,8 +128,8 @@ struct message *initMessages(void)
 	int i = 0;
 
 	do {
-		msg = malloc(sizeof(struct message))
-		clearMessage(void);
+		msg = malloc(sizeof(struct message));
+		clearMessage(msg);
 		msg->next = head;
 		head = msg;
 	} while(++i < MAILPILE_SIZE);

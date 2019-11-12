@@ -37,22 +37,22 @@ void SVCall(void)
 
 	/* Trapping source is MSP - save r4-r11 on stack (default, so just push) */
 	__asm(" 	PUSH 	{r4-r11}");
-	__asm(" 	MRS	r0,msp");
-	__asm(" 	BL	SVCHandler");	/* r0 is MSP */
-	__asm(" 	POP	{r4-r11}");
+	__asm(" 	MRS		r0,msp");
+	__asm(" 	BL		SVCHandler");	/* r0 is MSP */
+	__asm(" 	POP		{r4-r11}");
 	__asm(" 	POP 	{PC}");
 
 	/* Trapping source is PSP - save r4-r11 on psp stack (MSP is active stack) */
 	__asm("RtnViaPSP:");
 	__asm(" 	mrs 	r0,psp");
 	__asm("		stmdb 	r0!,{r4-r11}");	/* Store multiple, decrement before */
-	__asm("		msr	psp,r0");
-	__asm(" 	BL	SVCHandler");	/* r0 Is PSP */
+	__asm("		msr		psp,r0");
+	__asm(" 	BL		SVCHandler");	/* r0 Is PSP */
 
 	/* Restore r4..r11 from trapping process stack  */
 	__asm(" 	mrs 	r0,psp");
 	__asm("		ldmia 	r0!,{r4-r11}");	/* Load multiple, increment after */
-	__asm("		msr	psp,r0");
+	__asm("		msr		psp,r0");
 	__asm(" 	POP 	{PC}");
 }
 

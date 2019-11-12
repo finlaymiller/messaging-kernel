@@ -181,6 +181,8 @@ int k_send(struct message *msg)
 	UART0_TXStr(my_itoa(msg->sqid, b, 10));
 	UART0_TXStr("\nBODY\t\t");
 	UART0_TXStr(msg->body);
+	UART0_TXStr("\nSIZE\t\t");
+	UART0_TXStr(my_itoa(msg->size, b, 10));
 
 	// mailroom/box error checks
 	if(mailroom[msg->dqid].owner != curr_running)
@@ -216,7 +218,7 @@ int k_send(struct message *msg)
 int k_recv(struct message *msg)
 {
 	char b[128];
-	int i, copy_size;
+	int i;
 	struct pcb* curr_running = getRunning();
 	struct message *tmsg, *dmsg;
 
@@ -226,7 +228,7 @@ int k_recv(struct message *msg)
 	UART0_TXStr(my_itoa(msg->dqid, b, 10));
 	UART0_TXStr("\nSQID\t\t");
 	UART0_TXStr(my_itoa(msg->sqid, b, 10));
-	UART0_TXStr("\nMAX SIZE\t\t");
+	UART0_TXStr("\nMAX SIZE\t");
 	UART0_TXStr(my_itoa(msg->size, b, 10));
 
 	// mailroom/box error checks
@@ -264,7 +266,7 @@ int k_recv(struct message *msg)
 	tmsg->next = NULL;	// break last link
 	*/
 
-	return strlen(contents);
+	return TRUE_STRLEN(msg->body);
 }
 
 /*
