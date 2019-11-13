@@ -15,7 +15,7 @@
 #include "trap.h"
 
 #define NUM_MAILBOXES		64
-#define MAX_MESSAGE_LEN		64
+#define MAX_MSG_LEN			64
 #define MAX_NUM_MESSAGES	64
 #define	MAILPILE_SIZE		128
 
@@ -38,7 +38,7 @@ struct message
 	struct message* next;	// pointer to next message in list
 	unsigned int 	dqid;	// the mailbox of the receving process
 	unsigned int 	sqid;	// the mailbox of the sending process
-	char body[MAX_MESSAGE_LEN];	// message contents
+	char body[MAX_MSG_LEN];	// message contents
 	int				size;	// number of bytes in body
 };
 
@@ -52,8 +52,8 @@ struct mailbox
 /* function definitions */
 int p_bind(unsigned int);
 int p_unbind(unsigned int);
-int p_send(unsigned int, unsigned int, char msg[MAX_MESSAGE_LEN]);
-int p_recv(unsigned int, unsigned int, char buf[MAX_MESSAGE_LEN], int);
+int p_send(unsigned int, unsigned int, char msg[MAX_MSG_LEN]);
+int p_recv(unsigned int, unsigned int, char *, int);
 
 void k_copyMessage(struct message *, struct message *);
 void clearMessage(struct message *);

@@ -50,7 +50,7 @@ int p_unbind(unsigned int mailbox_number)
  * @param:
  * @returns:
  */
-int p_send(unsigned int src, unsigned int dst, char msg[MAX_MESSAGE_LEN])
+int p_send(unsigned int src, unsigned int dst, char msg[MAX_MSG_LEN])
 {
 	struct message pmsg;
 
@@ -58,7 +58,7 @@ int p_send(unsigned int src, unsigned int dst, char msg[MAX_MESSAGE_LEN])
 	if(dst > NUM_MAILBOXES)
 		// catch receiver mailbox validity
 		return BAD_RECVER;
-	else if(strlen(msg) > MAX_MESSAGE_LEN)
+	else if(strlen(msg) > MAX_MSG_LEN)
 		// catch too-long message
 		return BAD_SIZE;
 
@@ -66,7 +66,7 @@ int p_send(unsigned int src, unsigned int dst, char msg[MAX_MESSAGE_LEN])
 	pmsg . next = NULL;
 	pmsg . dqid = dst;
 	pmsg . sqid = src;
-	strncpy(pmsg.body, msg, (strlen(msg) < MAX_MESSAGE_LEN) ? strlen(msg) : MAX_MESSAGE_LEN);
+	memcpy(pmsg.body, msg, TRUE_STRLEN(msg));
 	pmsg . size = TRUE_STRLEN(pmsg.body);
 
 	return pkcall(SEND, (unsigned int)&pmsg);
@@ -78,9 +78,10 @@ int p_send(unsigned int src, unsigned int dst, char msg[MAX_MESSAGE_LEN])
  * @param:
  * @returns:
  */
-int p_recv(unsigned int src, unsigned int dst, char buf[MAX_MESSAGE_LEN], int size)
+int p_recv(unsigned int src, unsigned int dst, char *buf, int size)
 {
 	struct message pmsg;
+	int rtn_val;
 
 	// catch some basic errors before sending to kernel level
 	if((src > NUM_MAILBOXES) || (dst > NUM_MAILBOXES))
@@ -89,31 +90,35 @@ int p_recv(unsigned int src, unsigned int dst, char buf[MAX_MESSAGE_LEN], int si
 
 	// load values into message struct
 	pmsg . next = NULL;
-	pmsg . dqid = dst;
-	pmsg . sqid = src;
-	strncpy(pmsg.body, buf,
-		(strlen(buf) < MAX_MESSAGE_LEN) ? strlen(buf) : MAX_MESSAGE_LEN);
+	pmsg . dqid	= dst;
+	pmsg . sqid	= src;
+	pmsg . body[0] = '\0';
 	pmsg . size = size;
 
-	return pkcall(RECV, (unsigned int)&pmsg);
+	rtn_val = pkcall(RECV, (unsigned int)&pmsg);
+
+	memcpy(buf, pmsg.body, (size < TRUE_STRLEN(pmsg.body))?
+							size : TRUE_STRLEN(pmsg.body));
+
+	return rtn_val;
 }
 
 
 void k_copyMessage(struct message *dst_msg, struct message *src_msg)
 {
-	dst_msg->dqid =  src_msg->dqid;
-	dst_msg->sqid =  src_msg->sqid;
-	strcpy(dst_msg->body, src_msg->body);
+	dst_msg->dqid = src_msg->dqid;
+	dst_msg->sqid = src_msg->sqid;
+	memcpy(dst_msg->body, src_msg->body, src_msg->size);
 	dst_msg->size = src_msg->size;
 }
 
 void clearMessage(struct message *msg)
 {
-	msg->next	= NULL;
-	msg->dqid	= NULL;
-	msg->sqid	= NULL;
-	msg->body[0]= '\0';
-	msg->size	= NULL;
+	msg->next = NULL;
+	msg->dqid = NULL;
+	msg->sqid = NULL;
+	msg->body[0] = '\0';
+	msg->size = NULL;
 }
 
 /*
@@ -162,15 +167,8 @@ struct message *allocate(void)
  */
 int deallocate(struct message *old_msg)
 {
-	// link message
 	old_msg -> next = mailpile;
 	mailpile = old_msg;
-
-	// clear message fields
-	old_msg->dqid = NULL;
-	old_msg->sqid = NULL;
-	old_msg->body[0]= '\0';
-
 	return 1; // Always successful
 }
 

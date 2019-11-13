@@ -14,25 +14,34 @@ extern char *BIND_ERR_PRINTS[3];
 void procSendRecv(void)
 {
 	char 	buff[128], msg[128];
-	char	text[] = "this is a test message";
+	char	text[] = "qwerty";
 	int 	id = p_get_id();
 	int 	mbx = p_bind(id);
-	int 	rcode;
+	int 	rcode, i = 0;
+	char 	tstr[64];
 
 	msg[0] = '\0';
 
-	// send message
-	rcode = p_send(mbx, mbx, text);
-	UART0_TXStr("\nSend returned\t");
-	UART0_TXStr(my_itoa(rcode, buff, 10));
+	// send messages
+	while(i < TRUE_STRLEN(text))
+	{
+		tstr[i] = text[i];
+		tstr[++i] = '\0';
+		rcode = p_send(mbx, mbx, tstr);
+		UART0_TXStr("\tSend returned\t");
+		UART0_TXStr(my_itoa(rcode, buff, 10));
+	}
 
-	// receive message
-	rcode = p_recv(mbx, mbx, msg, 100);
-	UART0_TXStr("\nReceive returned\t");
-	UART0_TXStr(my_itoa(rcode, buff, 10));
-	UART0_TXStr("\nMessage is \"");
-	UART0_TXStr(msg);
-	UART0_TXStr("\"");
+	// receive messages
+	while(i > 0)
+	{
+		rcode = p_recv(mbx, mbx, msg, i-- + 1);
+		UART0_TXStr("\nRecv returned\t");
+		UART0_TXStr(my_itoa(rcode, buff, 10));
+		UART0_TXStr("\tMessage is \"");
+		UART0_TXStr(msg);
+		UART0_TXStr("\"");
+	}
 }
 
 
@@ -148,9 +157,9 @@ int pkcall(int code, unsigned int arg)
     volatile struct kcallargs arglist;
 
     /* Pass code and pkmsg to kernel in arglist structure */
-    arglist . code = (enum SVC_CODES)code;
-    arglist . arg1 = arg;
-    //arglist . arg2 = arg2;
+    arglist . code 		= (enum SVC_CODES)code;
+    arglist . arg1 		= arg;
+    arglist . rtnvalue 	= -1;
 
     /* R7 = address of arglist structure */
     assignR7((unsigned long) &arglist);

@@ -177,7 +177,7 @@ int k_send(struct message *msg)
 	UART0_TXStr("\nKernel received a message with the following data:");
 	UART0_TXStr("\nMQID\t\t");
 	UART0_TXStr(my_itoa(msg->dqid, b, 10));
-	UART0_TXStr("\nSQID\t\t");
+	UART0_TXStr("\tSQID\t\t");
 	UART0_TXStr(my_itoa(msg->sqid, b, 10));
 	UART0_TXStr("\nBODY\t\t");
 	UART0_TXStr(msg->body);
@@ -205,7 +205,7 @@ int k_send(struct message *msg)
 	mailroom[msg->dqid].message_list = kmsg;
 	mailroom[msg->dqid].num_messages++;	// update number of messages in mailbox
 
-	return strlen(kmsg->body);
+	return TRUE_STRLEN(kmsg->body);
 }
 
 
@@ -218,15 +218,14 @@ int k_send(struct message *msg)
 int k_recv(struct message *msg)
 {
 	char b[128];
-	int i;
 	struct pcb* curr_running = getRunning();
-	struct message *tmsg, *dmsg;
+	struct message *kmsg;
 
 	// debugging prints
 	UART0_TXStr("\nKernel looking for a message with the following data:");
 	UART0_TXStr("\nMQID\t\t");
 	UART0_TXStr(my_itoa(msg->dqid, b, 10));
-	UART0_TXStr("\nSQID\t\t");
+	UART0_TXStr("\tSQID\t\t");
 	UART0_TXStr(my_itoa(msg->sqid, b, 10));
 	UART0_TXStr("\nMAX SIZE\t");
 	UART0_TXStr(my_itoa(msg->size, b, 10));
@@ -245,26 +244,21 @@ int k_recv(struct message *msg)
 		return MBX_EMTY;
 	}
 
-	tmsg = mailroom[msg->dqid].message_list;
-	while(tmsg->next != NULL)	// get end of message list
-		tmsg = tmsg->next;
-	// tmsg now points to the last node of the list
+	kmsg = mailroom[msg->dqid].message_list;	// for readability
 	// DO SOME MORE CHECKS ON THE ACTUAL MESSAGE STRUCT HERE
 
-	memcpy(msg->body, tmsg->body, msg->size);  // copy msg contents into buffer
+	memcpy(msg->body, kmsg->body,	// copy message body
+		  (msg->size < TRUE_STRLEN(kmsg->body)) ?
+		   msg->size : TRUE_STRLEN(kmsg->body));
+
+	// remove message from mailbox
+	if(kmsg->next == NULL)
+		mailroom[msg->dqid].message_list = NULL;
+	else
+		mailroom[msg->dqid].message_list = kmsg->next;
+
+	deallocate(kmsg);
 	mailroom[msg->dqid].num_messages--;
-
-	/*	TEST MESSAGE REMOVAL LATER
-	deallocate(tmsg);	// be careful of leaving message data un-zeroed...
-						// thats a problem for tomorrow
-
-	// need to traverse list again (since its singly-linked) to break last link
-	// to tmsg after deallocate()'ing
-	tmsg = mailroom[msg->dqid].message_list;	// we can reuse this ptr
-	for(i = 0; i < mailroom[msg->dqid].num_messages; i++)
-		tmsg = tmsg->next;
-	tmsg->next = NULL;	// break last link
-	*/
 
 	return TRUE_STRLEN(msg->body);
 }
