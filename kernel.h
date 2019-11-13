@@ -33,10 +33,21 @@ void initMailroom(void);
 /* process */
 void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority);
 void nextProcess(void);
+
 void insertPriQueue(struct pcb *new_pcb, unsigned char priority);
 /* running */
 struct pcb* getNextRunning(void);
 void setRunningSP(unsigned long*);
 struct pcb* getRunning(void);
+
+void assignR7(volatile unsigned long);
+int k_terminate(void);
+int checkHighPriority(void);
+
+extern void procA(void);
+extern void procB(void);
+extern void procC(void);
+extern void idleProc(void);
+
 
 #endif /* KERNEL_H_ */

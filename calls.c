@@ -33,16 +33,18 @@ int k_get_id(void)
 }
 
 
-/*
- * Description
- *
- * @param:
- * @returns:
- */
-int k_nice(int priority)
+int nice(int priority)
 {
+    volatile struct kcallargs getidarg; /* Volatile to actually reserve space on stack */
+    getidarg . code = NICE;
+    getidarg . arg1 = priority;
 
-	return 0;
+    /* Assign address if getidarg to R7 */
+    assignR7((unsigned long) &getidarg);
+
+    SVC();
+
+    return getidarg . rtnvalue;
 }
 
 

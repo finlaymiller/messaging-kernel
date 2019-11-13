@@ -20,6 +20,7 @@ int k_get_id(void);
 int k_nice(int);
 int k_bind(unsigned int);
 int k_unbind(unsigned int);
+
 int k_send(struct message *);
 int k_recv(struct message *);
 int k_terminate(void);
