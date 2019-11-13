@@ -243,6 +243,7 @@ int k_recv(struct message *msg)
 	}
 	else if (mailroom[msg->dqid].num_messages == 0)
 	{	// catch mailbox empty
+	    //going to need to block the process here
 		return MBX_EMTY;
 	}
 
