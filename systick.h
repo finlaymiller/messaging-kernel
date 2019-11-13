@@ -10,6 +10,8 @@
 #ifndef SYSTICK_H_
 #define SYSTICK_H_
 
+#include "trap.h"
+
 // SysTick Registers
 // SysTick Control and Status Register (STCTRL)
 #define ST_CTRL_R   (*((volatile unsigned long *)0xE000E010))
@@ -17,15 +19,13 @@
 #define ST_RELOAD_R (*((volatile unsigned long *)0xE000E014))
 
 // SysTick defines
-#define ST_CTRL_COUNT      0x00010000  // Count Flag for STCTRL
-#define ST_CTRL_CLK_SRC    0x00000004  // Clock Source for STCTRL
-#define ST_CTRL_INTEN      0x00000002  // Interrupt Enable for STCTRL
-#define ST_CTRL_ENABLE     0x00000001  // Enable for STCTRL
-
-// Maximum period
-#define MAX_WAIT           0x1000000   /* 2^24 */
-#define PERIOD             0x186A00
-#define SYS_CHAR 'x' /* Character to fill in systick queue */
+#define ST_CTRL_COUNT   0x00010000	// Count Flag for STCTRL
+#define ST_CTRL_CLK_SRC 0x00000004	// Clock Source for STCTRL
+#define ST_CTRL_INTEN   0x00000002	// Interrupt Enable for STCTRL
+#define ST_CTRL_ENABLE  0x00000001	// Enable for STCTRL
+#define MAX_WAIT        0x01000000	// 2^24
+#define PERIOD          0x00027100	// 160 000
+#define SYS_CHAR 		'x' 		// Character to fill in systick queue
 
 typedef struct systick_
 {
@@ -34,13 +34,13 @@ typedef struct systick_
 	unsigned int enabled;	// T/F whether or not the alarm is running
 } SysTick;
 
-void systickInit(void);
-void SysTickStart(void);
-void SysTickStop(void);
-void SysTickIntEnable(void);
-void SysTickIntDisable(void);
+/* function declarations */
+void initSysTick(void);
+void startSysTick(void);
+void stopSysTick(void);
+void periodSysTick(unsigned long);
+void intEnableSysTick(void);
+void intDisableSysTick(void);
 void SysTickHandler(void);
-void PendSV_Handler(void);
-void SysTickPeriod(unsigned long Period);
 
 #endif /* SYSTICK_H_ */

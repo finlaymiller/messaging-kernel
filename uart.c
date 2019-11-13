@@ -46,7 +46,7 @@ void initUART(void)
 
     InterruptEnable(INT_VEC_UART0);       		// Enable UART0 interrupts
 	UART0_IntEnable(UART_INT_RX | UART_INT_TX); // Enable Receive and Transmit interrupts
-	INTERRUPT_MASTER_ENABLE();
+	InterruptMasterEnable();
 }
 
 /*
@@ -74,7 +74,7 @@ void InterruptEnable(unsigned long InterruptIndex)
 void UART0_IntHandler(void)
 {
 	// Receiving character
-	INTERRUPT_MASTER_DISABLE();
+	InterruptMasterDisable();
 	if (UART0_MIS_R & UART_INT_RX)
 	{
 		/* RECV done - clear interrupt and make char available to application */
@@ -97,7 +97,7 @@ void UART0_IntHandler(void)
 		if(!isQEmpty(UART_TX))
 			UART0_TXChar(dequeue(UART_TX));
 	}
-	INTERRUPT_MASTER_ENABLE();
+	InterruptMasterEnable();
 }
 
 /*
@@ -132,9 +132,3 @@ int UART0_TXReady(void)
 	// 1 if ready, 0 if busy
 	return !(UART0_FR_R & UART_FR_BUSY);
 }
-
-void UART_force_out_char(char c)
-{
-    UART0_DR_R = c;
-}
-

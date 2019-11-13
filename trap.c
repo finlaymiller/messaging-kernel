@@ -12,7 +12,7 @@
 #include "trap.h"
 
 extern void systick_init();
-struct pcb *running;
+extern struct pcb *running;
 
 
 /*
@@ -37,22 +37,22 @@ void SVCall(void)
 
 	/* Trapping source is MSP - save r4-r11 on stack (default, so just push) */
 	__asm(" 	PUSH 	{r4-r11}");
-	__asm(" 	MRS	r0,msp");
-	__asm(" 	BL	SVCHandler");	/* r0 is MSP */
-	__asm(" 	POP	{r4-r11}");
+	__asm(" 	MRS		r0,msp");
+	__asm(" 	BL		SVCHandler");	/* r0 is MSP */
+	__asm(" 	POP		{r4-r11}");
 	__asm(" 	POP 	{PC}");
 
 	/* Trapping source is PSP - save r4-r11 on psp stack (MSP is active stack) */
 	__asm("RtnViaPSP:");
 	__asm(" 	mrs 	r0,psp");
 	__asm("		stmdb 	r0!,{r4-r11}");	/* Store multiple, decrement before */
-	__asm("		msr	psp,r0");
-	__asm(" 	BL	SVCHandler");	/* r0 Is PSP */
+	__asm("		msr		psp,r0");
+	__asm(" 	BL		SVCHandler");	/* r0 Is PSP */
 
 	/* Restore r4..r11 from trapping process stack  */
 	__asm(" 	mrs 	r0,psp");
 	__asm("		ldmia 	r0!,{r4-r11}");	/* Load multiple, increment after */
-	__asm("		msr	psp,r0");
+	__asm("		msr		psp,r0");
 	__asm(" 	POP 	{PC}");
 }
 
@@ -103,16 +103,9 @@ void SVCHandler(struct stack_frame *argptr)
         firstSVCcall = FALSE;
 
         /* Initialize Systick */
-        systickInit();
+        initSysTick();
 
-        /*
-		 - Change the current LR to indicate return to Thread mode using the PSP
-		 - Assembler required to change LR to FFFF.FFFD (Thread/PSP)
-		 - BX LR loads PC from PSP stack (also, R0 through xPSR) - "hard pull"
-		*/
-		__asm(" movw    LR,#0xFFFD"); 	/* Lower 16 [and clear top 16] */
-		__asm(" movt    LR,#0xFFFF"); 	/* Upper 16 only */
-		__asm(" bx  LR");          		/* Force return to PSP */
+        returnPSP();
     }
 	else /* Subsequent SVCs */
 	{
@@ -129,10 +122,10 @@ void SVCHandler(struct stack_frame *argptr)
 			kcaptr -> rtnvalue = k_terminate();
 			break;
 		case SEND:
-			kcaptr -> rtnvalue = k_send(/*kcaptr->arg1, kcaptr->arg2*/);
+			kcaptr -> rtnvalue = k_send((struct message *)kcaptr->arg1);
 			break;
 		case RECV:
-			kcaptr -> rtnvalue = k_recv();
+			kcaptr -> rtnvalue = k_recv((struct message *)kcaptr->arg1);
 			break;
 		case BIND:		// arg1 should be the mailbox to bind to
 			kcaptr -> rtnvalue = k_bind(kcaptr->arg1);
@@ -164,7 +157,5 @@ void PendSV_Handler(void)
 
     InterruptMasterEnable();
 
-    __asm(" movw    LR,#0xFFFD"); 	/* Lower 16 [and clear top 16] */
-	__asm(" movt    LR,#0xFFFF"); 	/* Upper 16 only */
-	__asm(" bx  LR");          		/* Force return to PSP */
+    returnPSP();
 }

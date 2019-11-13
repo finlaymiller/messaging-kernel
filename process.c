@@ -9,6 +9,138 @@
 
 #include "process.h"
 
+extern char *BIND_ERR_PRINTS[3];
+
+void procSendRecv(void)
+{
+	char 	buff[128], msg[128];
+	char	text[] = "qwerty";
+	int 	id = p_get_id();
+	int 	mbx = p_bind(id);
+	int 	rcode, i = 0;
+	char 	tstr[64];
+
+	msg[0] = '\0';
+
+	// send messages
+	while(i < TRUE_STRLEN(text))
+	{
+		tstr[i] = text[i];
+		tstr[++i] = '\0';
+		rcode = p_send(mbx, mbx, tstr);
+		UART0_TXStr("\tSend returned\t");
+		UART0_TXStr(my_itoa(rcode, buff, 10));
+	}
+
+	// receive messages
+	while(i > 0)
+	{
+		rcode = p_recv(mbx, mbx, msg, i-- + 1);
+		UART0_TXStr("\nRecv returned\t");
+		UART0_TXStr(my_itoa(rcode, buff, 10));
+		UART0_TXStr("\tMessage is \"");
+		UART0_TXStr(msg);
+		UART0_TXStr("\"");
+	}
+}
+
+
+void procBindUnbind(void)
+{
+	char buff[128];
+	int i, mbx = 0;
+	int id = p_get_id();
+
+	// bind
+	for(i = 50; i < 60; i++)
+	{
+		mbx = p_bind(i);
+
+		if(mbx > 0)
+		{
+			UART0_TXStr("\nP");
+			UART0_TXStr(my_itoa(id, buff, 10));
+			UART0_TXStr(" bound to mailbox ");
+			UART0_TXStr(my_itoa(mbx, buff, 10));
+		}
+		else
+		{
+			UART0_TXStr("\nBind with P");
+			UART0_TXStr(my_itoa(id, buff, 10));
+			UART0_TXStr(" and mailbox ");
+			UART0_TXStr(my_itoa(i, buff, 10));
+			UART0_TXStr(" returned error \"");
+			UART0_TXStr(BIND_ERR_PRINTS[-mbx - 1]);
+			UART0_TXStr("\"");
+		}
+	}
+
+	// unbind
+	for(i = 55; i < 65; i++)
+	{
+		mbx = p_unbind(i);
+
+		if(mbx > 0)
+		{
+			UART0_TXStr("\nP");
+			UART0_TXStr(my_itoa(id, buff, 10));
+			UART0_TXStr(" unbound from mailbox ");
+			UART0_TXStr(my_itoa(mbx, buff, 10));
+		}
+		else
+		{
+			UART0_TXStr("\nUnbind with P");
+			UART0_TXStr(my_itoa(id, buff, 10));
+			UART0_TXStr(" and mailbox ");
+			UART0_TXStr(my_itoa(i, buff, 10));
+			UART0_TXStr(" returned error \"");
+			UART0_TXStr(BIND_ERR_PRINTS[-mbx -1]);
+			UART0_TXStr("\"");
+		}
+	}
+}
+
+
+
+/*
+ * Function to test process
+ */
+void procA(void)
+{
+    while(1){
+        UART0_TXChar('a');
+    }
+}
+
+/*
+ * Function to test process
+ */
+void procB(void)
+{
+    while(1){
+        UART0_TXChar('b');
+    }
+}
+
+/*
+ * Function to test process
+ */
+void procC(void)
+{
+    int i;
+    for(i=0; i<100; i++){
+        UART0_TXChar('c');
+    }
+}
+
+/*
+ * Idle process for when no other processes are in priority queue
+ */
+void idleProc(void)
+{
+    while(1);
+}
+
 
 /*
  * Process-kernel call function.  Supplies code and kernel message to the
@@ -20,14 +152,14 @@
  *                        list of more arguments
  * @returns:    value returned by kernel, depends on call type.
  */
-int pkcall(int code, unsigned int arg1, unsigned int* arg2)
+int pkcall(int code, unsigned int arg)
 {
     volatile struct kcallargs arglist;
 
     /* Pass code and pkmsg to kernel in arglist structure */
-    arglist . code = (enum SVC_CODES)code;
-    arglist . arg1 = arg1;
-    arglist . arg2 = arg2;
+    arglist . code 		= (enum SVC_CODES)code;
+    arglist . arg1 		= arg;
+    arglist . rtnvalue 	= -1;
 
     /* R7 = address of arglist structure */
     assignR7((unsigned long) &arglist);
@@ -40,80 +172,26 @@ int pkcall(int code, unsigned int arg1, unsigned int* arg2)
 }
 
 
-unsigned long getPSP(void)
+/*
+ * Returns ID of current process
+ *
+ * @param:		None
+ * @returns:	ID of the current process
+ */
+int p_get_id(void)
 {
-	/* returns contents of PSP (current process stack) */
-	__asm("	mrs		r0, psp");
-	__asm("	bx		lr");
-	return 0;
-}
-
-unsigned long getMSP(void)
-{
-	/* returns contents of MSP (main stack) */
-	__asm("	mrs		r0, msp");
-	__asm("	bx		lr");
-	return 0;
-}
-
-unsigned long getSP(void)
-{
-	/* leading space required for label */
-	__asm("	mov		r0, sp");
-	__asm("	bx		lr");
-	return 0;
-}
-
-void setPSP(volatile unsigned long process_stack)
-{
-	/* set PSP to process_stack */
-	__asm("	msr		psp, r0");
-}
-
-void setMSP(volatile unsigned long main_stack)
-{
-	/* set PSP to process_stack */
-	__asm("	msr		msp, r0");
-}
-
-void volatile saveRegisters(void)
-{
-	/* save r4-r11 on process stack */
-	__asm("	mrs		r0, psp");
-	__asm("	stmdb	r0!, {r4-r11}");
-	__asm("	msr		psp, r0");
-}
-
-void volatile loadRegisters(void)
-{
-	/* load r4-r11 from stack to CPU */
-	__asm("	mrs		r0, psp");
-	__asm("	ldmia	r0!, {r4-r11}");
-	__asm("	msr		psp, r0");
-}
-
-void volatile loadLR(void)
-{
-    __asm(" movw     lr, #0xfffd");
-    __asm(" movt     lr, #0xffff");
-}
-
-void returnPSP(void)
-{
-
+    return pkcall(GETID, NULL);
 }
 
 
 /*
- * Executes assembly instruction to enable interrupts
+ * Terminates process
+ *
+ * @param:		None
+ * @returns:	None
  */
-void InterruptMasterEnable(void)
+void p_terminate(void)
 {
-    /* enable CPU interrupts */
-    __asm(" cpsie   i");
+	pkcall(TERMINATE, NULL);
 }
 
-void InterruptMasterDisable(void)
-{
-    __asm(" cpsid i");
-}

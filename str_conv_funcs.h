@@ -10,6 +10,8 @@
 
 #include <string.h>
 
+#define MAX_STR_LEN 512
+
 /* function declaration */
 int my_atoi(char *, int *);
 char *my_itoa(int, char *, int);

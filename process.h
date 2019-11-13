@@ -14,13 +14,14 @@
 #include "kernel.h"
 #include "mail.h"
 #include "trap.h"
+#include "str_conv_funcs.h"
 
 #define PRIVATE 		static
-#define SVC()			__asm(" SVC #0")
 #define MSP_RTN			0xFFFFFFF9	// link register exception return using MSP
 #define PSP_RTN			0xFFFFFFFD	// link register exception return using PSP
 #define STACKSIZE		1024
-#define	NUM_PRI_LVLS	5
+#define	NUM_PRI			5
+#define NUM_MBX_PER_PROC	5
 
 /* Cortex default stack frame */
 struct stack_frame{
@@ -52,7 +53,8 @@ struct pcb{
     unsigned int  id;  		// process identifier
 	unsigned long state;    // state of process
 	unsigned char pri;      // priority of the process
-	unsigned long *stk;
+	unsigned long *stk;		// process stack
+	unsigned int mbxs[NUM_MBX_PER_PROC];	// mailboxes bound to by process
 };
 
 /* linked list structure */
@@ -62,24 +64,15 @@ struct linked_list{
 };
 
 /* function declarations */
-int pkcall(int , unsigned int , unsigned int*);
+void procSendRecv(void);
+void procBindUnbind(void);
+void procA(void);
+void procB(void);
+void procC(void);
+void idleProc(void);
 
-void setLR(volatile unsigned long);
-unsigned long getPSP();
-unsigned long getMSP();
-unsigned long getSP();
-void setPSP(volatile unsigned long);
-void setMSP(volatile unsigned long);\
-void volatile saveRegisters();
-void volatile loadRegisters();
-void volatile loadLR(void);
-void returnPSP(void);
-
-void InterruptMasterEnable(void);
-void InterruptMasterDisable(void);
-int pkcall(int code, unsigned int arg1, unsigned int* arg2);
-
-
-void SVCHandler(struct stack_frame*);
+int pkcall(int, unsigned int);
+int p_get_id(void);
+void p_terminate(void);
 
 #endif /* PROCESS_H_ */

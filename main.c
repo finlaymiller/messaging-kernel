@@ -16,6 +16,7 @@
 #include "systick.h"
 #include "kernel.h"
 #include "trap.h"
+#include "register.h"
 
 /*
  * Calls initialization functions for all modules
@@ -23,14 +24,15 @@
  */
 void main (void)
 {
-	initUART();
-    initPriQueue();
+	initKernel();
 
     // init procs here
+    reg_proc(&procSendRecv, 1, 3);
     reg_proc(&idleProc, 0, 0);
     reg_proc(&procA, 100, 3);
     reg_proc(&procB, 50, 3);
     reg_proc(&procC, 25, 3);
+
 
     initRunning();
 
