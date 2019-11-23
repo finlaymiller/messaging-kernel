@@ -77,7 +77,7 @@ void SVCall(void)
  */
 void SVCHandler(struct stack_frame *argptr)
 {
-	static int firstSVCcall = TRUE;
+    static int firstSVCcall = TRUE;
 	struct kcallargs *kcaptr;
 
     if (firstSVCcall){
@@ -174,5 +174,6 @@ void PendSV_Handler(void)
 
     InterruptMasterEnable();
 
-    returnPSP();
+    __asm(" movw    LR,#0xFFFD");   /* Lower 16 [and clear top 16] */
+    __asm(" movt    LR,#0xFFFF");   /* Upper 16 only */
 }
