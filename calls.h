@@ -23,6 +23,5 @@ int k_unbind(unsigned int);
 
 int k_send(struct message *);
 int k_recv(struct message *);
-int k_terminate(void);
 
 #endif /* CALLS_H_ */

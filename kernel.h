@@ -17,6 +17,8 @@ struct pcb;   //forward declaration for struct
 #include "systick.h"
 #include "trap.h"
 
+#define UNBLOCKED -1
+
 struct pri{
     unsigned long *head;    // holds pointer to first pcb in priority queue
     unsigned long *tail;    // holds pointer to last pcb in priority queue
@@ -39,14 +41,14 @@ void insertPriQueue(struct pcb *new_pcb, unsigned char priority);
 struct pcb* getNextRunning(void);
 void setRunningSP(unsigned long*);
 struct pcb* getRunning(void);
+void setNextRunning(void);
+void setRunning(struct pcb *new_running);
+void removePriQueue(void);
 
 void assignR7(volatile unsigned long);
 int k_terminate(void);
 int checkHighPriority(void);
 
-extern void procA(void);
-extern void procB(void);
-extern void procC(void);
 extern void idleProc(void);
 
 

@@ -9,28 +9,32 @@
 
 #include "process.h"
 
+#define PROC_NUM 1
+
 extern char *BIND_ERR_PRINTS[3];
 
 void procSendRecv(void)
 {
 	char 	buff[128], msg[128];
 	char	text[] = "qwerty";
-	int 	id = p_get_id();
-	int 	mbx = p_bind(id);
+	//int 	id = p_get_id();
+	int 	mbx = p_bind(PROC_NUM);
 	int 	rcode, i = 0;
 	char 	tstr[64];
 
 	msg[0] = '\0';
 
-	// send messages
-	while(i < TRUE_STRLEN(text))
-	{
-		tstr[i] = text[i];
-		tstr[++i] = '\0';
-		rcode = p_send(mbx, mbx, tstr);
-		UART0_TXStr("\tSend returned\t");
-		UART0_TXStr(my_itoa(rcode, buff, 10));
-	}
+//	// send messages
+//	while(i < TRUE_STRLEN(text))
+//	{
+//		tstr[i] = text[i];
+//		tstr[++i] = '\0';
+//		rcode = p_send(mbx, mbx, tstr);
+//		UART0_TXStr("\tSend returned\t");
+//		UART0_TXStr(my_itoa(rcode, buff, 10));
+//	}
+
+	i = 1;
 
 	// receive messages
 	while(i > 0)
@@ -42,6 +46,11 @@ void procSendRecv(void)
 		UART0_TXStr(msg);
 		UART0_TXStr("\"");
 	}
+}
+
+void procSend(void)
+{
+    int rcode = p_send(PROC_NUM, PROC_NUM, "A");
 }
 
 

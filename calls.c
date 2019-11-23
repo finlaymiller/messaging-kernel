@@ -243,7 +243,11 @@ int k_recv(struct message *msg)
 	}
 	else if (mailroom[msg->dqid].num_messages == 0)
 	{	// catch mailbox empty
-	    //going to need to block the process here
+
+	    removePriQueue();
+	    running->state = msg->sqid;  //TODO: verify that this is the right value
+	    startNextProcess();
+
 		return MBX_EMTY;
 	}
 
@@ -266,50 +270,3 @@ int k_recv(struct message *msg)
 	return TRUE_STRLEN(msg->body);
 }
 
-/*
- * Description
- *
- * @param:
- * @returns:
- */
-int k_terminate(void)
-{
-    if(running->next == running){
-        /* If this is the last process in the priority queue */
-        pri_queue[running->pri].head = NULL;
-        pri_queue[running->pri].tail = NULL;
-
-        //terminate process
-
-        /* Set new running */
-        running = getNextRunning();
-    } else {
-        /* Reset head or tail if necessary */
-        if(pri_queue[running->pri].head == (unsigned long*)running){
-            pri_queue[running->pri].head = (unsigned long*)running->next;
-        } else if(pri_queue[running->pri].tail == (unsigned long*)running){
-            pri_queue[running->pri].tail = (unsigned long*)running->prev;
-        }
-
-        /* set up temporary struct for next running pcb */
-        struct pcb *next_run = running->next;
-
-        /* Remove running from linked list */
-        running->prev->next = running->next;
-        running->next->prev = running->prev;
-
-        /* Deallocate memory for stack and pcb */
-        free(running->stk);
-        free(running);
-
-        /* Set new running */
-        running = next_run;
-    }
-
-    /* Set new stack pointer, load registers */
-    setPSP(running->sp);
-    loadRegisters();
-    returnPSP();
-
-    return 0;
-}

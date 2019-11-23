@@ -139,6 +139,23 @@ void SVCHandler(struct stack_frame *argptr)
 	}
 }
 
+void startNextProcess(void)
+{
+    InterruptMasterDisable();
+
+    if(getRunning()) saveRegisters();
+    setRunningSP((unsigned long*)getPSP());
+
+    /* Find and set next running process */
+    setNextRunning();
+    loadRegisters();
+
+    InterruptMasterEnable();
+
+    returnPSP();
+}
+
+
 /*
  * Pending Supervisor Call Handler
  *

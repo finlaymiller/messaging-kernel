@@ -132,6 +132,9 @@ void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority)
     /* Set priority in PCB */
     new_pcb->pri = priority;
 
+    /* Set state to not blocked */
+    new_pcb->state = UNBLOCKED;
+
     /* empty mailbox list */
     for(i = 0; i < NUM_MBX_PER_PROC; i++)
     	new_pcb->mbxs[i] = NULL;
@@ -150,6 +153,16 @@ void nextProcess(void)
     running = running->next;
 
     /* Set new stack pointer */
+    setPSP(running->sp);
+}
+
+/*
+ * Finds process at highest priority to run
+ */
+void setNextRunning(void)
+{
+    struct pcb *new_running = getNextRunning();
+    running = new_running;
     setPSP(running->sp);
 }
 
@@ -178,6 +191,32 @@ void insertPriQueue(struct pcb *new_pcb, unsigned char priority)
 
         /* Set up new tail */
         pri_queue[priority].tail = (unsigned long*)new_pcb;
+    }
+}
+
+/*
+ * Removes running pcb from priority queue
+ *
+ * @param:
+ * @returns: pcb pointer
+ */
+void removePriQueue(void)
+{
+    if(running->next == running){
+        /* If this is the last process in the priority queue */
+        pri_queue[running->pri].head = NULL;
+        pri_queue[running->pri].tail = NULL;
+    } else {
+        /* Reset head or tail if necessary */
+        if(pri_queue[running->pri].head == (unsigned long*)running){
+            pri_queue[running->pri].head = (unsigned long*)running->next;
+        } else if(pri_queue[running->pri].tail == (unsigned long*)running){
+            pri_queue[running->pri].tail = (unsigned long*)running->prev;
+        }
+
+        /* Remove running from linked list */
+        running->prev->next = running->next;
+        running->next->prev = running->prev;
     }
 }
 
@@ -347,43 +386,6 @@ int checkHighPriority(void)
 }
 
 /*
- * Function to test process
- */
-void procA(void)
-{
-    while(1){
-        UART_force_out_char('a');
-    }
-}
-
-/*
- * Function to test process
- */
-void procB(void)
-{
-    while(1){
-        UART_force_out_char('b');
-    }
-}
-
-/*
- * Function to test process
- */
-void procC(void)
-{
-    int i;
-    for(i=0; i<1000; i++){
-        UART_force_out_char('c');
-    }
-
-    // change priority here
-    nice(4);
-
-    for(i=0; i<1000; i++){
-        UART_force_out_char('c');
-}
-
-/*
  * Gets running pointer value
  *
  * @param:
@@ -392,4 +394,9 @@ void procC(void)
 struct pcb* getRunning(void)
 {
     return running;
+}
+
+void setRunning(struct pcb *new_running)
+{
+    running = new_running;
 }

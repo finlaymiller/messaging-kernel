@@ -39,6 +39,7 @@ struct kcallargs
 };
 
 void SVCall(void);
+void startNextProcess(void);
 void PendSV_Handler(void);
 
 #endif /* TRAP_H_ */
