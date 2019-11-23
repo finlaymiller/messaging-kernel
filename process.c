@@ -10,6 +10,15 @@
 #include "process.h"
 
 extern char *BIND_ERR_PRINTS[3];
+struct CUP cup = {ESC, '[', '0', '0', ';', '0', '0', 'H', NUL};
+char CLEAR_SCREEN[]     = {"\x1b[2J"};
+char CURSOR_SAVE[] 		= {"\x1b""7"};
+char CURSOR_HOME[] 		= {"\x1b[H"};
+char CLEAR_LINE[]       = {"\x1b[2K"};
+char HOME_COLOURS[]     = {"\x1b[2;30;47m"};
+char CURSOR_MIDDLE[] 	= {"\x1b[20C"};
+char TERM_COLOURS[]     = {"\x1b[0;0;0m"};
+char CURSOR_RESTORE[] 	= {"\x1b""8"};
 
 void procSendRecv(void)
 {
@@ -107,30 +116,45 @@ void procBindUnbind(void)
  */
 void procA(void)
 {
-    while(1){
-        UART0_TXChar('a');
-    }
+	char buf[32];
+	int i = 0;
+	struct CUP p =
+	{	.esc 		= ESC,
+		.sqrbrkt	= '[',
+		.line		= "10",
+		.semicolon	= ';',
+		.col		= "10",
+		.cmdchar	= 'H',
+		.nul		= NUL
+	};
+
+	UART0_TXStr(CLEAR_SCREEN);
+	drawWindow(p_get_id());
+	UART0_TXStr((char *)&p);
+	UART0_TXStr("HERE");
+	while(1);
+
 }
 
-/*
- * Function to test process
- */
-void procB(void)
-{
-    while(1){
-        UART0_TXChar('b');
-    }
-}
 
-/*
- * Function to test process
- */
-void procC(void)
+void drawWindow(unsigned int pid)
 {
-    int i;
-    for(i=0; i<100; i++){
-        UART0_TXChar('c');
-    }
+	char buf[32];
+	int i;
+	UART0_TXStr(CURSOR_HOME);
+	// make top bar
+	UART0_TXStr("------- P");
+	if(pid < 100)
+		if(pid < 10)
+			UART0_TXChar('0');
+		UART0_TXChar('0');
+	UART0_TXStr(my_itoa(pid, buf, 10));
+	UART0_TXStr(" -------\n");
+	// fill out walls
+	for(i = 0; i < 20; i++)
+		UART0_TXStr("|                  |\n");
+	// make bottom bar
+	UART0_TXStr("--------------------");
 }
 
 /*
