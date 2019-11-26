@@ -203,8 +203,12 @@ int k_send(struct message *msg)
 	// handle blocked processes
 	if(mailroom[msg->dqid].owner->state >= 0){
 
+	    //point PCB to the message and fill size in PCB
+        mailroom[msg->dqid].owner->msg = (char *)msg->body;
+        mailroom[msg->dqid].owner->sz = msg->size;
+
 	    //force that PCB back into the priority queue
-	    //point PCB to the message
+	    insertPriQueue(mailroom[msg->dqid].owner, mailroom[msg->dqid].owner->pri);
 
 	} else {
         // copy over message data and add to message queue
@@ -215,7 +219,8 @@ int k_send(struct message *msg)
         mailroom[msg->dqid].num_messages++;	// update number of messages in mailbox
 	}
 
-	return TRUE_STRLEN(kmsg->body);
+	//return TRUE_STRLEN(kmsg->body);
+	return 1;
 }
 
 
@@ -275,6 +280,7 @@ int k_recv(struct message *msg)
 	deallocate(kmsg);
 	mailroom[msg->dqid].num_messages--;
 
-	return TRUE_STRLEN(msg->body);
+	//return TRUE_STRLEN(msg->body);
+	return 1;
 }
 

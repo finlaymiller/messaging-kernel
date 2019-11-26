@@ -268,6 +268,8 @@ void setRunningSP(unsigned long* new_sp)
 
 int k_terminate(void)
 {
+    InterruptMasterDisable();
+
     if(running->next == running){
         /* If this is the last process in the priority queue */
         pri_queue[running->pri].head = NULL;
@@ -303,6 +305,8 @@ int k_terminate(void)
     /* Set new stack pointer, load registers */
     setPSP(running->sp);
     loadRegisters();
+
+    InterruptMasterEnable();
 
     __asm(" movw     lr, #0xfffd");
     __asm(" movt     lr, #0xffff");
