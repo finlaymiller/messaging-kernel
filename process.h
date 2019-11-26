@@ -68,8 +68,8 @@ struct linked_list{
 void procSendRecv(void);
 void procBindUnbind(void);
 void procA(void);
+void procA2(void);
 void idleProc(void);
-void drawWindow(unsigned int);
 
 int pkcall(int, unsigned int);
 int p_get_id(void);

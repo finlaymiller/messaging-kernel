@@ -24,7 +24,6 @@ int my_atoi(char *str, int *num)
 	{
 		if(*str >= '0' && *str <= '9')
 			total = total * 10 + (*str++ - '0');
-
 		else	// non-integer character detected
 			return 0;
 	}
@@ -47,12 +46,8 @@ char *my_itoa(int number, char *buff, int base)
     char *result = (buff == NULL || base > strlen(digits) || base < 2) ? NULL : buff;
     char sign = 0;
 
-
     if (number < 0)
-    {
          sign = '-';
-
-    }
 
     if (result != NULL)
     {

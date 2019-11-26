@@ -33,7 +33,7 @@ void main (void)
 
     initRunning();
 
-    UART0_TXStr("\n\n---------- REBOOT ----------\n\n");
+    v_clearScreen();
 
     SVC();
 

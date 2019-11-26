@@ -9,16 +9,7 @@
 
 #include "process.h"
 
-extern char *BIND_ERR_PRINTS[3];
-struct CUP cup = {ESC, '[', '0', '0', ';', '0', '0', 'H', NUL};
-char CLEAR_SCREEN[]     = {"\x1b[2J"};
-char CURSOR_SAVE[] 		= {"\x1b""7"};
-char CURSOR_HOME[] 		= {"\x1b[H"};
-char CLEAR_LINE[]       = {"\x1b[2K"};
-char HOME_COLOURS[]     = {"\x1b[2;30;47m"};
-char CURSOR_MIDDLE[] 	= {"\x1b[20C"};
-char TERM_COLOURS[]     = {"\x1b[0;0;0m"};
-char CURSOR_RESTORE[] 	= {"\x1b""8"};
+extern char *BIND_ERR_PRINTS;
 
 void procSendRecv(void)
 {
@@ -79,7 +70,7 @@ void procBindUnbind(void)
 			UART0_TXStr(" and mailbox ");
 			UART0_TXStr(my_itoa(i, buff, 10));
 			UART0_TXStr(" returned error \"");
-			UART0_TXStr(BIND_ERR_PRINTS[-mbx - 1]);
+			UART0_TXStr((char *)BIND_ERR_PRINTS[-mbx - 1]);
 			UART0_TXStr("\"");
 		}
 	}
@@ -103,58 +94,34 @@ void procBindUnbind(void)
 			UART0_TXStr(" and mailbox ");
 			UART0_TXStr(my_itoa(i, buff, 10));
 			UART0_TXStr(" returned error \"");
-			UART0_TXStr(BIND_ERR_PRINTS[-mbx -1]);
+			UART0_TXStr((char *)BIND_ERR_PRINTS[-mbx -1]);
 			UART0_TXStr("\"");
 		}
 	}
 }
 
 
+void procA(void)
+{
+	int i;
+	for(i = 0; i < 10; i++)
+		UART0_TXStr("a");
+}
+
 
 /*
  * Function to test process
  */
-void procA(void)
+void procA2(void)
 {
-	char buf[32];
-	int i = 0;
-	struct CUP p =
-	{	.esc 		= ESC,
-		.sqrbrkt	= '[',
-		.line		= "10",
-		.semicolon	= ';',
-		.col		= "10",
-		.cmdchar	= 'H',
-		.nul		= NUL
-	};
+	struct coord start 	= {05, 05},
+				 end	= {15, 12};
 
-	UART0_TXStr(CLEAR_SCREEN);
-	drawWindow(p_get_id());
-	UART0_TXStr((char *)&p);
+	v_drawWindow(p_get_id(), start, end);
+	UART0_TXStr("\x1b""8");
 	UART0_TXStr("HERE");
 	while(1);
 
-}
-
-
-void drawWindow(unsigned int pid)
-{
-	char buf[32];
-	int i;
-	UART0_TXStr(CURSOR_HOME);
-	// make top bar
-	UART0_TXStr("------- P");
-	if(pid < 100)
-		if(pid < 10)
-			UART0_TXChar('0');
-		UART0_TXChar('0');
-	UART0_TXStr(my_itoa(pid, buf, 10));
-	UART0_TXStr(" -------\n");
-	// fill out walls
-	for(i = 0; i < 20; i++)
-		UART0_TXStr("|                  |\n");
-	// make bottom bar
-	UART0_TXStr("--------------------");
 }
 
 /*

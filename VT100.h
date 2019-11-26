@@ -20,13 +20,17 @@
 #ifndef VT100_H_
 #define VT100_H_
 
+#include "str_conv_funcs.h"
+#include "uart.h"
+
 #define NUL	0x00
 #define ESC	0x1b
+#define DEL 0x7f
+#define SPC 0x20
 
 /* Cursor position string */
 
 /* Define the cursor position data structure */
-
 struct CUP
 {
 	char esc;
@@ -37,5 +41,15 @@ struct CUP
 	char cmdchar;
 	char nul;
 };
+
+struct coord
+{
+	int x;
+	int y;
+};
+
+
+unsigned int v_drawWindow(unsigned int,  struct coord, struct coord);
+void v_clearScreen(void);
 
 #endif /* VT100_H_ */
