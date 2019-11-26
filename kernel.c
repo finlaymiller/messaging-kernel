@@ -255,3 +255,39 @@ struct pcb* getRunning(void)
 {
     return running;
 }
+
+void printPriQueue(void)
+{
+	char buf[32] = {0};
+	int i;
+	struct pcb *pcbptr = NULL;
+
+
+	UART0_TXStr("\nPrinting current priority queue...");
+	for(i = NUM_PRI; i >= 0; i--)
+	{
+		UART0_TXStr("\n[Level ");
+		UART0_TXStr(my_itoa(i, buf, 10));
+		UART0_TXStr("]\t");
+
+		if(pri_queue[i].head != NULL)
+		{
+			pcbptr = (struct pcb *)pri_queue[i].head;
+
+			while(pcbptr != NULL)
+			{
+				// print process IDs
+				UART0_TXStr("P");
+				if(pcbptr->id < 100)	// zero-padding
+					UART0_TXStr("0");
+					if(pcbptr->id < 10)
+								UART0_TXStr("0");
+				UART0_TXStr(my_itoa(pcbptr->id, buf, 10));
+
+				UART0_TXStr(" -> ");
+				pcbptr = pcbptr->next;
+			}
+		}
+		else UART0_TXStr("NO RUNNING PROCESSES");
+	}
+}

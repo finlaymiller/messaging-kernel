@@ -113,12 +113,12 @@ void procA(void)
 	for(i = 0; i < 10; i++)
 		UART0_TXStr(unique_char);
 
-	p_nice(3);
+	p_nice(2);
 
 	for(i = 0; i < 10; i++)
 		UART0_TXStr(unique_char);
 
-	p_nice(4);
+	p_nice(3);
 
 	for(i = 0; i < 10; i++)
 		UART0_TXStr(unique_char);
@@ -135,12 +135,12 @@ void procB(void)
 	for(i = 0; i < 10; i++)
 		UART0_TXStr(unique_char);
 
-	p_nice(3);
+	p_nice(2);
 
 	for(i = 0; i < 10; i++)
 		UART0_TXStr(unique_char);
 
-	p_nice(4);
+	p_nice(3);
 
 	for(i = 0; i < 10; i++)
 		UART0_TXStr(unique_char);
