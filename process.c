@@ -107,9 +107,21 @@ void procBindUnbind(void)
  */
 void procA(void)
 {
-    while(1){
-        UART0_TXChar('a');
-    }
+	int i;
+	char unique_char[] = "a";
+
+	for(i = 0; i < 10; i++)
+		UART0_TXStr(unique_char);
+
+	p_nice(3);
+
+	for(i = 0; i < 10; i++)
+		UART0_TXStr(unique_char);
+
+	p_nice(4);
+
+	for(i = 0; i < 10; i++)
+		UART0_TXStr(unique_char);
 }
 
 /*
@@ -117,21 +129,23 @@ void procA(void)
  */
 void procB(void)
 {
-    while(1){
-        UART0_TXChar('b');
-    }
+	int i;
+	char unique_char[] = "b";
+
+	for(i = 0; i < 10; i++)
+		UART0_TXStr(unique_char);
+
+	p_nice(3);
+
+	for(i = 0; i < 10; i++)
+		UART0_TXStr(unique_char);
+
+	p_nice(4);
+
+	for(i = 0; i < 10; i++)
+		UART0_TXStr(unique_char);
 }
 
-/*
- * Function to test process
- */
-void procC(void)
-{
-    int i;
-    for(i=0; i<100; i++){
-        UART0_TXChar('c');
-    }
-}
 
 /*
  * Idle process for when no other processes are in priority queue
@@ -181,6 +195,17 @@ int pkcall(int code, unsigned int arg)
 int p_get_id(void)
 {
     return pkcall(GETID, NULL);
+}
+
+/*
+ * Returns ID of current process
+ *
+ * @param:		None
+ * @returns:	ID of the current process
+ */
+int p_nice(int priority)
+{
+    return pkcall(NICE, priority);
 }
 
 

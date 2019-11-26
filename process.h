@@ -68,11 +68,11 @@ void procSendRecv(void);
 void procBindUnbind(void);
 void procA(void);
 void procB(void);
-void procC(void);
 void idleProc(void);
 
 int pkcall(int, unsigned int);
 int p_get_id(void);
+int p_nice(int);
 void p_terminate(void);
 
 #endif /* PROCESS_H_ */
