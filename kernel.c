@@ -227,51 +227,6 @@ void setRunningSP(unsigned long* new_sp)
     running->sp = (unsigned long)new_sp;
 }
 
-int k_terminate(void)
-{
-    if(running->next == running){
-        /* If this is the last process in the priority queue */
-        pri_queue[running->pri].head = NULL;
-        pri_queue[running->pri].tail = NULL;
-
-        //terminate process
-
-        /* Set new running */
-        running = getNextRunning();
-    } else {
-        /* Reset head or tail if necessary */
-        if(pri_queue[running->pri].head == (unsigned long*)running){
-            pri_queue[running->pri].head = (unsigned long*)running->next;
-        } else if(pri_queue[running->pri].tail == (unsigned long*)running){
-            pri_queue[running->pri].tail = (unsigned long*)running->prev;
-        }
-
-        /* set up temporary struct for next running pcb */
-        struct pcb *next_run = running->next;
-
-        /* Remove running from linked list */
-        running->prev->next = running->next;
-        running->next->prev = running->prev;
-
-        /* Deallocate memory for stack and pcb */
-        free(running->stk);
-        free(running);
-
-        /* Set new running */
-        running = next_run;
-    }
-
-    /* Set new stack pointer, load registers */
-    setPSP(running->sp);
-    loadRegisters();
-
-    __asm(" movw     lr, #0xfffd");
-    __asm(" movt     lr, #0xffff");
-    __asm(" bx      lr");
-
-    return 0;
-}
-
 
 /*
  * Description
@@ -344,43 +299,6 @@ int checkHighPriority(void)
 
     /* Return error value if no processes found */
     return -1;
-}
-
-/*
- * Function to test process
- */
-void procA(void)
-{
-    while(1){
-        UART_force_out_char('a');
-    }
-}
-
-/*
- * Function to test process
- */
-void procB(void)
-{
-    while(1){
-        UART_force_out_char('b');
-    }
-}
-
-/*
- * Function to test process
- */
-void procC(void)
-{
-    int i;
-    for(i=0; i<1000; i++){
-        UART_force_out_char('c');
-    }
-
-    // change priority here
-    nice(4);
-
-    for(i=0; i<1000; i++){
-        UART_force_out_char('c');
 }
 
 /*

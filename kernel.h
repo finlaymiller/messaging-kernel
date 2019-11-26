@@ -41,13 +41,7 @@ void setRunningSP(unsigned long*);
 struct pcb* getRunning(void);
 
 void assignR7(volatile unsigned long);
-int k_terminate(void);
 int checkHighPriority(void);
-
-extern void procA(void);
-extern void procB(void);
-extern void procC(void);
-extern void idleProc(void);
 
 
 #endif /* KERNEL_H_ */
