@@ -172,6 +172,10 @@ void insertPriQueue(struct pcb *new_pcb, unsigned char priority)
         new_pcb->next = (struct pcb*)pri_queue[priority].head;
         new_pcb->prev = (struct pcb*)pri_queue[priority].tail;
 
+        /* Fix prev of head */
+        struct pcb *tmp_h = (struct pcb*)pri_queue[priority].head;
+        tmp_h->prev = new_pcb;
+
         /* Point tail to new pcb */
         struct pcb *tmp = (struct pcb*)pri_queue[priority].tail;
         tmp->next = new_pcb;
@@ -227,6 +231,62 @@ void setRunningSP(unsigned long* new_sp)
     running->sp = (unsigned long)new_sp;
 }
 
+
+/*
+ * Description
+ *
+ * @param:
+ * @returns:
+ */
+int k_nice(int priority)
+{
+    // remove process from current linked list
+    if(running->next == running){
+        /* If this is the last process in the priority queue */
+        pri_queue[running->pri].head = NULL;
+        pri_queue[running->pri].tail = NULL;
+    } else {
+
+        /* Reset head or tail if necessary */
+        if(pri_queue[running->pri].head == (unsigned long*)running){
+            pri_queue[running->pri].head = (unsigned long*)running->next;
+        } else if(pri_queue[running->pri].tail == (unsigned long*)running){
+            pri_queue[running->pri].tail = (unsigned long*)running->prev;
+        }
+
+        /* Remove running from linked list */
+        running->prev->next = running->next;
+        running->next->prev = running->prev;
+    }
+
+    // insert process into desired priority queue
+    insertPriQueue(running, priority);
+    running->pri = priority;
+
+    // check for higher priority process
+    int new_priority = checkHighPriority();
+    if(new_priority > priority){
+
+        /* TODO: Simplify this by calling a function from both here and PendSV_Handler */
+
+        saveRegisters();
+        setRunningSP((unsigned long*)getPSP());
+
+        running = (struct pcb*)pri_queue[new_priority].head;
+        /* Set new stack pointer */
+        setPSP(running->sp);
+
+        loadRegisters();
+
+        //branch to new process
+        __asm(" movw    LR,#0xFFFD");   /* Lower 16 [and clear top 16] */
+        __asm(" movt    LR,#0xFFFF");   /* Upper 16 only */
+        __asm(" bx  LR");
+    }
+
+    // return to process calling "nice"
+    return running->pri;
+}
 
 /*
  * Description: Checks for processes in the highest priority
