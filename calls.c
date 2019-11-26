@@ -200,12 +200,20 @@ int k_send(struct message *msg)
 		return MBX_FULL;
 	}
 
-	// copy over message data and add to message queue
-	kmsg = allocate();				// get fresh message struct from mailpile
-	k_copyMessage(kmsg, msg);		// copy message contents
-	kmsg->next = mailroom[msg->dqid].message_list;	// add to mailbox ll
-	mailroom[msg->dqid].message_list = kmsg;
-	mailroom[msg->dqid].num_messages++;	// update number of messages in mailbox
+	// handle blocked processes
+	if(mailroom[msg->dqid].owner->state >= 0){
+
+	    //force that PCB back into the priority queue
+	    //point PCB to the message
+
+	} else {
+        // copy over message data and add to message queue
+        kmsg = allocate();				// get fresh message struct from mailpile
+        k_copyMessage(kmsg, msg);		// copy message contents
+        kmsg->next = mailroom[msg->dqid].message_list;	// add to mailbox ll
+        mailroom[msg->dqid].message_list = kmsg;
+        mailroom[msg->dqid].num_messages++;	// update number of messages in mailbox
+	}
 
 	return TRUE_STRLEN(kmsg->body);
 }

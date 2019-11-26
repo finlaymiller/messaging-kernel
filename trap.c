@@ -152,7 +152,9 @@ void startNextProcess(void)
 
     InterruptMasterEnable();
 
-    returnPSP();
+    __asm(" movw    LR,#0xFFFD");   /* Lower 16 [and clear top 16] */
+    __asm(" movt    LR,#0xFFFF");   /* Upper 16 only */
+    __asm(" bx      lr");
 }
 
 

@@ -55,6 +55,8 @@ struct pcb{
 	unsigned char pri;      // priority of the process
 	unsigned long *stk;		// process stack
 	unsigned int mbxs[NUM_MBX_PER_PROC];	// mailboxes bound to by process
+	unsigned long *msg;     // Message pointer
+	unsigned int sz;      // size of message
 };
 
 /* linked list structure */
