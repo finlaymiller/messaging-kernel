@@ -172,6 +172,10 @@ void insertPriQueue(struct pcb *new_pcb, unsigned char priority)
         new_pcb->next = (struct pcb*)pri_queue[priority].head;
         new_pcb->prev = (struct pcb*)pri_queue[priority].tail;
 
+        /* Fix prev of head */
+        struct pcb *tmp_h = (struct pcb*)pri_queue[priority].head;
+        tmp_h->prev = new_pcb;
+
         /* Point tail to new pcb */
         struct pcb *tmp = (struct pcb*)pri_queue[priority].tail;
         tmp->next = new_pcb;
