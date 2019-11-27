@@ -73,15 +73,9 @@ int k_nice(int priority)
         setRunningSP((unsigned long*)getPSP());
 
         running = (struct pcb*)pri_queue[new_priority].head;
-        /* Set new stack pointer */
-        setPSP(running->sp);
-
-        loadRegisters();
-
-        //branch to new process
-        __asm(" movw    LR,#0xFFFD");   /* Lower 16 [and clear top 16] */
-        __asm(" movt    LR,#0xFFFF");   /* Upper 16 only */
-        __asm(" bx  LR");
+        setPSP(running->sp);	// set new stack pointer
+        loadRegisters();		// return to process
+        returnPSP();
     }
 
     // return to process calling "nice"
@@ -227,7 +221,7 @@ int k_send(struct message *msg)
 	UART0_TXStr(my_itoa(msg->size, b, 10));
 
 	// mailroom/box error checks
-	if(mailroom[msg->dqid].owner != curr_running)
+	if(mailroom[msg->sqid].owner != curr_running)
 	{	// catch sender mailbox validity
 		return BAD_SENDER;
 	}

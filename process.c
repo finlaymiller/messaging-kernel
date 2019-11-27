@@ -107,21 +107,13 @@ void procBindUnbind(void)
  */
 void procA(void)
 {
-	int i;
 	char unique_char[] = "a";
 
-	for(i = 0; i < 10; i++)
-		UART0_TXStr(unique_char);
-
+	UART0_TXStr(unique_char);
 	p_nice(2);
-
-	for(i = 0; i < 10; i++)
-		UART0_TXStr(unique_char);
-
+	UART0_TXStr(unique_char);
 	p_nice(3);
-
-	for(i = 0; i < 10; i++)
-		UART0_TXStr(unique_char);
+	UART0_TXStr(unique_char);
 }
 
 /*
@@ -129,21 +121,13 @@ void procA(void)
  */
 void procB(void)
 {
-	int i;
 	char unique_char[] = "b";
 
-	for(i = 0; i < 10; i++)
-		UART0_TXStr(unique_char);
-
+	UART0_TXStr(unique_char);
 	p_nice(2);
-
-	for(i = 0; i < 10; i++)
-		UART0_TXStr(unique_char);
-
+	UART0_TXStr(unique_char);
 	p_nice(3);
-
-	for(i = 0; i < 10; i++)
-		UART0_TXStr(unique_char);
+	UART0_TXStr(unique_char);
 }
 
 

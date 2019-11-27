@@ -37,8 +37,6 @@ void main (void)
 
     UART0_TXStr("\n\n---------- REBOOT ----------\n\n");
 
-    printPriQueue();
-
     SVC();
 
     while(1);
