@@ -109,6 +109,11 @@ void SysTickHandler(void)
 	if(pendSvEnabled)NVIC_INT_CTRL_R |= INT_CTRL_PENDSV;
 }
 
+void forcePendSV(void)
+{
+    NVIC_INT_CTRL_R |= INT_CTRL_PENDSV;
+}
+
 void enablePendSV(char en)
 {
     pendSvEnabled = en;

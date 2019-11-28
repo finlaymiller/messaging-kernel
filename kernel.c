@@ -131,6 +131,7 @@ void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority)
 
     /* Set priority in PCB */
     new_pcb->pri = priority;
+    new_pcb->pri_switch = 0;
 
     /* Set state to not blocked */
     new_pcb->state = UNBLOCKED;
@@ -150,11 +151,15 @@ void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority)
  */
 void nextProcess(void)
 {
-    if(running->state == UNBLOCKED){
-        running = running->next;
-    } else {
+    if(running->state != UNBLOCKED){
         /* If process was blocked, find next process to run */
         running = getNextRunning();
+    } else if(running->pri_switch == TRUE) {
+        /* If priority switch occured, reset flag and find next process to run */
+        running->pri_switch = FALSE;
+        running = getNextRunning();
+    } else {
+        running = running->next;
     }
 
     /* Set new stack pointer */
@@ -249,8 +254,6 @@ struct pcb* getNextRunning(void)
 		if(pri_queue[i].head)
 		{
 			next_to_run = (struct pcb *)pri_queue[i].head;
-			UART0_TXStr("\nSwitching to priority level ");
-			UART0_TXChar((char)i);
 			break;
 		}
 	}
@@ -357,28 +360,8 @@ int k_nice(int priority)
     insertPriQueue(running, priority);
     running->pri = priority;
 
-    // check for higher priority process
-    int new_priority = checkHighPriority();
-    if(new_priority > priority){
+    running->pri_switch = TRUE;
 
-        /* TODO: Simplify this by calling a function from both here and PendSV_Handler */
-
-        saveRegisters();
-        setRunningSP((unsigned long*)getPSP());
-
-        running = (struct pcb*)pri_queue[new_priority].head;
-        /* Set new stack pointer */
-        setPSP(running->sp);
-
-        loadRegisters();
-
-        //branch to new process
-        __asm(" movw    LR,#0xFFFD");   /* Lower 16 [and clear top 16] */
-        __asm(" movt    LR,#0xFFFF");   /* Upper 16 only */
-//        __asm(" bx  LR");
-    }
-
-    // return to process calling "nice"
     return running->pri;
 }
 
