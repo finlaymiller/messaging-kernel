@@ -34,7 +34,7 @@ void procSend(void)
 {
     int     mbx = p_bind(SEND_PROC_NUM);
 
-    int rcode = p_send(SEND_PROC_NUM, RECV_PROC_NUM, "A", 1);
+    int rcode = p_send(SEND_PROC_NUM, RECV_PROC_NUM, "K", 1);
 }
 
 
@@ -121,7 +121,7 @@ void procB(void)
 void procC(void)
 {
     int i;
-    for(i=0; i<100; i++){
+    for(i=0; i<10000; i++){
         UART0_TXChar('c');
     }
 }
