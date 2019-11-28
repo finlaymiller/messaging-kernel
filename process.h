@@ -51,10 +51,12 @@ struct pcb{
     struct pcb* prev; 		// link to previous pcb
     unsigned long sp;   	// stack pointer - r13 (PSP)
     unsigned int  id;  		// process identifier
-	unsigned long state;    // state of process
+	int state;    // state of process
 	unsigned char pri;      // priority of the process
 	unsigned long *stk;		// process stack
 	unsigned int mbxs[NUM_MBX_PER_PROC];	// mailboxes bound to by process
+	unsigned long *msg;     // Message pointer
+	unsigned int sz;      // size of message
 };
 
 /* linked list structure */
@@ -65,6 +67,7 @@ struct linked_list{
 
 /* function declarations */
 void procSendRecv(void);
+void procSend(void);
 void procBindUnbind(void);
 void procA(void);
 void procB(void);

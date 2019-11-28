@@ -50,7 +50,7 @@ int p_unbind(unsigned int mailbox_number)
  * @param:
  * @returns:
  */
-int p_send(unsigned int src, unsigned int dst, char msg[MAX_MSG_LEN])
+int p_send(unsigned int src, unsigned int dst, char msg[MAX_MSG_LEN], int size)
 {
 	struct message pmsg;
 
@@ -58,7 +58,7 @@ int p_send(unsigned int src, unsigned int dst, char msg[MAX_MSG_LEN])
 	if(dst > NUM_MAILBOXES)
 		// catch receiver mailbox validity
 		return BAD_RECVER;
-	else if(strlen(msg) > MAX_MSG_LEN)
+	else if(size > MAX_MSG_LEN)
 		// catch too-long message
 		return BAD_SIZE;
 
@@ -66,8 +66,8 @@ int p_send(unsigned int src, unsigned int dst, char msg[MAX_MSG_LEN])
 	pmsg . next = NULL;
 	pmsg . dqid = dst;
 	pmsg . sqid = src;
-	memcpy(pmsg.body, msg, TRUE_STRLEN(msg));
-	pmsg . size = TRUE_STRLEN(pmsg.body);
+	memcpy(pmsg.body, msg, size);
+	pmsg . size = size;
 
 	return pkcall(SEND, (unsigned int)&pmsg);
 }
@@ -97,8 +97,17 @@ int p_recv(unsigned int src, unsigned int dst, char *buf, int size)
 
 	rtn_val = pkcall(RECV, (unsigned int)&pmsg);
 
-	memcpy(buf, pmsg.body, (size < TRUE_STRLEN(pmsg.body))?
-							size : TRUE_STRLEN(pmsg.body));
+	/* Catch blocked processes to wait to be put back into WTR queue */
+	if(rtn_val == MBX_EMTY){
+	    struct pcb *curr_running = getRunning();
+	    while(curr_running->state != UNBLOCKED);
+
+	    /* Reaches this point when unblocked, fill buffer with message from PCB */
+	    memcpy(buf, curr_running->msg, curr_running->sz);
+	} else {
+	    memcpy(buf, pmsg.body, (size < pmsg.size)?
+	                                size : pmsg.size);
+	}
 
 	return rtn_val;
 }

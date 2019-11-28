@@ -77,7 +77,7 @@ void SVCall(void)
  */
 void SVCHandler(struct stack_frame *argptr)
 {
-	static int firstSVCcall = TRUE;
+    static int firstSVCcall = TRUE;
 	struct kcallargs *kcaptr;
 
     if (firstSVCcall){
@@ -138,6 +138,28 @@ void SVCHandler(struct stack_frame *argptr)
 		}
 	}
 }
+
+void startNextProcess(void)
+{
+    InterruptMasterDisable();
+
+    if(getRunning()) saveRegisters();
+    setRunningSP((unsigned long*)getPSP());
+
+    /* Find and set next running process */
+    setNextRunning();
+    loadRegisters();
+
+    /* Reenable pendSV handler before being blocked */
+    enablePendSV(TRUE);
+
+    InterruptMasterEnable();
+
+    __asm(" movw    LR,#0xFFFD");   /* Lower 16 [and clear top 16] */
+    __asm(" movt    LR,#0xFFFF");   /* Upper 16 only */
+    __asm(" bx      lr");
+}
+
 
 /*
  * Pending Supervisor Call Handler

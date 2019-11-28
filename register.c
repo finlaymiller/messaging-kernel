@@ -59,12 +59,6 @@ void volatile loadRegisters(void)
 	__asm("	msr		psp, r0");
 }
 
-void volatile loadLR(void)
-{
-    __asm(" movw     lr, #0xfffd");
-    __asm(" movt     lr, #0xffff");
-}
-
 void returnPSP(void)
 {
 	/*
@@ -74,7 +68,6 @@ void returnPSP(void)
 	*/
 	__asm(" movw    LR,#0xFFFD"); 	/* Lower 16 [and clear top 16] */
 	__asm(" movt    LR,#0xFFFF"); 	/* Upper 16 only */
-	__asm(" bx  LR");          		/* Force return to PSP */
 }
 
 void assignR7(volatile unsigned long data)

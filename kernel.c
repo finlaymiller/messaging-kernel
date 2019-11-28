@@ -132,6 +132,9 @@ void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority)
     /* Set priority in PCB */
     new_pcb->pri = priority;
 
+    /* Set state to not blocked */
+    new_pcb->state = UNBLOCKED;
+
     /* empty mailbox list */
     for(i = 0; i < NUM_MBX_PER_PROC; i++)
     	new_pcb->mbxs[i] = NULL;
@@ -147,9 +150,24 @@ void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority)
  */
 void nextProcess(void)
 {
-    running = running->next;
+    if(running->state == UNBLOCKED){
+        running = running->next;
+    } else {
+        /* If process was blocked, find next process to run */
+        running = getNextRunning();
+    }
 
     /* Set new stack pointer */
+    setPSP(running->sp);
+}
+
+/*
+ * Finds process at highest priority to run
+ */
+void setNextRunning(void)
+{
+    struct pcb *new_running = getNextRunning();
+    running = new_running;
     setPSP(running->sp);
 }
 
@@ -182,6 +200,32 @@ void insertPriQueue(struct pcb *new_pcb, unsigned char priority)
 
         /* Set up new tail */
         pri_queue[priority].tail = (unsigned long*)new_pcb;
+    }
+}
+
+/*
+ * Removes running pcb from priority queue
+ *
+ * @param:
+ * @returns: pcb pointer
+ */
+void removePriQueue(void)
+{
+    if(running->next == running){
+        /* If this is the last process in the priority queue */
+        pri_queue[running->pri].head = NULL;
+        pri_queue[running->pri].tail = NULL;
+    } else {
+        /* Reset head or tail if necessary */
+        if(pri_queue[running->pri].head == (unsigned long*)running){
+            pri_queue[running->pri].head = (unsigned long*)running->next;
+        } else if(pri_queue[running->pri].tail == (unsigned long*)running){
+            pri_queue[running->pri].tail = (unsigned long*)running->prev;
+        }
+
+        /* Remove running from linked list */
+        running->prev->next = running->next;
+        running->next->prev = running->prev;
     }
 }
 
@@ -229,6 +273,56 @@ struct pcb* getNextRunning(void)
 void setRunningSP(unsigned long* new_sp)
 {
     running->sp = (unsigned long)new_sp;
+}
+
+int k_terminate(void)
+{
+    InterruptMasterDisable();
+
+    if(running->next == running){
+        /* If this is the last process in the priority queue */
+        pri_queue[running->pri].head = NULL;
+        pri_queue[running->pri].tail = NULL;
+
+        //terminate process
+
+        /* Set new running */
+        running = getNextRunning();
+    } else {
+        /* Reset head or tail if necessary */
+        if(pri_queue[running->pri].head == (unsigned long*)running){
+            pri_queue[running->pri].head = (unsigned long*)running->next;
+        } else if(pri_queue[running->pri].tail == (unsigned long*)running){
+            pri_queue[running->pri].tail = (unsigned long*)running->prev;
+        }
+
+        /* set up temporary struct for next running pcb */
+        struct pcb *next_run = running->next;
+
+        /* Remove running from linked list */
+        running->prev->next = running->next;
+        running->next->prev = running->prev;
+
+        /* Deallocate memory for stack and pcb */
+        free(running->stk);
+        free(running);
+
+        /* Set new running */
+        running = next_run;
+    }
+
+    /* Set new stack pointer, load registers */
+    setPSP(running->sp);
+    loadRegisters();
+
+    InterruptMasterEnable();
+    enablePendSV(TRUE);
+
+    __asm(" movw     lr, #0xfffd");
+    __asm(" movt     lr, #0xffff");
+    __asm(" bx      lr");
+
+    return 0;
 }
 
 
@@ -281,7 +375,7 @@ int k_nice(int priority)
         //branch to new process
         __asm(" movw    LR,#0xFFFD");   /* Lower 16 [and clear top 16] */
         __asm(" movt    LR,#0xFFFF");   /* Upper 16 only */
-        __asm(" bx  LR");
+//        __asm(" bx  LR");
     }
 
     // return to process calling "nice"
@@ -314,4 +408,9 @@ int checkHighPriority(void)
 struct pcb* getRunning(void)
 {
     return running;
+}
+
+void setRunning(struct pcb *new_running)
+{
+    running = new_running;
 }

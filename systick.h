@@ -42,5 +42,6 @@ void periodSysTick(unsigned long);
 void intEnableSysTick(void);
 void intDisableSysTick(void);
 void SysTickHandler(void);
+void enablePendSV(char en);
 
 #endif /* SYSTICK_H_ */

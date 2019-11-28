@@ -9,39 +9,32 @@
 
 #include "process.h"
 
+#define SEND_PROC_NUM 1
+#define RECV_PROC_NUM 2
+#define RAND_PROC_NUM 3
+
 extern char *BIND_ERR_PRINTS[3];
 
 void procSendRecv(void)
 {
-	char 	buff[128], msg[128];
-	char	text[] = "qwerty";
-	int 	id = p_get_id();
-	int 	mbx = p_bind(id);
-	int 	rcode, i = 0;
-	char 	tstr[64];
+	char 	msg[128];
+	int 	mbx = p_bind(RECV_PROC_NUM);
+	int 	rcode;
 
-	msg[0] = '\0';
 
-	// send messages
-	while(i < TRUE_STRLEN(text))
-	{
-		tstr[i] = text[i];
-		tstr[++i] = '\0';
-		rcode = p_send(mbx, mbx, tstr);
-		UART0_TXStr("\tSend returned\t");
-		UART0_TXStr(my_itoa(rcode, buff, 10));
-	}
+	rcode = p_recv(mbx, mbx, msg, 1);
 
-	// receive messages
-	while(i > 0)
-	{
-		rcode = p_recv(mbx, mbx, msg, i-- + 1);
-		UART0_TXStr("\nRecv returned\t");
-		UART0_TXStr(my_itoa(rcode, buff, 10));
-		UART0_TXStr("\tMessage is \"");
-		UART0_TXStr(msg);
-		UART0_TXStr("\"");
-	}
+    while(1){
+        //UART0_TXChar('x');
+        UART0_TXChar(msg[0]);
+    }
+}
+
+void procSend(void)
+{
+    int     mbx = p_bind(SEND_PROC_NUM);
+
+    int rcode = p_send(SEND_PROC_NUM, RECV_PROC_NUM, "K", 1);
 }
 
 
@@ -128,7 +121,7 @@ void procB(void)
 void procC(void)
 {
     int i;
-    for(i=0; i<100; i++){
+    for(i=0; i<10000; i++){
         UART0_TXChar('c');
     }
 }
@@ -154,6 +147,8 @@ void idleProc(void)
  */
 int pkcall(int code, unsigned int arg)
 {
+    enablePendSV(FALSE);
+
     volatile struct kcallargs arglist;
 
     /* Pass code and pkmsg to kernel in arglist structure */
@@ -166,6 +161,8 @@ int pkcall(int code, unsigned int arg)
 
     /* Call kernel */
     SVC();
+
+    enablePendSV(TRUE);
 
     /* Return result of request to caller */
     return arglist . rtnvalue;
@@ -192,6 +189,6 @@ int p_get_id(void)
  */
 void p_terminate(void)
 {
-	pkcall(TERMINATE, NULL);
+    pkcall(TERMINATE, NULL);
 }
 
