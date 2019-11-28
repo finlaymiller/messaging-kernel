@@ -143,6 +143,13 @@ void procD(void)
         UART0_TXChar('d');
         waitTime(SLOW_TEXT);
     }
+
+    nice(2);
+
+    for(i=0; i<100; i++){
+        UART0_TXChar('y');
+        waitTime(SLOW_TEXT);
+    }
 }
 
 void procE(void)
@@ -150,6 +157,13 @@ void procE(void)
     int i;
     for(i=0; i<100; i++){
         UART0_TXChar('e');
+        waitTime(SLOW_TEXT);
+    }
+
+    nice(2);
+
+    for(i=0; i<100; i++){
+        UART0_TXChar('y');
         waitTime(SLOW_TEXT);
     }
 }
