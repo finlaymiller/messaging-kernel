@@ -187,7 +187,7 @@ int k_send(struct message *msg)
 	UART0_TXStr(my_itoa(msg->size, b, 10));
 
 	// mailroom/box error checks
-	if(mailroom[msg->dqid].owner != curr_running)
+	if(mailroom[msg->sqid].owner != curr_running)
 	{	// catch sender mailbox validity
 		return BAD_SENDER;
 	}
@@ -200,12 +200,13 @@ int k_send(struct message *msg)
 		return MBX_FULL;
 	}
 
-	// handle blocked processes
-	if(mailroom[msg->dqid].owner->state >= 0){
+	// handle blocked processes if mailbox is waiting for ANY or desired destination message
+	if(mailroom[msg->dqid].owner->state == msg->dqid || mailroom[msg->dqid].owner->state == 0){
 
-	    //point PCB to the message and fill size in PCB
+	    //point PCB to the message and fill size in PCB and unblock
         mailroom[msg->dqid].owner->msg = (char *)msg->body;
         mailroom[msg->dqid].owner->sz = msg->size;
+        mailroom[msg->dqid].owner->state = UNBLOCKED;
 
 	    //force that PCB back into the priority queue
 	    insertPriQueue(mailroom[msg->dqid].owner, mailroom[msg->dqid].owner->pri);
@@ -219,8 +220,7 @@ int k_send(struct message *msg)
         mailroom[msg->dqid].num_messages++;	// update number of messages in mailbox
 	}
 
-	//return TRUE_STRLEN(kmsg->body);
-	return 1;
+	return kmsg->size;
 }
 
 
@@ -258,18 +258,19 @@ int k_recv(struct message *msg)
 	{	// catch mailbox empty
 
 	    removePriQueue();
-	    running->state = msg->sqid;  //TODO: verify that this is the right value
-	    startNextProcess();
+	    running->state = msg->sqid;
+
+        /* Reenable pendSV handler before being blocked */
+        enablePendSV(TRUE);
 
 		return MBX_EMTY;
 	}
 
 	kmsg = mailroom[msg->dqid].message_list;	// for readability
-	// DO SOME MORE CHECKS ON THE ACTUAL MESSAGE STRUCT HERE
 
-	memcpy(msg->body, kmsg->body,	// copy message body
-		  (msg->size < TRUE_STRLEN(kmsg->body)) ?
-		   msg->size : TRUE_STRLEN(kmsg->body));
+	/* Get message size, then fill message body */
+	msg->size = ((msg->size < kmsg->size) ? msg->size : kmsg->size);
+	memcpy(msg->body, kmsg->body, msg->size);	// copy message body
 
 	// remove message from mailbox
 	if(kmsg->next == NULL)
@@ -280,7 +281,6 @@ int k_recv(struct message *msg)
 	deallocate(kmsg);
 	mailroom[msg->dqid].num_messages--;
 
-	//return TRUE_STRLEN(msg->body);
-	return 1;
+	return msg->size;
 }
 

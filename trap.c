@@ -150,6 +150,9 @@ void startNextProcess(void)
     setNextRunning();
     loadRegisters();
 
+    /* Reenable pendSV handler before being blocked */
+    enablePendSV(TRUE);
+
     InterruptMasterEnable();
 
     __asm(" movw    LR,#0xFFFD");   /* Lower 16 [and clear top 16] */

@@ -150,7 +150,12 @@ void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority)
  */
 void nextProcess(void)
 {
-    running = running->next;
+    if(running->state == UNBLOCKED){
+        running = running->next;
+    } else {
+        /* If process was blocked, find next process to run */
+        running = getNextRunning();
+    }
 
     /* Set new stack pointer */
     setPSP(running->sp);
@@ -311,6 +316,7 @@ int k_terminate(void)
     loadRegisters();
 
     InterruptMasterEnable();
+    enablePendSV(TRUE);
 
     __asm(" movw     lr, #0xfffd");
     __asm(" movt     lr, #0xffff");
@@ -369,7 +375,7 @@ int k_nice(int priority)
         //branch to new process
         __asm(" movw    LR,#0xFFFD");   /* Lower 16 [and clear top 16] */
         __asm(" movt    LR,#0xFFFF");   /* Upper 16 only */
-        __asm(" bx  LR");
+//        __asm(" bx  LR");
     }
 
     // return to process calling "nice"

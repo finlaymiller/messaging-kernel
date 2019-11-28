@@ -59,12 +59,6 @@ void volatile loadRegisters(void)
 	__asm("	msr		psp, r0");
 }
 
-void volatile loadLR(void)
-{
-    __asm(" movw     lr, #0xfffd");
-    __asm(" movt     lr, #0xffff");
-}
-
 void returnPSP(void)
 {
 	/*
