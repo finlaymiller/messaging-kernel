@@ -46,10 +46,7 @@ void setRunning(struct pcb *new_running);
 void removePriQueue(void);
 
 void assignR7(volatile unsigned long);
-int k_terminate(void);
 int checkHighPriority(void);
-
-extern void idleProc(void);
 
 
 #endif /* KERNEL_H_ */
