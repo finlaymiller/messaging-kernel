@@ -35,16 +35,13 @@ int k_get_id(void)
 
 int nice(int priority)
 {
-    volatile struct kcallargs getidarg; /* Volatile to actually reserve space on stack */
-    getidarg . code = NICE;
-    getidarg . arg1 = priority;
+    int rtn_code = pkcall(NICE, priority);
 
-    /* Assign address if getidarg to R7 */
-    assignR7((unsigned long) &getidarg);
+    //wait until context switch occurs again if priority switched
+    struct pcb* curr_run = getRunning();
+    while(curr_run->pri_switch);
 
-    SVC();
-
-    return getidarg . rtnvalue;
+    return rtn_code;
 }
 
 

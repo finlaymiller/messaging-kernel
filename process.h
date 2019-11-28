@@ -57,6 +57,7 @@ struct pcb{
 	unsigned int mbxs[NUM_MBX_PER_PROC];	// mailboxes bound to by process
 	unsigned long *msg;     // Message pointer
 	unsigned int sz;      // size of message
+	unsigned char pri_switch;
 };
 
 /* linked list structure */
@@ -72,6 +73,9 @@ void procBindUnbind(void);
 void procA(void);
 void procB(void);
 void procC(void);
+void procD(void);
+void procE(void);
+void waitTime(int x);
 void idleProc(void);
 
 int pkcall(int, unsigned int);

@@ -9,6 +9,7 @@
 #define CALLS_H_
 
 #include "kernel.h"
+#include "systick.h"
 #include "mail.h"
 #include "trap.h"
 #include "process.h"
@@ -23,5 +24,7 @@ int k_unbind(unsigned int);
 
 int k_send(struct message *);
 int k_recv(struct message *);
+
+int nice(int priority);
 
 #endif /* CALLS_H_ */

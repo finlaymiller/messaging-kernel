@@ -13,6 +13,8 @@
 #define RECV_PROC_NUM 2
 #define RAND_PROC_NUM 3
 
+#define SLOW_TEXT 100000
+
 extern char *BIND_ERR_PRINTS[3];
 
 void procSendRecv(void)
@@ -121,8 +123,56 @@ void procB(void)
 void procC(void)
 {
     int i;
-    for(i=0; i<10000; i++){
+    for(i=0; i<100; i++){
         UART0_TXChar('c');
+        waitTime(SLOW_TEXT);
+    }
+
+    nice(2);
+
+    for(i=0; i<100; i++){
+        UART0_TXChar('f');
+        waitTime(SLOW_TEXT);
+    }
+}
+
+void procD(void)
+{
+    int i;
+    for(i=0; i<100; i++){
+        UART0_TXChar('d');
+        waitTime(SLOW_TEXT);
+    }
+
+    nice(2);
+
+    for(i=0; i<100; i++){
+        UART0_TXChar('y');
+        waitTime(SLOW_TEXT);
+    }
+}
+
+void procE(void)
+{
+    int i;
+    for(i=0; i<100; i++){
+        UART0_TXChar('e');
+        waitTime(SLOW_TEXT);
+    }
+
+    nice(2);
+
+    for(i=0; i<100; i++){
+        UART0_TXChar('y');
+        waitTime(SLOW_TEXT);
+    }
+}
+
+void waitTime(int x)
+{
+    int i = x;
+    while(i){
+        i--;
     }
 }
 
