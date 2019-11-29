@@ -353,5 +353,7 @@ int k_nice(int priority)
 
     running->pri_switch = TRUE;
 
+    printPriQ();
+
     return running->pri;
 }

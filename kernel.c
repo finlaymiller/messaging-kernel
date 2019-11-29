@@ -11,6 +11,42 @@ struct pri pri_queue[NUM_PRI] = {NULL};
 extern struct message* mailpile;
 extern struct mailbox mailroom[NUM_MAILBOXES];
 
+
+void printPriQ(void)
+{
+	int i;
+	char buf[32];
+	struct pcb *pcbptr = getRunning();
+
+	UART0_TXStr("\n------------------------------\n| Printing Priority Queue:\n| [ P");
+	UART0_TXStr(my_itoa(pcbptr->id, buf, 10));
+	UART0_TXStr(" ] is currently running");
+	for(i = NUM_PRI - 1; i >= 0; i--)
+	{
+		// print level header
+		UART0_TXStr("\n| [ ");
+		UART0_TXStr(my_itoa(i, buf, 10));
+		UART0_TXStr(" ]\t");
+
+		// print all processes at that level
+		if(pri_queue[i].head != NULL)
+		{
+			pcbptr = (struct pcb *)pri_queue[i].head;
+
+			do
+			{
+				UART0_TXStr("[ P");
+				UART0_TXStr(my_itoa(pcbptr->id, buf, 10));
+				UART0_TXStr(" ]");
+				if(pcbptr->next != (struct pcb *)pri_queue[i].head)
+					UART0_TXStr(" -> ");
+				pcbptr = pcbptr->next;
+			} while(pcbptr != (struct pcb *)pri_queue[i].head);
+		}
+	}
+	UART0_TXStr("\n------------------------------\n");
+}
+
 /*******************	 INITIALIZATION FUNCTIONS    *************************/
 
 /*

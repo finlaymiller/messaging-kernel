@@ -29,8 +29,6 @@ void procA(void)
 	UART0_TXStr(unique);
 }
 
-ProcA prints
-
 void procB(void)
 {
 	char unique[] = "b";

@@ -33,6 +33,7 @@ void main (void)
     initRunning();
 
     UART0_TXStr("\n\n---------- REBOOT ----------\n\n");
+    printPriQ();
 
     SVC();
 

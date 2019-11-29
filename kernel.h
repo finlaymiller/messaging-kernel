@@ -24,6 +24,8 @@ struct pri{
     unsigned long *tail;    // holds pointer to last pcb in priority queue
 };
 
+void printPriQ(void);
+
 /* function declarations */
 /* initialization */
 void initKernel(void);
