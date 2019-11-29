@@ -32,19 +32,6 @@ int k_get_id(void)
     return running->id;
 }
 
-
-int nice(int priority)
-{
-    int rtn_code = pkcall(NICE, priority);
-
-    //wait until context switch occurs again if priority switched
-    struct pcb* curr_run = getRunning();
-    while(curr_run->pri_switch);
-
-    return rtn_code;
-}
-
-
 /*
  * Bine mailbox to process
  *
@@ -281,3 +268,93 @@ int k_recv(struct message *msg)
 	return msg->size;
 }
 
+<<<<<<< HEAD
+=======
+int k_terminate(void)
+{
+    InterruptMasterDisable();
+
+    if(running->next == running){
+        /* If this is the last process in the priority queue */
+        pri_queue[running->pri].head = NULL;
+        pri_queue[running->pri].tail = NULL;
+
+        //terminate process
+
+        /* Set new running */
+        running = getNextRunning();
+    } else {
+        /* Reset head or tail if necessary */
+        if(pri_queue[running->pri].head == (unsigned long*)running){
+            pri_queue[running->pri].head = (unsigned long*)running->next;
+        } else if(pri_queue[running->pri].tail == (unsigned long*)running){
+            pri_queue[running->pri].tail = (unsigned long*)running->prev;
+        }
+
+        /* set up temporary struct for next running pcb */
+        struct pcb *next_run = running->next;
+
+        /* Remove running from linked list */
+        running->prev->next = running->next;
+        running->next->prev = running->prev;
+
+        /* Deallocate memory for stack and pcb */
+        free(running->stk);
+        free(running);
+
+        /* Set new running */
+        running = next_run;
+    }
+
+    /* Set new stack pointer, load registers */
+    setPSP(running->sp);
+    loadRegisters();
+
+    InterruptMasterEnable();
+    enablePendSV(TRUE);
+
+    __asm(" movw     lr, #0xfffd");
+    __asm(" movt     lr, #0xffff");
+    __asm(" bx      lr");
+
+    return 0;
+}
+
+
+/*
+ * Description
+ *
+ * @param:
+ * @returns:
+ */
+int k_nice(int priority)
+{
+    // remove process from current linked list
+    if(running->next == running){
+        /* If this is the last process in the priority queue */
+        pri_queue[running->pri].head = NULL;
+        pri_queue[running->pri].tail = NULL;
+    } else {
+
+        /* Reset head or tail if necessary */
+        if(pri_queue[running->pri].head == (unsigned long*)running){
+            pri_queue[running->pri].head = (unsigned long*)running->next;
+        } else if(pri_queue[running->pri].tail == (unsigned long*)running){
+            pri_queue[running->pri].tail = (unsigned long*)running->prev;
+        }
+
+        /* Remove running from linked list */
+        running->prev->next = running->next;
+        running->next->prev = running->prev;
+    }
+
+    // insert process into desired priority queue
+    insertPriQueue(running, priority);
+    running->pri = priority;
+
+    running->pri_switch = TRUE;
+
+    return running->pri;
+}
+
+>>>>>>> 4e58ec3cf6c514de90e7efcd1d099b6380d734de

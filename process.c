@@ -17,157 +17,6 @@
 
 extern char *BIND_ERR_PRINTS[3];
 
-void procSendRecv(void)
-{
-	char 	msg[128];
-	int 	mbx = p_bind(RECV_PROC_NUM);
-	int 	rcode;
-
-
-	rcode = p_recv(mbx, mbx, msg, 1);
-
-    while(1){
-        //UART0_TXChar('x');
-        UART0_TXChar(msg[0]);
-    }
-}
-
-void procSend(void)
-{
-    int     mbx = p_bind(SEND_PROC_NUM);
-
-    int rcode = p_send(SEND_PROC_NUM, RECV_PROC_NUM, "K", 1);
-}
-
-
-void procBindUnbind(void)
-{
-	char buff[128];
-	int i, mbx = 0;
-	int id = p_get_id();
-
-	// bind
-	for(i = 50; i < 60; i++)
-	{
-		mbx = p_bind(i);
-
-		if(mbx > 0)
-		{
-			UART0_TXStr("\nP");
-			UART0_TXStr(my_itoa(id, buff, 10));
-			UART0_TXStr(" bound to mailbox ");
-			UART0_TXStr(my_itoa(mbx, buff, 10));
-		}
-		else
-		{
-			UART0_TXStr("\nBind with P");
-			UART0_TXStr(my_itoa(id, buff, 10));
-			UART0_TXStr(" and mailbox ");
-			UART0_TXStr(my_itoa(i, buff, 10));
-			UART0_TXStr(" returned error \"");
-			UART0_TXStr(BIND_ERR_PRINTS[-mbx - 1]);
-			UART0_TXStr("\"");
-		}
-	}
-
-	// unbind
-	for(i = 55; i < 65; i++)
-	{
-		mbx = p_unbind(i);
-
-		if(mbx > 0)
-		{
-			UART0_TXStr("\nP");
-			UART0_TXStr(my_itoa(id, buff, 10));
-			UART0_TXStr(" unbound from mailbox ");
-			UART0_TXStr(my_itoa(mbx, buff, 10));
-		}
-		else
-		{
-			UART0_TXStr("\nUnbind with P");
-			UART0_TXStr(my_itoa(id, buff, 10));
-			UART0_TXStr(" and mailbox ");
-			UART0_TXStr(my_itoa(i, buff, 10));
-			UART0_TXStr(" returned error \"");
-			UART0_TXStr(BIND_ERR_PRINTS[-mbx -1]);
-			UART0_TXStr("\"");
-		}
-	}
-}
-
-
-
-/*
- * Function to test process
- */
-void procA(void)
-{
-    while(1){
-        UART0_TXChar('a');
-    }
-}
-
-/*
- * Function to test process
- */
-void procB(void)
-{
-    while(1){
-        UART0_TXChar('b');
-    }
-}
-
-/*
- * Function to test process
- */
-void procC(void)
-{
-    int i;
-    for(i=0; i<100; i++){
-        UART0_TXChar('c');
-        waitTime(SLOW_TEXT);
-    }
-
-    nice(2);
-
-    for(i=0; i<100; i++){
-        UART0_TXChar('f');
-        waitTime(SLOW_TEXT);
-    }
-}
-
-void procD(void)
-{
-    int i;
-    for(i=0; i<100; i++){
-        UART0_TXChar('d');
-        waitTime(SLOW_TEXT);
-    }
-
-    nice(2);
-
-    for(i=0; i<100; i++){
-        UART0_TXChar('y');
-        waitTime(SLOW_TEXT);
-    }
-}
-
-void procE(void)
-{
-    int i;
-    for(i=0; i<100; i++){
-        UART0_TXChar('e');
-        waitTime(SLOW_TEXT);
-    }
-
-    nice(2);
-
-    for(i=0; i<100; i++){
-        UART0_TXChar('y');
-        waitTime(SLOW_TEXT);
-    }
-}
-
 void waitTime(int x)
 {
     int i = x;
@@ -232,6 +81,21 @@ int p_get_id(void)
 
 
 /*
+<<<<<<< HEAD
+=======
+ * Change current process priority
+ *
+ * @param:		Desired priority
+ * @returns:	priority of process after switch
+ */
+int p_nice(int priority)
+{
+	return pkcall(NICE, priority);
+}
+
+
+/*
+>>>>>>> 4e58ec3cf6c514de90e7efcd1d099b6380d734de
  * Terminates process
  *
  * @param:		None
