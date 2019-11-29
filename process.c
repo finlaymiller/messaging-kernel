@@ -17,6 +17,32 @@
 
 extern char *BIND_ERR_PRINTS[3];
 
+
+void procA(void)
+{
+	char unique[] = "a";
+
+	UART0_TXStr(unique);
+	p_nice(2);
+	UART0_TXStr(unique);
+	p_nice(3);
+	UART0_TXStr(unique);
+}
+
+ProcA prints
+
+void procB(void)
+{
+	char unique[] = "b";
+
+	UART0_TXStr(unique);
+	p_nice(2);
+	UART0_TXStr(unique);
+	p_nice(3);
+	UART0_TXStr(unique);
+}
+
+
 void waitTime(int x)
 {
     int i = x;
@@ -30,7 +56,12 @@ void waitTime(int x)
  */
 void idleProc(void)
 {
-    while(1);
+	UART0_TXStr("\nIdling");
+    while(1)
+    {
+    	UART0_TXStr(".");
+    	waitTime(SLOW_TEXT * 5);
+    }
 }
 
 
@@ -81,8 +112,6 @@ int p_get_id(void)
 
 
 /*
-<<<<<<< HEAD
-=======
  * Change current process priority
  *
  * @param:		Desired priority
@@ -95,7 +124,6 @@ int p_nice(int priority)
 
 
 /*
->>>>>>> 4e58ec3cf6c514de90e7efcd1d099b6380d734de
  * Terminates process
  *
  * @param:		None

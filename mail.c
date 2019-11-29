@@ -4,7 +4,6 @@
  *  Created on: Nov 5, 2019
  *      Author: Finlay Miller
  *
- *	TODO	Add support for process to own multiple mailboxes
  */
 
 #include "mail.h"

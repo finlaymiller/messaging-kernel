@@ -27,6 +27,8 @@ void main (void)
 	initKernel();
 
     // init procs here
+	reg_proc(procA, 1, 3);
+	reg_proc(procB, 2, 3);
 
     initRunning();
 

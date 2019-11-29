@@ -268,8 +268,7 @@ int k_recv(struct message *msg)
 	return msg->size;
 }
 
-<<<<<<< HEAD
-=======
+
 int k_terminate(void)
 {
     InterruptMasterDisable();
@@ -356,5 +355,3 @@ int k_nice(int priority)
 
     return running->pri;
 }
-
->>>>>>> 4e58ec3cf6c514de90e7efcd1d099b6380d734de

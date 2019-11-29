@@ -72,9 +72,6 @@ void procSend(void);
 void procBindUnbind(void);
 void procA(void);
 void procB(void);
-void procC(void);
-void procD(void);
-void procE(void);
 void waitTime(int x);
 void idleProc(void);
 
