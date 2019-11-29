@@ -80,6 +80,7 @@ void idleProc(void);
 
 int pkcall(int, unsigned int);
 int p_get_id(void);
+int p_nice(int priority);
 void p_terminate(void);
 
 #endif /* PROCESS_H_ */
