@@ -9,39 +9,34 @@
 
 #include "process.h"
 
+#define SEND_PROC_NUM 1
+#define RECV_PROC_NUM 2
+#define RAND_PROC_NUM 3
+
+#define SLOW_TEXT 100000
+
 extern char *BIND_ERR_PRINTS[3];
 
 void procSendRecv(void)
 {
-	char 	buff[128], msg[128];
-	char	text[] = "qwerty";
-	int 	id = p_get_id();
-	int 	mbx = p_bind(id);
-	int 	rcode, i = 0;
-	char 	tstr[64];
+	char 	msg[128];
+	int 	mbx = p_bind(RECV_PROC_NUM);
+	int 	rcode;
 
-	msg[0] = '\0';
 
-	// send messages
-	while(i < TRUE_STRLEN(text))
-	{
-		tstr[i] = text[i];
-		tstr[++i] = '\0';
-		rcode = p_send(mbx, mbx, tstr);
-		UART0_TXStr("\tSend returned\t");
-		UART0_TXStr(my_itoa(rcode, buff, 10));
-	}
+	rcode = p_recv(mbx, mbx, msg, 1);
 
-	// receive messages
-	while(i > 0)
-	{
-		rcode = p_recv(mbx, mbx, msg, i-- + 1);
-		UART0_TXStr("\nRecv returned\t");
-		UART0_TXStr(my_itoa(rcode, buff, 10));
-		UART0_TXStr("\tMessage is \"");
-		UART0_TXStr(msg);
-		UART0_TXStr("\"");
-	}
+    while(1){
+        //UART0_TXChar('x');
+        UART0_TXChar(msg[0]);
+    }
+}
+
+void procSend(void)
+{
+    int     mbx = p_bind(SEND_PROC_NUM);
+
+    int rcode = p_send(SEND_PROC_NUM, RECV_PROC_NUM, "K", 1);
 }
 
 
@@ -107,13 +102,9 @@ void procBindUnbind(void)
  */
 void procA(void)
 {
-	char unique_char[] = "a";
-
-	UART0_TXStr(unique_char);
-	p_nice(2);
-	UART0_TXStr(unique_char);
-	p_nice(3);
-	UART0_TXStr(unique_char);
+    while(1){
+        UART0_TXChar('a');
+    }
 }
 
 /*
@@ -121,15 +112,69 @@ void procA(void)
  */
 void procB(void)
 {
-	char unique_char[] = "b";
-
-	UART0_TXStr(unique_char);
-	p_nice(2);
-	UART0_TXStr(unique_char);
-	p_nice(3);
-	UART0_TXStr(unique_char);
+    while(1){
+        UART0_TXChar('b');
+    }
 }
 
+/*
+ * Function to test process
+ */
+void procC(void)
+{
+    int i;
+    for(i=0; i<100; i++){
+        UART0_TXChar('c');
+        waitTime(SLOW_TEXT);
+    }
+
+    nice(2);
+
+    for(i=0; i<100; i++){
+        UART0_TXChar('f');
+        waitTime(SLOW_TEXT);
+    }
+}
+
+void procD(void)
+{
+    int i;
+    for(i=0; i<100; i++){
+        UART0_TXChar('d');
+        waitTime(SLOW_TEXT);
+    }
+
+    nice(2);
+
+    for(i=0; i<100; i++){
+        UART0_TXChar('y');
+        waitTime(SLOW_TEXT);
+    }
+}
+
+void procE(void)
+{
+    int i;
+    for(i=0; i<100; i++){
+        UART0_TXChar('e');
+        waitTime(SLOW_TEXT);
+    }
+
+    nice(2);
+
+    for(i=0; i<100; i++){
+        UART0_TXChar('y');
+        waitTime(SLOW_TEXT);
+    }
+}
+
+void waitTime(int x)
+{
+    int i = x;
+    while(i){
+        i--;
+    }
+}
 
 /*
  * Idle process for when no other processes are in priority queue
@@ -152,6 +197,8 @@ void idleProc(void)
  */
 int pkcall(int code, unsigned int arg)
 {
+    enablePendSV(FALSE);
+
     volatile struct kcallargs arglist;
 
     /* Pass code and pkmsg to kernel in arglist structure */
@@ -164,6 +211,8 @@ int pkcall(int code, unsigned int arg)
 
     /* Call kernel */
     SVC();
+
+    enablePendSV(TRUE);
 
     /* Return result of request to caller */
     return arglist . rtnvalue;
@@ -181,17 +230,6 @@ int p_get_id(void)
     return pkcall(GETID, NULL);
 }
 
-/*
- * Returns ID of current process
- *
- * @param:		None
- * @returns:	ID of the current process
- */
-int p_nice(int priority)
-{
-    return pkcall(NICE, priority);
-}
-
 
 /*
  * Terminates process
@@ -201,6 +239,6 @@ int p_nice(int priority)
  */
 void p_terminate(void)
 {
-	pkcall(TERMINATE, NULL);
+    pkcall(TERMINATE, NULL);
 }
 

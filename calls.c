@@ -32,55 +32,18 @@ int k_get_id(void)
     return running->id;
 }
 
-/*
- * Description
- *
- * @param:
- * @returns:
- */
-int k_nice(int priority)
+
+int nice(int priority)
 {
-    // remove process from current linked list
-    if(running->next == running){
-        /* If this is the last process in the priority queue */
-        pri_queue[running->pri].head = NULL;
-        pri_queue[running->pri].tail = NULL;
-    } else {
+    int rtn_code = pkcall(NICE, priority);
 
-        /* Reset head or tail if necessary */
-        if(pri_queue[running->pri].head == (unsigned long*)running){
-            pri_queue[running->pri].head = (unsigned long*)running->next;
-        } else if(pri_queue[running->pri].tail == (unsigned long*)running){
-            pri_queue[running->pri].tail = (unsigned long*)running->prev;
-        }
+    //wait until context switch occurs again if priority switched
+    struct pcb* curr_run = getRunning();
+    while(curr_run->pri_switch);
 
-        /* Remove running from linked list */
-        running->prev->next = running->next;
-        running->next->prev = running->prev;
-    }
-
-    // insert process into desired priority queue
-    insertPriQueue(running, priority);
-    running->pri = priority;
-
-    // check for higher priority process
-    int new_priority = checkHighPriority();
-    if(new_priority > priority){
-
-        /* TODO: Simplify this by calling a function from both here and PendSV_Handler */
-
-        saveRegisters();
-        setRunningSP((unsigned long*)getPSP());
-
-        running = (struct pcb*)pri_queue[new_priority].head;
-        setPSP(running->sp);	// set new stack pointer
-        loadRegisters();		// return to process
-        returnPSP();
-    }
-
-    // return to process calling "nice"
-    return running->pri;
+    return rtn_code;
 }
+
 
 /*
  * Bine mailbox to process
@@ -234,14 +197,27 @@ int k_send(struct message *msg)
 		return MBX_FULL;
 	}
 
-	// copy over message data and add to message queue
-	kmsg = allocate();				// get fresh message struct from mailpile
-	k_copyMessage(kmsg, msg);		// copy message contents
-	kmsg->next = mailroom[msg->dqid].message_list;	// add to mailbox ll
-	mailroom[msg->dqid].message_list = kmsg;
-	mailroom[msg->dqid].num_messages++;	// update number of messages in mailbox
+	// handle blocked processes if mailbox is waiting for ANY or desired destination message
+	if(mailroom[msg->dqid].owner->state == msg->dqid || mailroom[msg->dqid].owner->state == 0){
 
-	return TRUE_STRLEN(kmsg->body);
+	    //point PCB to the message and fill size in PCB and unblock
+        mailroom[msg->dqid].owner->msg = (char *)msg->body;
+        mailroom[msg->dqid].owner->sz = msg->size;
+        mailroom[msg->dqid].owner->state = UNBLOCKED;
+
+	    //force that PCB back into the priority queue
+	    insertPriQueue(mailroom[msg->dqid].owner, mailroom[msg->dqid].owner->pri);
+
+	} else {
+        // copy over message data and add to message queue
+        kmsg = allocate();				// get fresh message struct from mailpile
+        k_copyMessage(kmsg, msg);		// copy message contents
+        kmsg->next = mailroom[msg->dqid].message_list;	// add to mailbox ll
+        mailroom[msg->dqid].message_list = kmsg;
+        mailroom[msg->dqid].num_messages++;	// update number of messages in mailbox
+	}
+
+	return kmsg->size;
 }
 
 
@@ -277,15 +253,21 @@ int k_recv(struct message *msg)
 	}
 	else if (mailroom[msg->dqid].num_messages == 0)
 	{	// catch mailbox empty
+
+	    removePriQueue();
+	    running->state = msg->sqid;
+
+        /* Reenable pendSV handler before being blocked */
+        enablePendSV(TRUE);
+
 		return MBX_EMTY;
 	}
 
 	kmsg = mailroom[msg->dqid].message_list;	// for readability
-	// DO SOME MORE CHECKS ON THE ACTUAL MESSAGE STRUCT HERE
 
-	memcpy(msg->body, kmsg->body,	// copy message body
-		  (msg->size < TRUE_STRLEN(kmsg->body)) ?
-		   msg->size : TRUE_STRLEN(kmsg->body));
+	/* Get message size, then fill message body */
+	msg->size = ((msg->size < kmsg->size) ? msg->size : kmsg->size);
+	memcpy(msg->body, kmsg->body, msg->size);	// copy message body
 
 	// remove message from mailbox
 	if(kmsg->next == NULL)
@@ -296,53 +278,6 @@ int k_recv(struct message *msg)
 	deallocate(kmsg);
 	mailroom[msg->dqid].num_messages--;
 
-	return TRUE_STRLEN(msg->body);
+	return msg->size;
 }
 
-/*
- * Description
- *
- * @param:
- * @returns:
- */
-int k_terminate(void)
-{
-    if(running->next == running){
-        /* If this is the last process in the priority queue */
-        pri_queue[running->pri].head = NULL;
-        pri_queue[running->pri].tail = NULL;
-
-        //terminate process
-
-        /* Set new running */
-        running = getNextRunning();
-    } else {
-        /* Reset head or tail if necessary */
-        if(pri_queue[running->pri].head == (unsigned long*)running){
-            pri_queue[running->pri].head = (unsigned long*)running->next;
-        } else if(pri_queue[running->pri].tail == (unsigned long*)running){
-            pri_queue[running->pri].tail = (unsigned long*)running->prev;
-        }
-
-        /* set up temporary struct for next running pcb */
-        struct pcb *next_run = running->next;
-
-        /* Remove running from linked list */
-        running->prev->next = running->next;
-        running->next->prev = running->prev;
-
-        /* Deallocate memory for stack and pcb */
-        free(running->stk);
-        free(running);
-
-        /* Set new running */
-        running = next_run;
-    }
-
-    /* Set new stack pointer, load registers */
-    setPSP(running->sp);
-    loadRegisters();
-    returnPSP();
-
-    return 0;
-}

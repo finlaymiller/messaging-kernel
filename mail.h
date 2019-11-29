@@ -52,7 +52,7 @@ struct mailbox
 /* function definitions */
 int p_bind(unsigned int);
 int p_unbind(unsigned int);
-int p_send(unsigned int, unsigned int, char msg[MAX_MSG_LEN]);
+int p_send(unsigned int src, unsigned int dst, char msg[MAX_MSG_LEN], int size);
 int p_recv(unsigned int, unsigned int, char *, int);
 
 void k_copyMessage(struct message *, struct message *);

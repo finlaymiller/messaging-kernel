@@ -19,10 +19,9 @@ unsigned long getPSP();
 unsigned long getMSP();
 unsigned long getSP();
 void setPSP(volatile unsigned long);
-void setMSP(volatile unsigned long);\
+void setMSP(volatile unsigned long);
 void volatile saveRegisters();
 void volatile loadRegisters();
-void volatile loadLR(void);
 void returnPSP(void);
 void assignR7(volatile unsigned long);
 

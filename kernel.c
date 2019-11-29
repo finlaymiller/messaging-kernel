@@ -131,6 +131,10 @@ void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority)
 
     /* Set priority in PCB */
     new_pcb->pri = priority;
+    new_pcb->pri_switch = 0;
+
+    /* Set state to not blocked */
+    new_pcb->state = UNBLOCKED;
 
     /* empty mailbox list */
     for(i = 0; i < NUM_MBX_PER_PROC; i++)
@@ -147,9 +151,28 @@ void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority)
  */
 void nextProcess(void)
 {
-    running = running->next;
+    if(running->state != UNBLOCKED){
+        /* If process was blocked, find next process to run */
+        running = getNextRunning();
+    } else if(running->pri_switch == TRUE) {
+        /* If priority switch occured, reset flag and find next process to run */
+        running->pri_switch = FALSE;
+        running = getNextRunning();
+    } else {
+        running = running->next;
+    }
 
     /* Set new stack pointer */
+    setPSP(running->sp);
+}
+
+/*
+ * Finds process at highest priority to run
+ */
+void setNextRunning(void)
+{
+    struct pcb *new_running = getNextRunning();
+    running = new_running;
     setPSP(running->sp);
 }
 
@@ -185,6 +208,32 @@ void insertPriQueue(struct pcb *new_pcb, unsigned char priority)
     }
 }
 
+/*
+ * Removes running pcb from priority queue
+ *
+ * @param:
+ * @returns: pcb pointer
+ */
+void removePriQueue(void)
+{
+    if(running->next == running){
+        /* If this is the last process in the priority queue */
+        pri_queue[running->pri].head = NULL;
+        pri_queue[running->pri].tail = NULL;
+    } else {
+        /* Reset head or tail if necessary */
+        if(pri_queue[running->pri].head == (unsigned long*)running){
+            pri_queue[running->pri].head = (unsigned long*)running->next;
+        } else if(pri_queue[running->pri].tail == (unsigned long*)running){
+            pri_queue[running->pri].tail = (unsigned long*)running->prev;
+        }
+
+        /* Remove running from linked list */
+        running->prev->next = running->next;
+        running->next->prev = running->prev;
+    }
+}
+
 /*******************	RUNNING-RELATED FUNCTIONS    *************************/
 
 /*
@@ -200,14 +249,11 @@ struct pcb* getNextRunning(void)
 {
 	struct pcb* next_to_run = NULL;
 	int i;
-	char buf[4];
 
 	for(i = NUM_PRI-1; i>=0; i--){
 		if(pri_queue[i].head)
 		{
 			next_to_run = (struct pcb *)pri_queue[i].head;
-			UART0_TXStr("\nSwitching to priority level ");
-			UART0_TXStr(my_itoa(i, buf, 10));
 			break;
 		}
 	}
@@ -230,6 +276,93 @@ struct pcb* getNextRunning(void)
 void setRunningSP(unsigned long* new_sp)
 {
     running->sp = (unsigned long)new_sp;
+}
+
+int k_terminate(void)
+{
+    InterruptMasterDisable();
+
+    if(running->next == running){
+        /* If this is the last process in the priority queue */
+        pri_queue[running->pri].head = NULL;
+        pri_queue[running->pri].tail = NULL;
+
+        //terminate process
+
+        /* Set new running */
+        running = getNextRunning();
+    } else {
+        /* Reset head or tail if necessary */
+        if(pri_queue[running->pri].head == (unsigned long*)running){
+            pri_queue[running->pri].head = (unsigned long*)running->next;
+        } else if(pri_queue[running->pri].tail == (unsigned long*)running){
+            pri_queue[running->pri].tail = (unsigned long*)running->prev;
+        }
+
+        /* set up temporary struct for next running pcb */
+        struct pcb *next_run = running->next;
+
+        /* Remove running from linked list */
+        running->prev->next = running->next;
+        running->next->prev = running->prev;
+
+        /* Deallocate memory for stack and pcb */
+        free(running->stk);
+        free(running);
+
+        /* Set new running */
+        running = next_run;
+    }
+
+    /* Set new stack pointer, load registers */
+    setPSP(running->sp);
+    loadRegisters();
+
+    InterruptMasterEnable();
+    enablePendSV(TRUE);
+
+    __asm(" movw     lr, #0xfffd");
+    __asm(" movt     lr, #0xffff");
+    __asm(" bx      lr");
+
+    return 0;
+}
+
+
+/*
+ * Description
+ *
+ * @param:
+ * @returns:
+ */
+int k_nice(int priority)
+{
+    // remove process from current linked list
+    if(running->next == running){
+        /* If this is the last process in the priority queue */
+        pri_queue[running->pri].head = NULL;
+        pri_queue[running->pri].tail = NULL;
+    } else {
+
+        /* Reset head or tail if necessary */
+        if(pri_queue[running->pri].head == (unsigned long*)running){
+            pri_queue[running->pri].head = (unsigned long*)running->next;
+        } else if(pri_queue[running->pri].tail == (unsigned long*)running){
+            pri_queue[running->pri].tail = (unsigned long*)running->prev;
+        }
+
+        /* Remove running from linked list */
+        running->prev->next = running->next;
+        running->next->prev = running->prev;
+    }
+
+    // insert process into desired priority queue
+    insertPriQueue(running, priority);
+    running->pri = priority;
+
+    running->pri_switch = TRUE;
+
+    return running->pri;
 }
 
 /*
@@ -260,38 +393,7 @@ struct pcb* getRunning(void)
     return running;
 }
 
-void printPriQueue(void)
+void setRunning(struct pcb *new_running)
 {
-	char buf[32] = {0};
-	int i;
-	struct pcb *pcbptr = NULL;
-
-
-	UART0_TXStr("\nPrinting current priority queue...");
-	for(i = NUM_PRI; i >= 0; i--)
-	{
-		UART0_TXStr("\n[Level ");
-		UART0_TXStr(my_itoa(i, buf, 10));
-		UART0_TXStr("]\t");
-
-		if(pri_queue[i].head != NULL)
-		{
-			pcbptr = (struct pcb *)pri_queue[i].head;
-
-			while(pcbptr != NULL)
-			{
-				// print process IDs
-				UART0_TXStr("P");
-				if(pcbptr->id < 100)	// zero-padding
-					UART0_TXStr("0");
-					if(pcbptr->id < 10)
-								UART0_TXStr("0");
-				UART0_TXStr(my_itoa(pcbptr->id, buf, 10));
-
-				UART0_TXStr(" -> ");
-				pcbptr = pcbptr->next;
-			}
-		}
-		else UART0_TXStr("NO RUNNING PROCESSES");
-	}
+    running = new_running;
 }

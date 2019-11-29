@@ -17,6 +17,8 @@
 
 SysTick* systick;
 
+static char pendSvEnabled;
+
 /*
  * Initializes SysTick
  *
@@ -28,6 +30,8 @@ void initSysTick(void)
     periodSysTick(PERIOD);
     intEnableSysTick();
     startSysTick();
+
+    pendSvEnabled = TRUE;
 }
 
 /*
@@ -102,5 +106,15 @@ void SysTickHandler(void)
     /* Enqueue characater onto systick queue */
     //enqueue(SYSTICK, SYS_CHAR);
 
-	NVIC_INT_CTRL_R |= INT_CTRL_PENDSV;
+	if(pendSvEnabled)NVIC_INT_CTRL_R |= INT_CTRL_PENDSV;
+}
+
+void forcePendSV(void)
+{
+    NVIC_INT_CTRL_R |= INT_CTRL_PENDSV;
+}
+
+void enablePendSV(char en)
+{
+    pendSvEnabled = en;
 }
