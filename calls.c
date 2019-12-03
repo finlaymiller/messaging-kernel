@@ -7,11 +7,6 @@
  *  All functions that processes need to access through supervisor calls are
  *  stored here. They are prefixed with 'k_' to indicate that they are
  *  kernel-level functions rather than process (p_).
- *
- *
- *  todo	write nice() function
- *  todo	write send() function
- *  todo	write recv() function
  */
 
 #include "calls.h"

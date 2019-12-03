@@ -17,6 +17,7 @@
 #include "kernel.h"
 #include "trap.h"
 #include "register.h"
+#include "VT100.h"
 
 /*
  * Calls initialization functions for all modules
