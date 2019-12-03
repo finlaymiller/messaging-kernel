@@ -14,6 +14,7 @@
 #define RAND_PROC_NUM 3
 
 #define SLOW_TEXT 100000
+#define IDLE_TEXT 200000
 
 extern char *BIND_ERR_PRINTS[3];
 
@@ -30,7 +31,15 @@ void waitTime(int x)
  */
 void idleProc(void)
 {
-    while(1);
+    char ch = 'a';
+    while(1){
+        repositionCursor(0, 80);
+
+        UART0_TXChar(ch);
+        waitTime(IDLE_TEXT);
+        ch++;
+        if(ch > 'z') ch = 'a';
+    }
 }
 
 
@@ -187,24 +196,16 @@ void procBindUnbind(void)
 }
 
 
-
 /*
  * Function to test process
  */
-void procA(void)
+void procPrinter(void)
 {
-    while(1){
-        UART0_TXChar('a');
-    }
-}
-
-/*
- * Function to test process
- */
-void procB(void)
-{
-    while(1){
-        UART0_TXChar('b');
+    int i;
+    char ch = (char) p_get_id();
+    for(i=0; i<50; i++){
+        UART0_TXChar(ch);
+        waitTime(SLOW_TEXT);
     }
 }
 
@@ -214,14 +215,14 @@ void procB(void)
 void procC(void)
 {
     int i;
-    for(i=0; i<100; i++){
+    for(i=0; i<20; i++){
         UART0_TXChar('c');
         waitTime(SLOW_TEXT);
     }
 
     p_nice(2);
 
-    for(i=0; i<100; i++){
+    for(i=0; i<20; i++){
         UART0_TXChar('f');
         waitTime(SLOW_TEXT);
     }
@@ -230,14 +231,14 @@ void procC(void)
 void procD(void)
 {
     int i;
-    for(i=0; i<100; i++){
+    for(i=0; i<20; i++){
         UART0_TXChar('d');
         waitTime(SLOW_TEXT);
     }
 
     p_nice(2);
 
-    for(i=0; i<100; i++){
+    for(i=0; i<20; i++){
         UART0_TXChar('y');
         waitTime(SLOW_TEXT);
     }
@@ -246,14 +247,14 @@ void procD(void)
 void procE(void)
 {
     int i;
-    for(i=0; i<100; i++){
+    for(i=0; i<20; i++){
         UART0_TXChar('e');
         waitTime(SLOW_TEXT);
     }
 
     p_nice(2);
 
-    for(i=0; i<100; i++){
+    for(i=0; i<20; i++){
         UART0_TXChar('y');
         waitTime(SLOW_TEXT);
     }

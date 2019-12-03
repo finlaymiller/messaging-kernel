@@ -25,13 +25,14 @@
  */
 void main (void)
 {
-	initKernel();
+    initKernel();
 
-	initTerminal();
+    initTerminal();
 
     /* Init processes here */
-	reg_proc(&procPrinter, 'a', 2);
-	reg_proc(&procPrinter, 'b', 2);
+    reg_proc(&procPrinter, 'a', 2);
+    reg_proc(&procPrinter, 'b', 2);
+    reg_proc(&procPrinter, 'c', 2);
 
 
     initRunning();

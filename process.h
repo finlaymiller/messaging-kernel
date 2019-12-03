@@ -15,6 +15,7 @@
 #include "mail.h"
 #include "trap.h"
 #include "str_conv_funcs.h"
+#include "VT100.h"
 
 #define PRIVATE 		static
 #define MSP_RTN			0xFFFFFFF9	// link register exception return using MSP
@@ -70,6 +71,7 @@ struct linked_list{
 void procSendRecv(void);
 void procSend(void);
 void procBindUnbind(void);
+void procPrinter(void);
 void procA(void);
 void procB(void);
 void procC(void);

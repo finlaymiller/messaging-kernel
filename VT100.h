@@ -8,6 +8,7 @@
 #ifndef VT100_H_
 #define VT100_H_
 
-void repositionCursor(int x, int y);
+void repositionCursor(unsigned int x, unsigned int y);
+void initTerminal(void);
 
 #endif /* VT100_H_ */
