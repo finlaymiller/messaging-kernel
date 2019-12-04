@@ -72,6 +72,8 @@ void procSendRecv(void);
 void procSend(void);
 void procBindUnbind(void);
 void procPrinter(void);
+void procNiceA(void);
+void procNiceB(void);
 void procA(void);
 void procB(void);
 void procC(void);

@@ -52,6 +52,8 @@ void initTerminal(void)
  */
 void repositionCursor(unsigned int row, unsigned int col)
 {
+    enablePendSV(FALSE);
+
     char buf[2];
     char *tmp;
 
@@ -81,4 +83,6 @@ void repositionCursor(unsigned int row, unsigned int col)
     cup . col [1] = buf[1];
 
     UART0_TXStr((char *)&cup);
+
+    enablePendSV(TRUE);
 }

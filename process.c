@@ -209,6 +209,60 @@ void procPrinter(void)
     }
 }
 
+void procNiceA(void)
+{
+    /* Set base values for row and column */
+    int b_row = 1;
+    int b_col = 1;
+    repositionCursor(b_row, b_col);
+
+    int i;
+    for(i=0; i<20; i++){
+        UART0_TXChar('a');
+        waitTime(SLOW_TEXT);
+    }
+
+    /* Lower priority */
+    p_nice(1);
+
+    /* Position cursor below initial position */
+    repositionCursor(b_row+1, b_col);
+
+    for(i=0; i<20; i++){
+        repositionCursor(b_row+1, b_col);
+        UART0_TXChar('a');
+        b_col++;
+        waitTime(SLOW_TEXT);
+    }
+}
+
+void procNiceB(void)
+{
+    /* Set base values for row and column */
+    int b_row = 5;
+    int b_col = 1;
+    repositionCursor(b_row, b_col);
+
+    int i;
+    for(i=0; i<20; i++){
+        UART0_TXChar('b');
+        waitTime(SLOW_TEXT);
+    }
+
+    /* Lower priority */
+    p_nice(1);
+
+    /* Position cursor below initial position */
+    repositionCursor(b_row+1, b_col);
+
+    for(i=0; i<20; i++){
+        repositionCursor(b_row+1, b_col);
+        UART0_TXChar('b');
+        b_col++;
+        waitTime(SLOW_TEXT);
+    }
+}
+
 /*
  * Function to test process
  */
