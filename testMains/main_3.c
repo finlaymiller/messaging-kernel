@@ -30,9 +30,8 @@ void main (void)
     initTerminal();
 
     /* Init processes here */
-    reg_proc(&procNiceA, 10, 4);
-    reg_proc(&procNiceB, 10, 3);
-    reg_proc(&procNiceC, 10, 2);
+    reg_proc(&procSendRecv, 10, 3);
+    reg_proc(&procSend, 'T', 3);
 
     initRunning();
 

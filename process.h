@@ -70,10 +70,13 @@ struct linked_list{
 /* function declarations */
 void procSendRecv(void);
 void procSend(void);
+void procBlockSend(void);
+void procBlockRecv(void);
 void procBindUnbind(void);
 void procPrinter(void);
 void procNiceA(void);
 void procNiceB(void);
+void procNiceC(void);
 void procA(void);
 void procB(void);
 void procC(void);

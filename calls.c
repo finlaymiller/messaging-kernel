@@ -154,17 +154,6 @@ int k_send(struct message *msg)
 	struct pcb* curr_running = getRunning();
 	struct message *kmsg;
 
-	// debugging prints
-	UART0_TXStr("\nKernel received a message with the following data:");
-	UART0_TXStr("\nMQID\t\t");
-	UART0_TXStr(my_itoa(msg->dqid, b, 10));
-	UART0_TXStr("\tSQID\t\t");
-	UART0_TXStr(my_itoa(msg->sqid, b, 10));
-	UART0_TXStr("\nBODY\t\t");
-	UART0_TXStr(msg->body);
-	UART0_TXStr("\nSIZE\t\t");
-	UART0_TXStr(my_itoa(msg->size, b, 10));
-
 	// mailroom/box error checks
 	if(mailroom[msg->sqid].owner != curr_running)
 	{	// catch sender mailbox validity
@@ -190,6 +179,8 @@ int k_send(struct message *msg)
 	    //force that PCB back into the priority queue
 	    insertPriQueue(mailroom[msg->dqid].owner, mailroom[msg->dqid].owner->pri);
 
+	    running->pri_switch = TRUE;
+
 	} else {
         // copy over message data and add to message queue
         kmsg = allocate();				// get fresh message struct from mailpile
@@ -214,15 +205,6 @@ int k_recv(struct message *msg)
 	char b[128];
 	struct pcb* curr_running = getRunning();
 	struct message *kmsg;
-
-	// debugging prints
-	UART0_TXStr("\nKernel looking for a message with the following data:");
-	UART0_TXStr("\nMQID\t\t");
-	UART0_TXStr(my_itoa(msg->dqid, b, 10));
-	UART0_TXStr("\tSQID\t\t");
-	UART0_TXStr(my_itoa(msg->sqid, b, 10));
-	UART0_TXStr("\nMAX SIZE\t");
-	UART0_TXStr(my_itoa(msg->size, b, 10));
 
 	// mailroom/box error checks
 	if(mailroom[msg->dqid].owner != curr_running)

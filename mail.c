@@ -69,7 +69,13 @@ int p_send(unsigned int src, unsigned int dst, char msg[MAX_MSG_LEN], int size)
 	memcpy(pmsg.body, msg, size);
 	pmsg . size = size;
 
-	return pkcall(SEND, (unsigned int)&pmsg);
+	int rtn_val = pkcall(SEND, (unsigned int)&pmsg);
+
+	/* TODO: Update priority switch */
+	struct pcb *curr_running = getRunning();
+	while(curr_running->pri_switch == TRUE);
+
+	return rtn_val;
 }
 
 /*

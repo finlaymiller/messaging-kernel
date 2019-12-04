@@ -122,21 +122,67 @@ void procSendRecv(void)
     char    msg[128];
     int     mbx = p_bind(RECV_PROC_NUM);
     int     rcode;
+    int i;
 
+    for(i=0; i<50; i++){
+        UART0_TXChar('Q');
+        waitTime(SLOW_TEXT);
+    }
 
     rcode = p_recv(mbx, mbx, msg, 1);
 
-    while(1){
-        //UART0_TXChar('x');
+    repositionCursor(5, 1);
+
+    for(i=0; i<50; i++){
         UART0_TXChar(msg[0]);
+        waitTime(SLOW_TEXT);
     }
 }
 
 void procSend(void)
 {
+    char ch = (char) p_get_id();
+
     int     mbx = p_bind(SEND_PROC_NUM);
 
-    int rcode = p_send(SEND_PROC_NUM, RECV_PROC_NUM, "K", 1);
+    int rcode = p_send(SEND_PROC_NUM, RECV_PROC_NUM, &ch, 1);
+}
+
+void procBlockRecv(void)
+{
+    char    msg[128];
+    int     mbx = p_bind(RECV_PROC_NUM);
+    int     rcode;
+    int i;
+
+    rcode = p_recv(mbx, mbx, msg, 1);
+
+    repositionCursor(5, 1);
+
+    for(i=0; i<50; i++){
+        UART0_TXChar(msg[0]);
+        waitTime(SLOW_TEXT);
+    }
+}
+
+void procBlockSend(void)
+{
+    int i;
+    for(i=0; i<50; i++){
+        UART0_TXChar('W');
+        waitTime(SLOW_TEXT);
+    }
+
+    char ch = (char) p_get_id();
+
+    int     mbx = p_bind(SEND_PROC_NUM);
+
+    int rcode = p_send(SEND_PROC_NUM, RECV_PROC_NUM, &ch, 1);
+
+    for(i=0; i<50; i++){
+        UART0_TXChar('D');
+        waitTime(SLOW_TEXT);
+    }
 }
 
 
@@ -263,55 +309,33 @@ void procNiceB(void)
     }
 }
 
-/*
- * Function to test process
- */
-void procC(void)
+void procNiceC(void)
 {
+    /* Set base values for row and column */
+    int b_row = 10;
+    int b_col = 1;
+    repositionCursor(b_row, b_col);
+
     int i;
     for(i=0; i<20; i++){
         UART0_TXChar('c');
         waitTime(SLOW_TEXT);
     }
 
-    p_nice(2);
+    /* Lower priority */
+    p_nice(1);
+
+    /* Position cursor below initial position */
+    repositionCursor(b_row+1, b_col);
 
     for(i=0; i<20; i++){
-        UART0_TXChar('f');
+        repositionCursor(b_row+1, b_col);
+        UART0_TXChar('c');
+        b_col++;
         waitTime(SLOW_TEXT);
     }
 }
 
-void procD(void)
-{
-    int i;
-    for(i=0; i<20; i++){
-        UART0_TXChar('d');
-        waitTime(SLOW_TEXT);
-    }
 
-    p_nice(2);
-
-    for(i=0; i<20; i++){
-        UART0_TXChar('y');
-        waitTime(SLOW_TEXT);
-    }
-}
-
-void procE(void)
-{
-    int i;
-    for(i=0; i<20; i++){
-        UART0_TXChar('e');
-        waitTime(SLOW_TEXT);
-    }
-
-    p_nice(2);
-
-    for(i=0; i<20; i++){
-        UART0_TXChar('y');
-        waitTime(SLOW_TEXT);
-    }
-}
 
 
