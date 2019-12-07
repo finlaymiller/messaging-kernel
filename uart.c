@@ -9,6 +9,7 @@
 
 #include "queue.h"
 #include "uart.h"
+#include "train_phy.h"
 
 /*  globals */
 volatile char data_rx;
@@ -44,8 +45,33 @@ void initUART(void)
     UART0_CTL_R = UART_CTL_UARTEN;        // Enable the UART
     wait = 0; // wait; give UART time to enable itself.
 
+
+    /* Initialize UART1 */
+    SYSCTL_RCGCGPIO_R |= SYSCTL_RCGCUART_GPIOB;
+    SYSCTL_RCGCUART_R |= SYSCTL_RCGCGPIO_UART1;
+    wait = 0;   // wait required before accessing the UART config regs
+
+    UART1_CTL_R &= ~UART_CTL_UARTEN;        // Disable the UART
+    wait = 0;   // wait required before accessing the UART config regs
+
+    // Setup the BAUD rate
+    UART1_IBRD_R = 8;   // IBRD = int(16,000,000 / (16 * 115,200)) = 8.680555555555556
+    UART1_FBRD_R = 44;  // FBRD = int(.680555555555556 * 64 + 0.5) = 44.05555555555556
+
+    UART1_LCRH_R = (UART_LCRH_WLEN_8);  // WLEN: 8, no parity, one stop bit, without FIFOs)
+
+    GPIO_PORTB_AFSEL_R = 0x3;        // Enable Receive and Transmit on PA1-0
+    GPIO_PORTB_PCTL_R = (0x01) | ((0x01) << 4);         // Enable UART RX/TX pins on PA1-0
+    GPIO_PORTB_DEN_R = EN_DIG_PB0 | EN_DIG_PB1;        // Enable Digital I/O on PA1-0
+
+    UART1_CTL_R = UART_CTL_UARTEN;        // Enable the UART
+    wait = 0;   // wait required before accessing the UART config regs
+
     InterruptEnable(INT_VEC_UART0);       		// Enable UART0 interrupts
+    InterruptEnable(INT_VEC_UART1);
+
 	UART0_IntEnable(UART_INT_RX | UART_INT_TX); // Enable Receive and Transmit interrupts
+	UART1_IntEnable(UART_INT_RX | UART_INT_TX); // Enable Receive and Transmit interrupts
 	InterruptMasterEnable();
 }
 
@@ -65,6 +91,41 @@ void InterruptEnable(unsigned long InterruptIndex)
         NVIC_EN0_R = 1 << InterruptIndex;       // Enable the interrupt in the EN0 Register
     else
         NVIC_EN1_R = 1 << (InterruptIndex - 32);    // Enable the interrupt in the EN1 Register
+}
+
+/*
+ * Enables interrupts for UART1
+ */
+void UART1_IntEnable(unsigned long flags)
+{
+    /* Set specified bits for interrupt */
+    UART1_IM_R |= flags;
+}
+
+/*
+ * Interrupt service routine for UART1
+ * Handles all TX and RX interrupts for UART1
+ */
+void UART1_IntHandler(void)
+{
+    // Receiving character
+    InterruptMasterDisable();
+    if (UART1_MIS_R & UART_INT_RX)
+    {
+        /* RECV done - clear interrupt and make char available to application */
+        UART1_ICR_R |= UART_INT_RX;
+
+        /* send data to data_rx variable and set data received flag */
+        data_rx = UART1_DR_R;
+    }
+
+    // Transmitting character
+    if (UART1_MIS_R & UART_INT_TX)
+    {
+        /* XMIT done - clear interrupt */
+        UART1_ICR_R |= UART_INT_TX;
+    }
+    InterruptMasterEnable();
 }
 
 /*
@@ -116,6 +177,25 @@ void UART0_TXStr(char *string)
 }
 
 /*
+ * This function makes it easier to transmit an entire string via UART1
+ *
+ * @param   string: The string to be transmitted
+ * @returns:        None
+ */
+void UART1_TXStr(char *string)
+{
+    int i=0;
+
+    while(1){
+        UART1_TXChar(string[i]);
+
+        if(string[i] == ETX) break;
+
+        i++;
+    }
+}
+
+/*
  * This function makes it easier to transmit a character via UART
  *
  * @param	data:	The character to be transmitted
@@ -127,8 +207,20 @@ void UART0_TXChar(char data)
     UART0_DR_R = data;			// send character to UART0 data register
 }
 
+void UART1_TXChar(char data)
+{
+    while(!UART1_TXReady());    // wait till UART0 is ready
+    UART0_DR_R = data;          // send character to UART0 data register
+}
+
 int UART0_TXReady(void)
 {
 	// 1 if ready, 0 if busy
 	return !(UART0_FR_R & UART_FR_BUSY);
+}
+
+int UART1_TXReady(void)
+{
+    // 1 if ready, 0 if busy
+    return !(UART1_FR_R & UART_FR_BUSY);
 }

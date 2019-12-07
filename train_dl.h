@@ -22,6 +22,19 @@ struct Packet{
     unsigned char message[MAX_MESS_LEN]; /* Message */
 };
 
+struct Control{
+    unsigned char nr : 3;   /* Nr for packet */
+    unsigned char ns : 3;   /* Ns for packet */
+    enum PktType type : 2;  /* Type of packet */
+};
+
+union Ctrl{
+    struct Control s_control;
+    char c_control;
+};
+
+void initControlUnion(void);
 void dl_transmitMagDir(struct t_message magdir);
+
 
 #endif /* TRAIN_DL_H_ */
