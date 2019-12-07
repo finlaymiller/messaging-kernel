@@ -7,3 +7,9 @@
 
 
 #include "train_dl.h"
+
+
+void dl_transmitMagDir(struct t_message magdir)
+{
+
+}
