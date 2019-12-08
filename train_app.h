@@ -18,11 +18,25 @@
 #define CCW 0x1
 
 /* Define message codes */
-#define C_MAGDIR 0xC0
+#define C_SENSORTRIGGER     0xA0
+#define C_SENSORACK         0xA2
+#define C_SENSORREQ         0xA8
+#define C_SENSORREQACK      0xAA
+#define C_MAGDIR            0xC0
+#define C_CHANGESPEED       0xC2
+#define C_SWITCHREQ         0xE0
+#define C_SWITCHACK         0xE2
 
 /* Define message code lengths */
-#define L_MAGDIR 3
-#define L_ERR 255
+#define L_SENSORTRIGGER     2
+#define L_SENSORACK         2
+#define L_SENSORREQ         2
+#define L_SENSORREQACK      3
+#define L_MAGDIR            3
+#define L_CHANGESPEED       3
+#define L_SWITCHREQ         3
+#define L_SWITCHACK         3
+#define L_ERR               255
 
 /* Trainset messages */
 struct t_message{
