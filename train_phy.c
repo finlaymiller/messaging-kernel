@@ -9,10 +9,64 @@
 #include "uart.h"
 #include "process.h"
 
-#define FRAME_LEN 9 // TODO: update this to non-magic number
 #define SLOW_TEXT 10000
 #define PADDING 5   //Number bytes on top of packet length in the frame (excluding DLE's)
 #define FRAME_OFFSET 3  //offset of frame start to where packet message begins
+#define BUFFER_SIZE 10  //buffer size for incoming characters
+
+/* Static variables for phy layer */
+static char rx_buffer[BUFFER_SIZE];
+static char len = 0;
+static char chksum = 0;
+
+/*
+ * Handles WAIT_STX state
+ * Returns new state to go into
+ */
+char handleWaitSTX(char inbyte)
+{
+    if(inbyte == STX){
+        len = 0;
+        chksum = 0;
+        rx_buffer[len] = inbyte;
+        return WAIT_INBYTE1;
+    } else {
+        return WAIT_STX;
+    }
+}
+
+/*
+ * Handles WAIT_INBYTE1 state
+ * Returns new state to go into
+ */
+char handleWaitInbyte1(char inbyte)
+{
+    if(inbyte == ETX){
+        /* Transmission complete, send to datalink layer */
+        // Call datalink layer function
+    } else if(inbyte == DLE){
+        /* Discard character and move to WAIT_INBYTE2 */
+        return WAIT_INBYTE2;
+    } else {
+        /* Regular character, add to buffer */
+        chksum += inbyte;
+        len++;
+        rx_buffer[len] = inbyte;
+        return WAIT_INBYTE1;
+    }
+}
+
+/*
+ * Handles WAIT_INBYTE2 state
+ * Returns new state to go into
+ */
+char handleWaitInbyte2(char inbyte)
+{
+    chksum += inbyte;
+    len++;
+    rx_buffer[len] = inbyte;
+    return WAIT_INBYTE1;
+}
 
 /*
  * Transmits magnitude direction frame
@@ -60,3 +114,4 @@ char calculateChecksum(struct Packet packet)
     /* Return one's complement of sum */
     return ~checksum;
 }
+
