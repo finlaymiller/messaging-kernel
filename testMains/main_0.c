@@ -18,6 +18,8 @@
 #include "trap.h"
 #include "register.h"
 #include "VT100.h"
+#include "train_app.h"
+#include "train_dl.h"
 
 /*
  * Calls initialization functions for all modules
@@ -26,17 +28,9 @@
 void main (void)
 {
     initKernel();
-
     initTerminal();
 
-    /* Init processes here */
-    reg_proc(&procPrinter, 'a', 3);
-    reg_proc(&procPrinter, 'b', 2);
-    reg_proc(&procPrinter, 'c', 1);
-
-    initRunning();
-
-    SVC();
+    transmitMagDir();
 
     while(1);
 
