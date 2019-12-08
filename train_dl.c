@@ -8,14 +8,10 @@
 
 #include "train_dl.h"
 #include "train_phy.h"
+#include "train_app.h"
 
 /* Define static struct to keep track of Ns and Nr */
 static union Ctrl control = {0};
-
-void initControlUnion(void)
-{
-    control.c_control = 0;
-}
 
 void dl_transmitMagDir(struct t_message magdir)
 {
@@ -27,13 +23,35 @@ void dl_transmitMagDir(struct t_message magdir)
     /* Set control in packet to current value of static control struct */
     packet.control = (unsigned char)control.c_control;
 
-    /* TODO: Create length lookup function for each type of packet */
-    // packet.length = getPacketLen(control.type);
-    packet.length = 3;
+    /* Get and set message length (return if error in code) */
+    char len = getMessageLen(magdir.code);
+    if(len == L_ERR) return;  // Dont transmit if code is incorrect
+    packet.length = len;
 
     /* Copy message into packet */
     memcpy(packet.message, (char *)&magdir, packet.length);
 
     /* Send to phy layer */
-    phy_transmitMagDir(packet);
+    phy_transmitFrame(packet);
+}
+
+/*
+ * Gets the message length to be set in packet
+ * Returns error value if code is incorrect
+ */
+char getMessageLen(unsigned char code)
+{
+    char rtn;
+
+    /* Find code and return length */
+    switch(code){
+    case C_MAGDIR:
+        rtn = L_MAGDIR;
+        break;
+    default:
+        rtn = L_ERR;
+        break;
+    }
+
+    return rtn;
 }

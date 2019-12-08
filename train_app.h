@@ -20,6 +20,10 @@
 /* Define message codes */
 #define C_MAGDIR 0xC0
 
+/* Define message code lengths */
+#define L_MAGDIR 3
+#define L_ERR 255
+
 /* Trainset messages */
 struct t_message{
     unsigned char code;  /* Message code */
@@ -36,6 +40,6 @@ struct mag_dir{
 
 /* Public Function Declarations */
 struct t_message buildMagDirMessage(unsigned char loc_num, struct mag_dir mag_arg);
-void transmitMagDir(void);
+void transmitMagDir(char loc_num, char mag, char dir);
 
 #endif /* TRAIN_APP_H_ */

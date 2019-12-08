@@ -9,15 +9,15 @@
 #include "train_app.h"
 #include "train_dl.h"
 
-void transmitMagDir(void)
+void transmitMagDir(char loc_num, char mag, char dir)
 {
-    struct mag_dir mag;
-    mag.ignored = 0x0;
-    mag.direction = CCW;
-    mag.magnitude = 0x4;
+    struct mag_dir magdir;
+    magdir.ignored = 0x0;
+    magdir.direction = dir;
+    magdir.magnitude = mag;
 
     /* Build mag_dir message */
-    struct t_message new_mess = buildMagDirMessage(LOC_ALL, mag);
+    struct t_message new_mess = buildMagDirMessage(loc_num, magdir);
 
     /* Send to datalink layer */
     dl_transmitMagDir(new_mess);

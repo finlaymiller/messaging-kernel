@@ -30,7 +30,7 @@ void main (void)
     initKernel();
     initTerminal();
 
-    transmitMagDir();
+    transmitMagDir(LOC_ALL, 0xA, CW);
 
     while(1);
 

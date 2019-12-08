@@ -17,7 +17,7 @@
 /*
  * Transmits magnitude direction frame
  */
-void phy_transmitMagDir(struct Packet packet)
+void phy_transmitFrame(struct Packet packet)
 {
     char frame_len = packet.length + PADDING;
 
