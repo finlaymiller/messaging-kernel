@@ -3,8 +3,9 @@
  *
  *  Created on: Oct 17, 2019
  *      Author: Larry Hughes
- *      Editor: Finlay Miller
- *      		Derek Capone
+ *      Editor: Finlay Miller and Derek Capone
+ * 
+ * Headerfile for process-related functions and processes used for testing
  */
 
 #ifndef PROCESS_H_
@@ -15,7 +16,9 @@
 #include "mail.h"
 #include "trap.h"
 #include "str_conv_funcs.h"
+#include "VT100.h"
 
+/* global definitions */
 #define PRIVATE 		static
 #define MSP_RTN			0xFFFFFFF9	// link register exception return using MSP
 #define PSP_RTN			0xFFFFFFFD	// link register exception return using PSP
@@ -51,10 +54,13 @@ struct pcb{
     struct pcb* prev; 		// link to previous pcb
     unsigned long sp;   	// stack pointer - r13 (PSP)
     unsigned int  id;  		// process identifier
-	unsigned long state;    // state of process
+	int state;    // state of process
 	unsigned char pri;      // priority of the process
 	unsigned long *stk;		// process stack
 	unsigned int mbxs[NUM_MBX_PER_PROC];	// mailboxes bound to by process
+	unsigned long *msg;     // Message pointer
+	unsigned int sz;      // size of message
+	unsigned char pri_switch;
 };
 
 /* linked list structure */
@@ -64,15 +70,22 @@ struct linked_list{
 };
 
 /* function declarations */
-void procSendRecv(void);
-void procBindUnbind(void);
-void procA(void);
-void procB(void);
-void idleProc(void);
-
+/* process-related functions */
 int pkcall(int, unsigned int);
 int p_get_id(void);
 int p_nice(int);
 void p_terminate(void);
+void waitTime(unsigned int);
+void idleProc(void);
+/* testing processes */
+void procSendRecv(void);
+void procSend(void);
+void procBlockSend(void);
+void procBlockRecv(void);
+void procBindUnbind(void);
+void procPrinter(void);
+void procNiceA(void);
+void procNiceB(void);
+void procNiceC(void);
 
 #endif /* PROCESS_H_ */

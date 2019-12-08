@@ -2,7 +2,9 @@
  * str_conv_funcs.h
  *
  *  Created on: Nov 7, 2019
- *      Author: Finlay Miller
+ *      Author: Finlay Miller and Derek Capone
+ * 
+ * Headerfile for string conversion functions
  */
 
 #ifndef STR_CONV_FUNCS_H_
@@ -12,7 +14,7 @@
 
 #define MAX_STR_LEN 512
 
-/* function declaration */
+/* function declarations */
 int my_atoi(char *, int *);
 char *my_itoa(int, char *, int);
 void reverse(char *);

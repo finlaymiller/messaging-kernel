@@ -2,18 +2,16 @@
  * trap.c
  *
  *  Created on: Nov 2, 2019
- *      Author: Finlay Miller
- *
- *
- *  NOTE: All the comments I deleted from SVCHandler are still present in the
- *  original file, SVC_example.c.
+ *      Author: Larry Hughes with a bit from 
+ * 				Finlay Miller and Derek Capone
+ * 
+ * All the functions required to deal with supervisor calls (SVCs) are here
  */
 
 #include "trap.h"
 
 extern void systick_init();
 extern struct pcb *running;
-
 
 /*
  * Supervisor call (trap) entry point
@@ -23,8 +21,10 @@ extern struct pcb *running;
  * Restore r4-r11 from trapping process stack to CPU
  * SVCHandler is called with r0 equal to MSP or PSP to access any arguments
  *
- * @param: 		None
- * @returns:	None
+ * Arguments:
+ * 	 		None
+ * Returns:	
+ * 			None
  */
 void SVCall(void)
 {
@@ -72,12 +72,14 @@ void SVCall(void)
  * Since this has been called as a trap (Cortex exception), the code is in
  * Handler mode and uses the MSP
  *
- * @param:		Pointer to the the top of the process stack
- * @returns:	None
+ * Arguments:
+ * 		[struct stack_frame *] Pointer to the the top of the process stack
+ * Returns:	
+ * 		None
  */
 void SVCHandler(struct stack_frame *argptr)
 {
-	static int firstSVCcall = TRUE;
+    static int firstSVCcall = TRUE;
 	struct kcallargs *kcaptr;
 
     if (firstSVCcall){
@@ -121,10 +123,10 @@ void SVCHandler(struct stack_frame *argptr)
 		case TERMINATE:	// no arguments requred
 			kcaptr -> rtnvalue = k_terminate();
 			break;
-		case SEND:
+		case SEND:		// arg1 should be message to send
 			kcaptr -> rtnvalue = k_send((struct message *)kcaptr->arg1);
 			break;
-		case RECV:
+		case RECV:		// arg1 should be the message to receive
 			kcaptr -> rtnvalue = k_recv((struct message *)kcaptr->arg1);
 			break;
 		case BIND:		// arg1 should be the mailbox to bind to
@@ -138,6 +140,26 @@ void SVCHandler(struct stack_frame *argptr)
 		}
 	}
 }
+
+void startNextProcess(void)
+{
+    InterruptMasterDisable();
+
+    if(getRunning()) saveRegisters();
+    setRunningSP((unsigned long*)getPSP());
+
+    /* Find and set next running process */
+    setNextRunning();
+    loadRegisters();
+
+    /* Reenable pendSV handler before being blocked */
+    enablePendSV(TRUE);
+    InterruptMasterEnable();
+
+    returnPSP();
+    __asm(" bx      lr");
+}
+
 
 /*
  * Pending Supervisor Call Handler
@@ -154,9 +176,7 @@ void PendSV_Handler(void)
 
     nextProcess();
     loadRegisters();
-
     InterruptMasterEnable();
-
-    __asm(" movw    LR,#0xFFFD");   /* Lower 16 [and clear top 16] */
-    __asm(" movt    LR,#0xFFFF");   /* Upper 16 only */
+	
+    returnPSP();
 }

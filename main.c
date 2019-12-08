@@ -17,6 +17,7 @@
 #include "kernel.h"
 #include "trap.h"
 #include "register.h"
+#include "VT100.h"
 
 /*
  * Calls initialization functions for all modules
@@ -24,18 +25,15 @@
  */
 void main (void)
 {
-	initKernel();
+    initKernel();
 
-    // init procs here
-    //reg_proc(&procSendRecv, 1, 3);
-    reg_proc(&idleProc, 0, 0);
-    reg_proc(&procA, 100, 3);
-    reg_proc(&procB, 50, 3);
+    initTerminal();
 
+    /* Init processes here */
+    reg_proc(&procSendRecv, 10, 3);
+    reg_proc(&procSend, 'T', 3);
 
     initRunning();
-
-    UART0_TXStr("\n\n---------- REBOOT ----------\n\n");
 
     SVC();
 

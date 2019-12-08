@@ -2,7 +2,10 @@
  * register.c
  *
  *  Created on: Nov 8, 2019
- *      Author: Finlay Miller
+ *      Author: Larry Hughes
+ * 
+ * 	Wraps assembly commands in C functions so we don't have to touch or think
+ * 	about their yucky assembly innards.
  */
 
 #include "register.h"
@@ -59,12 +62,6 @@ void volatile loadRegisters(void)
 	__asm("	msr		psp, r0");
 }
 
-void volatile loadLR(void)
-{
-    __asm(" movw     lr, #0xfffd");
-    __asm(" movt     lr, #0xffff");
-}
-
 void returnPSP(void)
 {
 	/*
@@ -74,7 +71,6 @@ void returnPSP(void)
 	*/
 	__asm(" movw    LR,#0xFFFD"); 	/* Lower 16 [and clear top 16] */
 	__asm(" movt    LR,#0xFFFF"); 	/* Upper 16 only */
-	__asm(" bx  LR");          		/* Force return to PSP */
 }
 
 void assignR7(volatile unsigned long data)

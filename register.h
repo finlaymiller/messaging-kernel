@@ -2,14 +2,15 @@
  * register.h
  *
  *  Created on: Nov 8, 2019
- *      Author: Finlay Miller
+ *      Author: Finlay Miller and Derek Capone
+ * 
+ * 	Headerfile for register Functions
  */
 
 #ifndef REGISTER_H_
 #define REGISTER_H_
 
-
-// CPU interrupt enable/disable macros
+/* CPU interrupt enable/disable macros */
 #define InterruptMasterEnable()		__asm(" cpsie   i")
 #define InterruptMasterDisable()	__asm(" cpsid 	i")
 
@@ -19,10 +20,9 @@ unsigned long getPSP();
 unsigned long getMSP();
 unsigned long getSP();
 void setPSP(volatile unsigned long);
-void setMSP(volatile unsigned long);\
+void setMSP(volatile unsigned long);
 void volatile saveRegisters();
 void volatile loadRegisters();
-void volatile loadLR(void);
 void returnPSP(void);
 void assignR7(volatile unsigned long);
 
