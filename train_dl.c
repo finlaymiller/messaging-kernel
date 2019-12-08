@@ -22,7 +22,7 @@ void dl_transmitMagDir(struct t_message magdir)
     struct Packet packet;
 
     /* Define type of packet in static structure  */
-    control.s_control.type = (enum PktType) ACK;
+    control.s_control.type = (enum PktType) DATA;
 
     /* Set control in packet to current value of static control struct */
     packet.control = (unsigned char)control.c_control;
@@ -36,5 +36,4 @@ void dl_transmitMagDir(struct t_message magdir)
 
     /* Send to phy layer */
     phy_transmitMagDir(packet);
-
 }

@@ -17,7 +17,7 @@ void transmitMagDir(void)
     mag.magnitude = 0x4;
 
     /* Build mag_dir message */
-    struct t_message new_mess = buildMagDirMessage(LOC1, mag);
+    struct t_message new_mess = buildMagDirMessage(LOC_ALL, mag);
 
     /* Send to datalink layer */
     dl_transmitMagDir(new_mess);

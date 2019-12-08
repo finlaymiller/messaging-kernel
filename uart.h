@@ -91,6 +91,7 @@
 
 // Public UART Functions
 void initUART(void);
+void initUART1(void);
 void InterruptEnable(unsigned long);
 void UART0_IntEnable(unsigned long);
 void UART0_IntHandler(void);

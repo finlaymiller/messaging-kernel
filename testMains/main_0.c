@@ -28,7 +28,9 @@
 void main (void)
 {
     initKernel();
-    initTerminal();
+    //initTerminal();
+
+    //UART0_TXStr("Hello");
 
     transmitMagDir();
 

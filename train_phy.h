@@ -12,6 +12,7 @@
 
 #define STX 0x02
 #define ETX 0x03
+#define DLE 0x10
 
 void phy_transmitMagDir(struct Packet packet);
 
