@@ -33,8 +33,7 @@ union Ctrl{
     char c_control;
 };
 
-void initControlUnion(void);
 void dl_transmitMagDir(struct t_message magdir);
-
+char getMessageLen(unsigned char code);
 
 #endif /* TRAIN_DL_H_ */

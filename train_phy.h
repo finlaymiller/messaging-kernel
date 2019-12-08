@@ -14,6 +14,7 @@
 #define ETX 0x03
 #define DLE 0x10
 
-void phy_transmitMagDir(struct Packet packet);
+void phy_transmitFrame(struct Packet packet);
+char calculateChecksum(struct Packet packet);
 
 #endif /* TRAIN_PHY_H_ */

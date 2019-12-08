@@ -135,60 +135,38 @@ void UART1_IntHandler(void)
     InterruptMasterEnable();
 }
 
-void UART0_IntHandler(void)
-{
-    // Receiving character
-    InterruptMasterDisable();
-    if (UART0_MIS_R & UART_INT_RX)
-    {
-        /* RECV done - clear interrupt and make char available to application */
-        UART0_ICR_R |= UART_INT_RX;
-
-        /* send data to data_rx variable and set data received flag */
-        data_rx = UART0_DR_R;
-    }
-
-    // Transmitting character
-    if (UART0_MIS_R & UART_INT_TX)
-    {
-        /* XMIT done - clear interrupt */
-        UART0_ICR_R |= UART_INT_TX;
-    }
-    InterruptMasterEnable();
-}
-
 /*
  * Interrupt service routine for UART0
  * Handles all TX and RX interrupts for UART0
  */
-//void UART0_IntHandler(void)
-//{
-//	// Receiving character
-//	InterruptMasterDisable();
-//	if (UART0_MIS_R & UART_INT_RX)
-//	{
-//		/* RECV done - clear interrupt and make char available to application */
-//		UART0_ICR_R |= UART_INT_RX;
-//
-//		/* send data to data_rx variable and set data received flag */
-//		data_rx = UART0_DR_R;
-//		//got_data = TRUE;
-//
-//		enqueue(UART_RX, data_rx);	// send to RX queue
-//	}
-//
-//	// Transmitting character
-//	if (UART0_MIS_R & UART_INT_TX)
-//	{
-//		/* XMIT done - clear interrupt */
-//		UART0_ICR_R |= UART_INT_TX;
-//
-//		/* transmit char if one is available */
-//		if(!isQEmpty(UART_TX))
-//			UART0_TXChar(dequeue(UART_TX));
-//	}
-//	InterruptMasterEnable();
-//}
+void UART0_IntHandler(void)
+{
+	// Receiving character
+	InterruptMasterDisable();
+	if (UART0_MIS_R & UART_INT_RX)
+	{
+		/* RECV done - clear interrupt and make char available to application */
+		UART0_ICR_R |= UART_INT_RX;
+
+		/* send data to data_rx variable and set data received flag */
+		data_rx = UART0_DR_R;
+		//got_data = TRUE;
+
+		enqueue(UART_RX, data_rx);	// send to RX queue
+	}
+
+	// Transmitting character
+	if (UART0_MIS_R & UART_INT_TX)
+	{
+		/* XMIT done - clear interrupt */
+		UART0_ICR_R |= UART_INT_TX;
+
+		/* transmit char if one is available */
+		if(!isQEmpty(UART_TX))
+			UART0_TXChar(dequeue(UART_TX));
+	}
+	InterruptMasterEnable();
+}
 
 /*
  * This function makes it easier to transmit an entire string via UART
@@ -211,11 +189,21 @@ void UART0_TXStr(char *string)
  * @param   string: The string to be transmitted
  * @returns:        None
  */
-void UART1_TXStr(char *string)
+void UART1_TXStr(char *string, char len)
 {
-    int i=0;
+    int i;
+    for(i=0; i<len; i++){
 
-    for(i=0; i<9; i++){
+        /* Check if byte needs to be preceeded by DLE */
+        //TODO: clean this long check up
+        if(string[i] == DLE || string[i] == STX || string[i] == ETX){
+            if((i != len-1) && (i != 0)){
+                /* Transmit DLE if necessary */
+                UART1_TXChar(DLE);
+            }
+        }
+
+        /* Transmit byte on UART1 */
         UART1_TXChar(string[i]);
     }
 }

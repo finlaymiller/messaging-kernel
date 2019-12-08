@@ -11,27 +11,52 @@
 
 #define FRAME_LEN 9 // TODO: update this to non-magic number
 #define SLOW_TEXT 10000
+#define PADDING 5   //Number bytes on top of packet length in the frame (excluding DLE's)
+#define FRAME_OFFSET 3  //offset of frame start to where packet message begins
 
-void phy_transmitMagDir(struct Packet packet)
+/*
+ * Transmits magnitude direction frame
+ */
+void phy_transmitFrame(struct Packet packet)
 {
-    char frame[FRAME_LEN];
+    char frame_len = packet.length + PADDING;
 
-    char checksum = packet.control + packet.length + packet.message[0] + packet.message[1] + packet.message[2];
-    checksum = ~checksum;
+    char frame[frame_len];
 
+    /* Add constant values to frame */
     frame[0] = STX;
     frame[1] = packet.control;
-    frame[2] = DLE;
-    frame[3] = packet.length;
-    frame[4] = packet.message[0];
-    frame[5] = packet.message[1];
-    frame[6] = packet.message[2];
-    frame[7] = checksum;
-    frame[8] = ETX;
+    frame[2] = packet.length;
+    frame[frame_len-2] = calculateChecksum(packet);
+    frame[frame_len-1] = ETX;
 
-    while(1){
-        UART1_TXStr(frame);
-        waitTime(10 * SLOW_TEXT);
+    /* Fill packet message into frame */
+    char i;
+    for(i=0; i<packet.length; i++){
+        frame[i + FRAME_OFFSET] = packet.message[i];
     }
 
+    while(1){
+        UART1_TXStr(frame, frame_len);
+        waitTime(10 * SLOW_TEXT);
+    }
+}
+
+/*
+ * Calculates checksum of the packet
+ */
+char calculateChecksum(struct Packet packet)
+{
+    char checksum, i;
+
+    /* Add control and length to checksum */
+    checksum = packet.control + packet.length;
+
+    /* Add packet message to checksum */
+    for(i=0; i<packet.length; i++){
+        checksum += packet.message[i];
+    }
+
+    /* Return one's complement of sum */
+    return ~checksum;
 }

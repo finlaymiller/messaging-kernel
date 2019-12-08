@@ -27,7 +27,7 @@ void initKernel(void)
 	initPriQueue();
 	mailpile = initMessages();
 
-	//reg_proc(&idleProc, 0, 0);
+	reg_proc(&idleProc, 0, 0);
 }
 
 /*
