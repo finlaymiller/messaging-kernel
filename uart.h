@@ -100,7 +100,7 @@ void UART1_IntEnable(unsigned long);
 void UART1_IntHandler(void);
 void UART0_Start(void);
 void UART0_TXStr(char *);
-void UART1_TXStr(char *);
+void UART1_TXStr(char *, char);
 void UART0_TXChar(char);
 void UART1_TXChar(char);
 int  UART0_TXReady(void);

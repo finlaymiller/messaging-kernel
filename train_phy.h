@@ -15,5 +15,6 @@
 #define DLE 0x10
 
 void phy_transmitMagDir(struct Packet packet);
+char calculateChecksum(struct Packet packet);
 
 #endif /* TRAIN_PHY_H_ */
