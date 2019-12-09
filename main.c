@@ -30,8 +30,7 @@ void main (void)
     initTerminal();
 
     /* Init processes here */
-    reg_proc(&procSendRecv, 10, 3);
-    reg_proc(&procSend, 'T', 3);
+    reg_proc(&procDrawGUI, 10, 3);
 
     initRunning();
 

@@ -87,5 +87,6 @@ void procPrinter(void);
 void procNiceA(void);
 void procNiceB(void);
 void procNiceC(void);
+void procDrawGUI(void);
 
 #endif /* PROCESS_H_ */

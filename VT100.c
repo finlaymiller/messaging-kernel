@@ -21,13 +21,7 @@ static struct CUP cup = {ESC, '[', '0', '0', ';', '0', '0', 'H', NUL};
  */
 void initTerminal(void)
 {
-    repositionCursor(1, 1);
-
-    int i;
-    for(i = 0; i < MAX_ROWS * MAX_COLS; i++){
-        UART0_TXChar(SPACE);
-    }
-
+	UART0_TXStr(CLEAR_SCREEN);
     repositionCursor(1, 1);
 }
 
@@ -75,4 +69,40 @@ void repositionCursor(unsigned int row, unsigned int col)
     UART0_TXStr((char *)&cup);
 
     enablePendSV(TRUE);
+}
+
+void drawTrainset(void)
+{
+	int i;
+	char *pic[] = {
+	"       x---------------------x\n",
+	"   S1 / 20     S2          19 \x5c S3\n",
+	"14 x-----x-----x-----x-----x-----x\n",
+	"  /      13   12  /  11   10    9 \x5c\n",
+	" /      x--------x                 \x5c\n",
+	"x 15    24      23                8 x\n",
+	"|                                   |\n",
+	"|                                   |\n",
+	"x 16                21      22    7 x\n",
+	" \x5c                  x--------x     /\n",
+	"  \x5c      2     3   / 4     5    6 /\n",
+	" 1 x-----x-----x-----x-----x-----x\n",
+	"   S6 \x5c 17     S5     18      / S4\n",
+	"       x---------------------x"
+	};
+
+    repositionCursor(1, 1);
+    for(i = 0; i < MAX_COLS; i++)
+    	UART0_TXChar('=');
+
+    UART0_TXStr("\n");
+    for(i = 0; i < 14; i++)
+    {
+    	repositionCursor(i + 8, 4);	//whitespace
+    	UART0_TXStr(pic[i]);
+    }
+
+    repositionCursor(MAX_ROWS, 1);
+    for(i = 0; i < MAX_COLS; i++)
+        	UART0_TXChar('=');
 }

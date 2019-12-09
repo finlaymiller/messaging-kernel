@@ -21,6 +21,22 @@
 #define MAX_ROWS 24
 #define MAX_COLS 80
 
+#define CLEAR_SCREEN    "\x1b[2J"
+#define CURSOR_SAVE     "\x1b""7"
+#define CURSOR_HOME     "\x1b[H"
+#define CLEAR_LINE      "\x1b[2K"
+#define HOME_COLOURS    "\x1b[0;30;47m"
+#define CURSOR_MIDDLE   "\x1b[20C"
+#define TERM_COLOURS    "\x1b[0;0;0m"
+#define CURSOR_RESTORE  "\x1b""8"
+
+#define CURSOR_LEFT     "\x1b[D"
+#define CURSOR_RIGHT    "\x1b[C"
+#define CURSOR_UP       "\x1b[A"
+#define CURSOR_DOWN     "\x1b[B"
+
+#define BLINK_TEXT      "\x1b[5m"
+
 /* structure to be used for moving the cursor around */
 struct CUP
 {
@@ -34,7 +50,8 @@ struct CUP
 };
 
 /* function declarations */
-void repositionCursor(unsigned int x, unsigned int y);
+void repositionCursor(unsigned int, unsigned int);
 void initTerminal(void);
+void drawTrainset(void);
 
 #endif /* VT100_H_ */

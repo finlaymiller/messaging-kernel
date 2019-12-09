@@ -414,6 +414,10 @@ void procNiceC(void)
     }
 }
 
-
+void procDrawGUI(void)
+{
+	drawTrainset();
+	while(1);
+}
 
 
