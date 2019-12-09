@@ -15,6 +15,9 @@
 volatile char data_rx;
 volatile int got_data;
 
+/* Globals for receiving frames */
+static char state;
+
 /*
  * Initializes UART0 by setting up UART registers
  * 8 data bits, no parity, one stop bit
@@ -52,6 +55,9 @@ void initUART(void)
 
 void initUART1(void)
 {
+    /* Start in state "WAIT_STX" */
+    state = WAIT_STX;
+
     volatile int wait;
 
     /* Initialize UART1 */
@@ -124,6 +130,17 @@ void UART1_IntHandler(void)
 
         /* send data to data_rx variable and set data received flag */
         data_rx = UART1_DR_R;
+
+        if(state == WAIT_STX && data_rx == STX){
+            /* Reset variables and change state to WAIT_INBYTE1 */
+            state = handleWaitSTX(data_rx);
+        } else if(state == WAIT_INBYTE1){
+            /* Handle WAIT_INBYTE1 state */
+            state = handleWaitInbyte1(data_rx);
+        } else if(state == WAIT_INBYTE2){
+            /* Handle WAIT_INBYTE2 state */
+            state = handleWaitInbyte2(data_rx);
+        }
     }
 
     // Transmitting character
