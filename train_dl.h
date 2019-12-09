@@ -10,7 +10,9 @@
 
 #include "train_app.h"
 
-#define MAX_MESS_LEN 10  /* TODO: Fix this value */
+#define MAX_MESS_LEN    10  /* TODO: Fix this value */
+#define CTRL_INVALID    0
+#define CTRL_VALID      1
 
 /* Type of packets to send/receive */
 enum PktType{DATA = 0, ACK, NACK};
@@ -35,5 +37,7 @@ union Ctrl{
 
 void dl_transmitMagDir(struct t_message magdir);
 char getMessageLen(unsigned char code);
+void unpackFrame(char *frame, char len, char chksum);
+char checkCtrl(struct Control ctrl);
 
 #endif /* TRAIN_DL_H_ */

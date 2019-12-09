@@ -30,7 +30,14 @@ void main (void)
     initKernel();
     initTerminal();
 
-    transmitMagDir(LOC_ALL, 0xA, CW);
+    /* Init processes */
+    reg_proc(&magDirProcess, 50, 4);
+    reg_proc(&handleMessages, 51, 4);
+
+    /* Initialize running pcb */
+    initRunning();
+
+    SVC();
 
     while(1);
 

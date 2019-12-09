@@ -55,5 +55,8 @@ struct mag_dir{
 /* Public Function Declarations */
 struct t_message buildMagDirMessage(unsigned char loc_num, struct mag_dir mag_arg);
 void transmitMagDir(char loc_num, char mag, char dir);
+void handleMessages(void);
+void fillMessage(char *msg, char len);
+void magDirProcess(void);
 
 #endif /* TRAIN_APP_H_ */

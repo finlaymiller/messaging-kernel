@@ -6,6 +6,7 @@
  */
 
 #include "train_phy.h"
+#include "train_dl.h"
 #include "uart.h"
 #include "process.h"
 
@@ -43,7 +44,7 @@ char handleWaitInbyte1(char inbyte)
 {
     if(inbyte == ETX){
         /* Transmission complete, send to datalink layer */
-        // Call datalink layer function
+        unpackFrame(rx_buffer, len+1, chksum);  //Note: len+1 because length is incremented before adding bytes
     } else if(inbyte == DLE){
         /* Discard character and move to WAIT_INBYTE2 */
         return WAIT_INBYTE2;
