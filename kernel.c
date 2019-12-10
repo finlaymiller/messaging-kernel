@@ -1,41 +1,48 @@
-/**
+/*
  * kernel.c
+ *
+ *  Created on: Nov 3, 2019
+ *      Author: Finlay Miller and Derek Capone
+ *
+ *  All kernel-level functions OTHER than kernel calls made by processes are
+ *  located in this file.
  */
 
-/* Includes */
+/* includes */
 #include "kernel.h"
 
 /* globals */
 struct pcb *running;		// pointer to pcb of currently running process
-struct pri pri_queue[NUM_PRI] = {NULL};
-extern struct message* mailpile;
-extern struct mailbox mailroom[NUM_MAILBOXES];
+struct pri pri_queue[NUM_PRI] = {NULL}; // list of all processes
+extern struct message* mailpile;    // linked-list of all available empty msgs
+extern struct mailbox mailroom[NUM_MAILBOXES];  // array of mailboxes
 
 /*******************	 INITIALIZATION FUNCTIONS    *************************/
-
 /*
- * Description
+ *  Initialize the kernel. Open UART0 connection, initialize priority process
+ *  queues, allocate all messages to be used, and start idle process.
  *
- * @param:
- * @returns:
+ *  Arguments:
+ *      None
+ *  Returns:
+ *      None
  */
 void initKernel(void)
 {
-
 	initUART();
-	initUART1();
-	initPriQueue();
 	mailpile = initMessages();
-
 	reg_proc(&idleProc, 0, 0);
 }
 
+
 /*
- * Initializes stack of process
+ * Initializes stack of a process
  *
- * @param:		stk       -
- * 				func_name -
- * @returns:	None
+ *  Arguments:
+ *      [long] Pointer to top of stack    
+ * 		[function] Process function
+ *  Returns:
+ *      None
  */
 void initStack(unsigned long *stk, void(*func_name)())
 {
@@ -46,11 +53,14 @@ void initStack(unsigned long *stk, void(*func_name)())
     memcpy(&stk[STACKSIZE - sizeof(sf)], &sf, sizeof(sf));
 }
 
+
 /*
- * Creates and returns initial stack frame values
+ *  Creates and returns initial stack frame values
  *
- * @param:
- * @returns:
+ *  Arguments:
+ *      [function] Process function
+ *  Returns:
+ *      [struct stack_frame] The stack frame of the process
  */
 struct stack_frame initStackFrame(void(*func_name)())
 {
@@ -69,7 +79,6 @@ struct stack_frame initStackFrame(void(*func_name)())
     sf.r10 = 0x10101010;
     sf.r11 = 0x11111111;
     sf.r12 = 0x12121212;
-
     sf.lr = (unsigned long)p_terminate;	// terminate process routine
     sf.pc = (unsigned long)func_name;  	// entry point for process
     sf.psr = 0x01000000;
@@ -78,10 +87,12 @@ struct stack_frame initStackFrame(void(*func_name)())
 }
 
 /*
- * Description
+ *  Initializes running queue
  *
- * @param:
- * @returns:
+ *  Arguments:
+ *      None
+ *  Returns:
+ *      None
  */
 void initRunning(void)
 {
@@ -94,29 +105,29 @@ void initRunning(void)
     }
 }
 
-/* TODO: do this at compile time */
-void initPriQueue(void)
-{
-    char i;
-    for(i=0; i<NUM_PRI; i++){
-        pri_queue[i].head = NULL;
-        pri_queue[i].tail = NULL;
-    }
-}
-
-/*******************	PROCESS-RELATED FUNCTIONS    *************************/
-
 /*
- * Registers process by:
- * - allocating memory for stack size and pcb
- * - initializing stack with initial register values
- * - initializing pcb values
- * - inserting into desired priority queue
- * "priority" can be 1-4 (4 highest)
+ *  Registers process by:
+ *      - allocating memory for stack size and pcb
+ *      - initializing stack with initial register values
+ *      - initializing pcb values
+ *      - inserting into desired priority queue
+ *      - "priority" can be 1-4 (4 highest)
+ *      - PID can be 1-65535
+ * 
+ *  Arguments:
+ *      [function] Process function
+ *      [int] Process ID
+ *      [char] Priority level to run at
+ *  Returns:
+ *      None
  */
 void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority)
 {
 	unsigned int i;
+
+    /* catch bad PID */
+    if(pid == 0)
+        return -1;
 
     /* Initialize stack memory and push initial register values */
     unsigned long *stk = (unsigned long *)malloc(STACKSIZE);
@@ -144,44 +155,39 @@ void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority)
     insertPriQueue(new_pcb, priority);
 }
 
+/*******************	PRIORITY RELATED FUNCTIONS    ************************/
 /*
  * Changes "running" to the next process in the priority queue
  *
- * @param:
- * @returns:
+ *  Arguments:
+ *      None
+ *  Returns:
+ *      None
  */
 void nextProcess(void)
 {
-    if(running->state != UNBLOCKED){
+    if(running->state != UNBLOCKED) {
         /* If process was blocked, find next process to run */
         running = getNextRunning();
     } else if(running->pri_switch == TRUE) {
         /* If priority switch occured, reset flag and find next process to run */
         running->pri_switch = FALSE;
         running = getNextRunning();
-    } else {
+    } else
         running = running->next;
-    }
 
     /* Set new stack pointer */
     setPSP(running->sp);
 }
 
 /*
- * Finds process at highest priority to run
- */
-void setNextRunning(void)
-{
-    struct pcb *new_running = getNextRunning();
-    running = new_running;
-    setPSP(running->sp);
-}
-
-/*
- * Insert pcb into respective priority queue
+ *  Insert process PCB into respective priority queue
  *
- * @param:
- * @returns:
+ *  Arguments:
+ *      [struct pcb] PCB of process to enter into priority queue
+ *      [char] Priority at which to run
+ *  Returns:
+ *      None
  */
 void insertPriQueue(struct pcb *new_pcb, unsigned char priority)
 {
@@ -210,10 +216,12 @@ void insertPriQueue(struct pcb *new_pcb, unsigned char priority)
 }
 
 /*
- * Removes running pcb from priority queue
+ * Removes running PCB from priority queue
  *
- * @param:
- * @returns: pcb pointer
+ *  Arguments:
+ *      None
+ *  Returns: 
+ *      None
  */
 void removePriQueue(void)
 {
@@ -235,21 +243,53 @@ void removePriQueue(void)
     }
 }
 
-/*******************	RUNNING-RELATED FUNCTIONS    *************************/
+/*
+ *  Checks for processes in the highest priority
+ *
+ *  Arguments:
+ *      None
+ *  Returns: 
+ *      [int] Highest priority with processes waiting to run, -1 if no process
+ *              was found
+ */
+int checkHighPriority(void)
+{
+    int i;
+    for(i = NUM_PRI - 1; i >= 0; i--)
+        if(pri_queue[i].head != NULL) return i;
+
+    return -1;  // Return error value if no processes found
+}
+
+/*******************	RUNNING RELATED FUNCTIONS    *************************/
+/*
+ *  Finds process at highest priority to run
+ * 
+ *  Arguments:
+ *      None
+ *  Returns:
+ *      None
+ */
+void setNextRunning(void)
+{
+    struct pcb *new_running = getNextRunning();
+    running = new_running;
+    setPSP(running->sp);
+}
 
 /*
- * Search process priority queues to find next process to run.
- * This function assumes that all pcbs are already correctly linked.
+ *  Search process priority queues to find next process to run.
+ *  This function assumes that all PCBs are already correctly linked.
  *
- * Remove debugging prints before handing in
- *
- * @param:		None
- * @returns:	Pointer to PCB of next process to run
+ *  Arguments:
+ * 		None
+ *  Returns:
+ *  	[struct pcb] Pointer to PCB of next process to run
  */
 struct pcb* getNextRunning(void)
 {
-	struct pcb* next_to_run = NULL;
 	int i;
+	struct pcb* next_to_run = NULL;
 
 	for(i = NUM_PRI-1; i>=0; i--){
 		if(pri_queue[i].head)
@@ -269,46 +309,40 @@ struct pcb* getNextRunning(void)
 }
 
 /*
- * Sets running stack pointer value
+ *  Sets running stack pointer value
  *
- * @param:
- * @returns:
+ *  Arguments:
+ *      [long] Pointer to top of process stack
+ *  Returns:
+ *      None
  */
 void setRunningSP(unsigned long* new_sp)
 {
     running->sp = (unsigned long)new_sp;
 }
 
-
 /*
- * Description: Checks for processes in the highest priority
+ *  Updates global `running` variable with PCB of running process
  *
- * @param:
- * @returns: Highest priority with processes waiting to run
+ *  Arguments:
+ *      [struct pcb] PCB to update variable with
+ *  Returns:
+ *      None
  */
-int checkHighPriority(void)
+void setRunning(struct pcb *new_running)
 {
-    int i;
-    for(i=NUM_PRI-1; i>=0; i--){
-        if(pri_queue[i].head != NULL) return i;
-    }
-
-    /* Return error value if no processes found */
-    return -1;
+    running = new_running;
 }
 
 /*
- * Gets running pointer value
+ *  Gets PCB of running process
  *
- * @param:
- * @returns:
+ *  Arguments:
+ *      None
+ *  Returns:
+ *      [struct pcb] Pointer to PCB of running process
  */
 struct pcb* getRunning(void)
 {
     return running;
-}
-
-void setRunning(struct pcb *new_running)
-{
-    running = new_running;
 }

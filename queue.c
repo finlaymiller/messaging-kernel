@@ -2,64 +2,17 @@
  * queue.c
  *
  *  Created on: Sep 19, 2019
- * Modified on:	Oct 09, 2019
- *      Author: Finlay Miller
- *      		Derek Capone
+ *      Author: Finlay Miller and Derek Capone
  *
  *	Contains all circular-queue-related functions for monitor operation.
+ *  For this assignment queues are only used in UART functions. Legacy code!
  */
 
 #include "queue.h"
 
 /* globals */
 q_struct q_table[NUM_Q];
-//extern systick_struct systick;
-//extern int cmd_index;		// number of characters currently in command string
 
-
-/*
- * Initializes array of queues filled with zeroes
- *
- * @param num_queues: 	Number of queues to fill array with
- * @return:				None
- */
-//void initQTable(int num_queues)
-//{
-//    unsigned int i, j;
-//    for(i = 0; i < num_queues; i++)
-//    {
-//    	for(j = 0; j < MAX_Q_LEN; j++)
-//    		q_table[i].contents[j] = 0;
-//
-//    	q_table[i].head = 0;
-//    	q_table[i].tail = 0;
-//    }
-//}
-
-/*
- * Handler which is called when a character is received. dequeues a char from
- * the indicated queue, sends it to the checker functions, then sends it to
- *
- * @param: q_index:	Index position in the queue table of the queue that
- * 					received the character
- * @returns: 		None
- */
-//void handleQ(int q_index)
-//{
-//    char data = deQ(q_index);	// dequeue char from buffer
-//    systick_struct *stptr = &systick;
-//
-//    if(q_index == UART_RX)		// received character handler
-//    {
-//    	checkChar(data);		// process char
-//    }
-//    else if(q_index == SYSTICK)	// update SYSTICK
-//    {
-//    	timeIncrement();
-//    	if(stptr->enabled)		// check alarm if one is set
-//    	    	alarmCheck();
-//    }
-//}
 
 /*
  * Checks whether or not queue is empty.

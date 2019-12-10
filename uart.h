@@ -1,11 +1,11 @@
 /*
  * uart.h
- *
+ * 
+ *  Created on: Sep 19, 2019
+ *  Author: Derek Capone and Finlay Miller
+ * 
  * Defines constants for UART registers and bit values
  * Declares public UART functions
- *
- *  Created on: Sep 19, 2019
- *  Author: Derek Capone
  */
 
 #ifndef UART_H_

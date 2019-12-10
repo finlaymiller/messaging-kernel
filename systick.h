@@ -1,16 +1,20 @@
 /*
  * systick.h
  *
- * Declares public functions for SysTick module
- *
  *  Created on: Oct 2, 2019
- *  Author: Derek Capone
+ *  Author: Derek Capone and Finlay Miller
+ * 
+ * Declares public functions for SysTick module
  */
 
 #ifndef SYSTICK_H_
 #define SYSTICK_H_
 
+#include "queue.h"
 #include "trap.h"
+#include "time.h"
+#include "process.h"
+#include "kernel.h"
 
 // SysTick Registers
 // SysTick Control and Status Register (STCTRL)
