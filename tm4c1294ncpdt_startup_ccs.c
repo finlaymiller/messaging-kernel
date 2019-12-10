@@ -34,6 +34,7 @@ static void NmiSR(void);
 static void FaultISR(void);
 static void IntDefaultHandler(void);
 extern void UART0_IntHandler(void);
+extern void UART1_IntHandler(void);
 extern void SysTickHandler(void);
 extern void SVCall(void);
 extern void PendSV_Handler(void);
@@ -93,7 +94,7 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // GPIO Port D
     IntDefaultHandler,                      // GPIO Port E
     UART0_IntHandler,                      	// UART0 Rx and Tx
-    IntDefaultHandler,                      // UART1 Rx and Tx
+    UART1_IntHandler,                      // UART1 Rx and Tx
     IntDefaultHandler,                      // SSI0 Rx and Tx
     IntDefaultHandler,                      // I2C0 Master and Slave
     IntDefaultHandler,                      // PWM Fault

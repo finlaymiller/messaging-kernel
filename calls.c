@@ -30,7 +30,6 @@ int k_get_id(void)
 }
 
 /*
- *	Binds mailbox to process. The rules for binding are as follows:
  *		- One process per mailbox.
  * 		- Processes are allowed to bind to up to 5 mailboxes.
  *		- Mailbox numbers are between 1 and 63.
@@ -68,10 +67,11 @@ int k_bind(unsigned int mailbox_number)
 	}
 	else if(mailbox_number == 0)
 	{	// catch bind to ANY mailbox
+		// search mailroom for available box
 		for(i = 1; i < NUM_MAILBOXES; i++)
-		{	// search mailroom for available box
+		{
 			if(!mailroom[i].owner)
-			{	// mailbox found, save its ID to bind to
+			{
 				good_mailbox = i;
 				break;
 			}
@@ -109,7 +109,6 @@ int k_bind(unsigned int mailbox_number)
 
 	return good_mailbox;
 }
-
 
 /*
  * 	Unbind mailbox(es) from process. The rules for unbinding are as follows:
@@ -169,7 +168,6 @@ int k_unbind(unsigned int mailbox_number)
 	
 	return old_mailbox;
 }
-
 
 /*
  * 	Send message from a process to a mailbox. The rules for sending messages 
@@ -233,7 +231,6 @@ int k_send(struct message *msg)
 	return kmsg->size;
 }
 
-
 /*
  * 	Receive a message from a mailbox. Receiving works as follows:
  * 		- Receiver must own a mailbox
@@ -287,7 +284,6 @@ int k_recv(struct message *msg)
 
 	return msg->size;
 }
-
 
 /*
  * 	Terminate the currently running process. Process is removed from running
@@ -343,7 +339,6 @@ int k_terminate(void)
 
     return 0;
 }
-
 
 /*
  * 	Change priority level of currently running process. Valid process levels

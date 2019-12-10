@@ -105,7 +105,6 @@ void initRunning(void)
     }
 }
 
-
 /*
  *  Registers process by:
  *      - allocating memory for stack size and pcb
@@ -156,7 +155,6 @@ void reg_proc(void(*func_name)(), unsigned int pid, unsigned char priority)
     insertPriQueue(new_pcb, priority);
 }
 
-
 /*******************	PRIORITY RELATED FUNCTIONS    ************************/
 /*
  * Changes "running" to the next process in the priority queue
@@ -181,7 +179,6 @@ void nextProcess(void)
     /* Set new stack pointer */
     setPSP(running->sp);
 }
-
 
 /*
  *  Insert process PCB into respective priority queue
@@ -218,7 +215,6 @@ void insertPriQueue(struct pcb *new_pcb, unsigned char priority)
     }
 }
 
-
 /*
  * Removes running PCB from priority queue
  *
@@ -247,7 +243,6 @@ void removePriQueue(void)
     }
 }
 
-
 /*
  *  Checks for processes in the highest priority
  *
@@ -266,7 +261,6 @@ int checkHighPriority(void)
     return -1;  // Return error value if no processes found
 }
 
-
 /*******************	RUNNING RELATED FUNCTIONS    *************************/
 /*
  *  Finds process at highest priority to run
@@ -282,7 +276,6 @@ void setNextRunning(void)
     running = new_running;
     setPSP(running->sp);
 }
-
 
 /*
  *  Search process priority queues to find next process to run.
@@ -315,7 +308,6 @@ struct pcb* getNextRunning(void)
 	return next_to_run;
 }
 
-
 /*
  *  Sets running stack pointer value
  *
@@ -329,7 +321,6 @@ void setRunningSP(unsigned long* new_sp)
     running->sp = (unsigned long)new_sp;
 }
 
-
 /*
  *  Updates global `running` variable with PCB of running process
  *
@@ -342,7 +333,6 @@ void setRunning(struct pcb *new_running)
 {
     running = new_running;
 }
-
 
 /*
  *  Gets PCB of running process

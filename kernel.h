@@ -44,5 +44,8 @@ struct pcb* getNextRunning(void);
 void setRunningSP(unsigned long*);
 void setRunning(struct pcb *);
 struct pcb* getRunning(void);
+void setNextRunning(void);
+void setRunning(struct pcb *new_running);
+void removePriQueue(void);
 
 #endif /* KERNEL_H_ */

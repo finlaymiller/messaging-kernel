@@ -31,6 +31,23 @@
 #define UART0_ICR_R         (*((volatile unsigned long *)0x4000C044))   // UART0 Interrupt Clear Register
 #define UART0_CC_R          (*((volatile unsigned long *)0x4000CFC8))   // UART0 Clock Control Register
 
+//UART1 & PORTB registers
+#define INT_VEC_UART1           6
+#define GPIO_PORTB_AFSEL_R  (*((volatile unsigned long *)0x40059420))
+#define GPIO_PORTB_DEN_R    (*((volatile unsigned long *)0x4005951C))
+#define GPIO_PORTB_PCTL_R   (*((volatile unsigned long *)0x4005952C))
+#define UART1_DR_R          (*((volatile unsigned long *)0x4000D000))
+#define UART1_FR_R          (*((volatile unsigned long *)0x4000D018))
+#define UART1_IBRD_R        (*((volatile unsigned long *)0x4000D024))
+#define UART1_FBRD_R        (*((volatile unsigned long *)0x4000D028))
+#define UART1_LCRH_R        (*((volatile unsigned long *)0x4000D02C))
+#define UART1_CTL_R         (*((volatile unsigned long *)0x4000D030))
+#define UART1_IFLS_R        (*((volatile unsigned long *)0x4000D034))
+#define UART1_IM_R          (*((volatile unsigned long *)0x4000D038))
+#define UART1_MIS_R         (*((volatile unsigned long *)0x4000D040))
+#define UART1_ICR_R         (*((volatile unsigned long *)0x4000D044))
+#define UART1_CC_R          (*((volatile unsigned long *)0x4000DFC8))
+
 #define INT_VEC_UART0           5           // UART0 Rx and Tx interrupt index (decimal)
 #define UART_FR_TXFF            0x00000020  // UART Transmit FIFO Full
 #define UART_FR_RXFE            0x00000010  // UART Receive FIFO Empty
@@ -48,13 +65,17 @@
 #define EN_TX_PA1               0x00000002  // Enable Transmit Function on PA1
 #define EN_DIG_PA0              0x00000001  // Enable Digital I/O on PA0
 #define EN_DIG_PA1              0x00000002  // Enable Digital I/O on PA1
+#define EN_DIG_PB0              0x00000001  // Enable Digital I/O on PB0
+#define EN_DIG_PB1              0x00000002  // Enable Digital I/O on PB1
 
 // Clock Gating Registers
 #define SYSCTL_RCGCGPIO_R      (*((volatile unsigned long *)0x400FE608))
 #define SYSCTL_RCGCUART_R      (*((volatile unsigned long *)0x400FE618))
 
 #define SYSCTL_RCGCGPIO_UART0      0x00000001  // UART0 Clock Gating Control
+#define SYSCTL_RCGCGPIO_UART1      0x00000002  // UART1 Clock Gating Control
 #define SYSCTL_RCGCUART_GPIOA      0x00000001  // Port A Clock Gating Control
+#define SYSCTL_RCGCUART_GPIOB      0x00000002  // Port A Clock Gating Control
 
 // Clock Configuration Register
 #define SYSCTRL_RCC_R           (*((volatile unsigned long *)0x400FE0B0))
@@ -70,12 +91,19 @@
 
 // Public UART Functions
 void initUART(void);
+void initUART1(void);
 void InterruptEnable(unsigned long);
 void UART0_IntEnable(unsigned long);
 void UART0_IntHandler(void);
+void UART1_IntHandler(void);
+void UART1_IntEnable(unsigned long);
+void UART1_IntHandler(void);
 void UART0_Start(void);
 void UART0_TXStr(char *);
+void UART1_TXStr(char *, char);
 void UART0_TXChar(char);
+void UART1_TXChar(char);
 int  UART0_TXReady(void);
+int  UART1_TXReady(void);
 
 #endif /* UART_H_ */

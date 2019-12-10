@@ -55,7 +55,6 @@ int pkcall(int code, unsigned int arg)
     return arglist . rtnvalue;
 }
 
-
 /*
  * Returns ID of current process
  *
@@ -69,7 +68,6 @@ int p_get_id(void)
     return pkcall(GETID, NULL);
 }
 
-
 /*
  * Change current process priority
  *
@@ -82,7 +80,6 @@ int p_nice(int priority)
 {
 	return pkcall(NICE, priority);
 }
-
 
 /*
  * Terminate current process
@@ -134,9 +131,7 @@ void idleProc(void)
     }
 }
 
-
 /**************************** Processes for Testing **************************/
-/******************* Abandon all hope, ye who enter here! ********************/
 void procDrawGUI(void)
 {
     int mbx, rcode, hall;
@@ -150,8 +145,12 @@ void procDrawGUI(void)
 
     /* block on receive, when hall update is received, uodate GUI */
 	while(1)
-    {
-        rcode = p_recv(mbx, mbx, msg_buf, 10);  // receive hall number
+    {   
+        // receive hall number update                 
+        // HALL_..._SRVR is the mailbox of the process that would be sending
+        // hall sensor updates, but alas, we ran out of time and this was never
+        // fully implemented
+        rcode = p_recv(mbx, HALL_UPDATE_SRVR, msg_buf, 10);
         my_atoi(msg_buf, (int *)hall);  // convert to integer
         updateTrainPos(hall);   // draw GUI
     }

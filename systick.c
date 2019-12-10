@@ -13,6 +13,8 @@
 SysTick* systick;
 static char pendSvEnabled;
 
+static char pendSvEnabled;
+
 /*
  * Initializes SysTick
  *

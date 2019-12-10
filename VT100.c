@@ -4,7 +4,7 @@
  *  Created on: Dec 3, 2019
  *      Author: Larry Hughes, Derek Capone, and Finlay Miller
  * 
- * VT100 is 
+ * Functions that use VT100 codes to make our terminal prettier
  */
 
 #include "VT100.h"
