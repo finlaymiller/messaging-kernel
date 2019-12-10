@@ -3,8 +3,9 @@
  *
  *  Created on: Oct 17, 2019
  *      Author: Larry Hughes
- *      Editor: Finlay Miller
- *      		Derek Capone
+ *      Editor: Finlay Miller and Derek Capone
+ * 
+ * Headerfile for process-related functions and processes used for testing
  */
 
 #ifndef PROCESS_H_
@@ -17,6 +18,7 @@
 #include "str_conv_funcs.h"
 #include "VT100.h"
 
+/* global definitions */
 #define PRIVATE 		static
 #define MSP_RTN			0xFFFFFFF9	// link register exception return using MSP
 #define PSP_RTN			0xFFFFFFFD	// link register exception return using PSP
@@ -68,6 +70,14 @@ struct linked_list{
 };
 
 /* function declarations */
+/* process-related functions */
+int pkcall(int, unsigned int);
+int p_get_id(void);
+int p_nice(int);
+void p_terminate(void);
+void waitTime(unsigned int);
+void idleProc(void);
+/* testing processes */
 void procSendRecv(void);
 void procSend(void);
 void procBlockSend(void);
@@ -77,17 +87,6 @@ void procPrinter(void);
 void procNiceA(void);
 void procNiceB(void);
 void procNiceC(void);
-void procA(void);
-void procB(void);
-void procC(void);
-void procD(void);
-void procE(void);
-void waitTime(int x);
-void idleProc(void);
-
-int pkcall(int, unsigned int);
-int p_get_id(void);
-int p_nice(int priority);
-void p_terminate(void);
+void procDrawGUI(void);
 
 #endif /* PROCESS_H_ */

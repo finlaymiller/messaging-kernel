@@ -2,7 +2,10 @@
  * register.c
  *
  *  Created on: Nov 8, 2019
- *      Author: Finlay Miller
+ *      Author: Larry Hughes
+ * 
+ * 	Wraps assembly commands in C functions so we don't have to touch or think
+ * 	about their yucky assembly innards.
  */
 
 #include "register.h"

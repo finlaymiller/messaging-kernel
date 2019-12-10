@@ -2,7 +2,9 @@
  * str_conv_funcs.c
  *
  *  Created on: Nov 7, 2019
- *      Author: Finlay Miller
+ *      Author: Finlay Miller and Derek Capone
+ * 
+ * Custom versions of the somewhat standard C functions, itoa and atoi.
  */
 
 #include "str_conv_funcs.h"
@@ -12,9 +14,11 @@ const char digits[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 /*
  * Converts provided ASCII string to integers and checks for non-integer chars
  *
- * @param	str:	The string to be converted
- * @param	num:	The integer result of the conversion
- * @returns:		1 if conversion is successful, 0 if a char was detected
+ * Arguments:
+ *  	[char*] The string to be converted
+ * 	     [int] The integer result of the conversion
+ * Returns:
+ * 		[int] 1 if conversion is successful, 0 if a char was detected
  */
 int my_atoi(char *str, int *num)
 {
@@ -35,24 +39,22 @@ int my_atoi(char *str, int *num)
 
 
 /*
- * Convert integer to string
+ * Converts integer to string
  *
- * @param:	number:	Number to convert
- * 			buff:	Buffer to write string to
- * 			base:	Base of number (most commonly 10)
- * @returns:		Pointer to head of string
+ * Arguments:
+ * 	    [int] Number to convert
+ * 		[char*] Buffer to write string to
+ * 		[int]	Base of number (most commonly 10)
+ * Returns:
+ * 		[int] Pointer to head of string
  */
 char *my_itoa(int number, char *buff, int base)
 {
-    char *result = (buff == NULL || base > strlen(digits) || base < 2) ? NULL : buff;
+    char *result = (buff == NULL || base > strlen(digits) || base < 2)
+                   ? NULL : buff;
     char sign = 0;
 
-
-    if (number < 0)
-    {
-         sign = '-';
-
-    }
+    if (number < 0) sign = '-';
 
     if (result != NULL)
     {
@@ -74,8 +76,10 @@ char *my_itoa(int number, char *buff, int base)
 /*
  * Reverse string in place
  *
- * @param:	s:	String to reverse
- * @returns:	None
+ * Arguments:
+ *  	[char*]	String to reverse
+ * Returns:	
+ *      None
  */
 void reverse(char s[])
 {

@@ -1,10 +1,10 @@
 /*
  * uart.c
  *
- * Defines UART initialization and handler functions
- *
  *  Created on: Sep 19, 2019
- *  Author: Derek Capone
+ *  Author: Derek Capone and Finlay Miller
+ * 
+ * Defines UART initialization and handler functions
  */
 
 #include "queue.h"

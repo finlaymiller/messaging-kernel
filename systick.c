@@ -1,21 +1,17 @@
 /*
  * systick.c
  *
+ *  Created on: Oct 2, 2019
+ *  Author: Derek Capone and Finlay Miller
+ *
  * Defines all SysTick module functions
  * Defines constants for SysTick registers and bits
- *
- *  Created on: Oct 2, 2019
- *  Author: Derek Capone
- *
  */
 
-#include "queue.h"
 #include "systick.h"
-#include "time.h"
-#include "process.h"
-#include "kernel.h"
 
 SysTick* systick;
+static char pendSvEnabled;
 
 static char pendSvEnabled;
 
@@ -109,11 +105,27 @@ void SysTickHandler(void)
 	if(pendSvEnabled)NVIC_INT_CTRL_R |= INT_CTRL_PENDSV;
 }
 
+/*
+ * Force a PendSV
+ * 
+ * Arguments:
+ *      None
+ * Returns:
+ *      None
+ */
 void forcePendSV(void)
 {
     NVIC_INT_CTRL_R |= INT_CTRL_PENDSV;
 }
 
+/*
+ * Enable PendSV
+ * 
+ * Arguments:
+ *      None
+ * Returns:
+ *      None
+ */
 void enablePendSV(char en)
 {
     pendSvEnabled = en;
