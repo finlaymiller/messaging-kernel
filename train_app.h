@@ -2,11 +2,15 @@
  * train_app.h
  *
  *  Created on: Dec 7, 2019
- *      Author: Derek
+ *      Author: Derek Capone and Finlay Miller
+ * 
+ * Headerfile for application layer trainset functions and processing
  */
 
 #ifndef TRAIN_APP_H_
 #define TRAIN_APP_H_
+
+#include "routing_table.h"
 
 /* Define locomotive numbers */
 #define LOC1 0x01

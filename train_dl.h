@@ -2,12 +2,15 @@
  * train_dl.h
  *
  *  Created on: Dec 7, 2019
- *      Author: Derek
+ *      Author: Derek Capone and Finlay Miller
+ * 
+ * Headerfile for all datalink layer trainset functions
  */
 
 #ifndef TRAIN_DL_H_
 #define TRAIN_DL_H_
 
+#include "train_phy.h"
 #include "train_app.h"
 
 #define MAX_MESS_LEN    10  /* TODO: Fix this value */
@@ -35,6 +38,7 @@ union Ctrl{
     char c_control;
 };
 
+/* Public Function Declarations */
 void dl_transmitMagDir(struct t_message magdir);
 char getMessageLen(unsigned char code);
 void unpackFrame(char *frame, char len, char chksum);

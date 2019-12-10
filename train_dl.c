@@ -2,13 +2,13 @@
  * train_dl.c
  *
  *  Created on: Dec 7, 2019
- *      Author: Derek
+ *      Author: Derek Capone and Finlay Miller\
+ * 
+ * This file contains all of the data-link-layer train related functions
  */
 
 
 #include "train_dl.h"
-#include "train_phy.h"
-#include "train_app.h"
 
 #define LEN_IND  2  //index for length of message in frame
 #define MSG_IND  3  // index for beginning of message in frame
@@ -18,6 +18,13 @@ static union Ctrl control = {0};
 
 /*
  * Check validity of packet, send to application layer if packet is valid
+ * 
+ * Arguments:
+ *      [char *] pointer to data frame
+ *      [char] length of frame
+ *      [char] checksum of frame
+ * Returns:
+ *      None
  */
 void unpackFrame(char *frame, char len, char chksum)
 {
@@ -44,16 +51,26 @@ void unpackFrame(char *frame, char len, char chksum)
 /*
  * Check Nr of incoming packet to see if value is correct
  * TODO: Check value depending on type of packet
+ * 
+ * Arguments:
+ *      [struct Control] control byte of packet
+ * Returns:
+ *      [char]  1 if packet is valid
+ *              0 if packet is invalid
  */
 char checkCtrl(struct Control ctrl)
 {
-    if(control.s_control.ns == ctrl.nr){
-        return CTRL_VALID;
-    } else {
-        return CTRL_INVALID;
-    }
+    return ((control.s_control.ns == ctrl.nr) ? CTRL_VALID : CTRL_INVALID);
 }
 
+/*
+ * Send mag dir update request from DLL to PL
+ * 
+ * Arguments:
+ *      [struct t_message] message to send
+ * Returns:
+ *      None
+ */
 void dl_transmitMagDir(struct t_message magdir)
 {
     struct Packet packet;
@@ -78,7 +95,15 @@ void dl_transmitMagDir(struct t_message magdir)
 
 /*
  * Gets the message length to be set in packet
- * Returns error value if code is incorrect
+ * Returns error value if code is incorrect. We know that this is hilariously
+ * inefficient as-is. The struct was used so that we could later incorporate 
+ * checks for each type of message length but due to lack of time we didn't get
+ * to it.
+ * 
+ * Arguments:
+ *      [unsigned char] the code to check the length of
+ * Returns:
+ *      [char] the length of the message
  */
 char getMessageLen(unsigned char code)
 {
