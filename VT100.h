@@ -30,13 +30,6 @@
 #define TERM_COLOURS    "\x1b[0;0;0m"
 #define CURSOR_RESTORE  "\x1b""8"
 
-#define CURSOR_LEFT     "\x1b[D"
-#define CURSOR_RIGHT    "\x1b[C"
-#define CURSOR_UP       "\x1b[A"
-#define CURSOR_DOWN     "\x1b[B"
-
-#define BLINK_TEXT      "\x1b[5m"
-
 /* structure to be used for moving the cursor around */
 struct CUP
 {
@@ -49,9 +42,17 @@ struct CUP
     char nul;
 };
 
+/* structure to be used for repositioning cursor */
+struct coord
+{
+    unsigned int x;
+    unsigned int y;
+}
+
 /* function declarations */
 void repositionCursor(unsigned int, unsigned int);
 void initTerminal(void);
 void drawTrainset(void);
+void updateTrainPos(unsigned int);
 
 #endif /* VT100_H_ */
